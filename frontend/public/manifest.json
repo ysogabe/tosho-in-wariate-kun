@@ -1,0 +1,21 @@
+{
+  "name": "図書当番割り当てくん",
+  "short_name": "図書当番",
+  "description": "図書委員会の当番割り当てを管理するシステム",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f9f5f6",
+  "theme_color": "#b4e6e6",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
