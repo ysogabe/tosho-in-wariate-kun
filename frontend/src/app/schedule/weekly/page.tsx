@@ -3,163 +3,184 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
+interface Schedule {
+  id: number;
+  name: string;
+  description?: string; // Optional as per backend
+  start_date: string;
+  end_date: string;
+}
+
+interface AssignmentMember {
+  id: number;
+  name: string;
+}
+interface BackendScheduleAssignment {
+  id: number;
+  schedule_id: number;
+  library_id: number;
+  library_name: string;
+  date: string; // YYYY-MM-DD from backend
+  time_slot: string;
+  committee_member_id?: number | null; // If direct assignment
+  committee_member_name?: string | null; // If direct assignment
+  assigned_committee_members: AssignmentMember[]; // Updated to use this for members list
+}
+
+// Frontend representation, might be slightly different or augmented
 interface ScheduleAssignment {
   id: number;
-  date: string;
-  day: string;
+  date: string; // Keep as YYYY-MM-DD for filtering
+  day: string; // Derived on frontend for display
   timeSlot: string;
-  library: string;
-  members: string[];
+  library: string; // Corresponds to library_name
+  members: AssignmentMember[]; // Updated
 }
+
+
+const API_BASE_URL = 'http://localhost:5001/api';
 
 export default function WeeklySchedulePage() {
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(new Date());
-  const [scheduleAssignments, setScheduleAssignments] = useState<ScheduleAssignment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [schedules, setSchedules] = useState<{id: number, name: string}[]>([
-    { id: 1, name: '2025年度前期スケジュール' },
-    { id: 2, name: '2025年度後期スケジュール' },
-  ]);
-  const [selectedScheduleId, setSelectedScheduleId] = useState<number>(1);
+  const [allScheduleAssignments, setAllScheduleAssignments] = useState<BackendScheduleAssignment[]>([]);
+  const [filteredAssignmentsForWeek, setFilteredAssignmentsForWeek] = useState<ScheduleAssignment[]>([]);
+  
+  const [isLoadingSchedules, setIsLoadingSchedules] = useState(true);
+  const [isLoadingAssignments, setIsLoadingAssignments] = useState(false); // Initially false until a schedule is selected
+  
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(null);
+  
+  const [errorSchedules, setErrorSchedules] = useState<string | null>(null);
+  const [errorAssignments, setErrorAssignments] = useState<string | null>(null);
+
 
   // 曜日の配列
   const daysOfWeek = ['日', '月', '火', '水', '木', '金', '土'];
 
-  // 現在の週の日付を計算
+  // YYYY-MM-DD formatter
+  const formatDateToYYYYMMDD = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  // 現在の週の日付を計算 (月曜日始まり)
   const calculateWeekDates = (startDate: Date): Date[] => {
     const dates: Date[] = [];
     const currentDate = new Date(startDate);
-    
-    // 週の開始日（月曜日）に調整
     const day = currentDate.getDay();
-    const diff = currentDate.getDate() - day + (day === 0 ? -6 : 1);
+    const diff = currentDate.getDate() - day + (day === 0 ? -6 : 1); // Adjust to Monday
     currentDate.setDate(diff);
-    
-    // 月曜日から日曜日までの7日間
     for (let i = 0; i < 7; i++) {
       dates.push(new Date(currentDate));
       currentDate.setDate(currentDate.getDate() + 1);
     }
-    
     return dates;
   };
 
-  // 日付をフォーマット
-  const formatDate = (date: Date): string => {
+  // 日付を M/D 形式でフォーマット (表示用)
+  const formatDisplayDate = (date: Date): string => {
     const month = date.getMonth() + 1;
     const day = date.getDate();
     return `${month}/${day}`;
   };
 
-  // 前の週へ
-  const goToPreviousWeek = () => {
-    const newDate = new Date(currentWeekStart);
-    newDate.setDate(newDate.getDate() - 7);
-    setCurrentWeekStart(newDate);
+  // 週のナビゲーション
+  const goToPreviousWeek = () => setCurrentWeekStart(prev => new Date(prev.setDate(prev.getDate() - 7)));
+  const goToNextWeek = () => setCurrentWeekStart(prev => new Date(prev.setDate(prev.getDate() + 7)));
+  const goToCurrentWeek = () => setCurrentWeekStart(new Date());
+
+  // スケジュール選択の変更
+  const handleScheduleChange = (scheduleId: string) => {
+    setSelectedScheduleId(Number(scheduleId));
+    setErrorAssignments(null); // Clear previous assignment errors
   };
 
-  // 次の週へ
-  const goToNextWeek = () => {
-    const newDate = new Date(currentWeekStart);
-    newDate.setDate(newDate.getDate() + 7);
-    setCurrentWeekStart(newDate);
-  };
-
-  // 今週へ
-  const goToCurrentWeek = () => {
-    setCurrentWeekStart(new Date());
-  };
-
-  // スケジュールを変更
-  const changeSchedule = (scheduleId: number) => {
-    setSelectedScheduleId(scheduleId);
-  };
-
-  // スケジュールデータを取得
+  // Fetch schedules list on mount
   useEffect(() => {
-    setIsLoading(true);
-    
-    // 実際のアプリではAPIからデータを取得する
-    // ここではモックデータを使用
-    setTimeout(() => {
-      const weekDates = calculateWeekDates(currentWeekStart);
-      
-      const mockAssignments: ScheduleAssignment[] = [
-        {
-          id: 1,
-          date: '2025/4/7',
-          day: '月',
-          timeSlot: '12:30-13:00',
-          library: '図書室A',
-          members: ['山田太郎', '佐藤花子']
-        },
-        {
-          id: 2,
-          date: '2025/4/7',
-          day: '月',
-          timeSlot: '15:30-16:00',
-          library: '図書室A',
-          members: ['鈴木一郎', '高橋明']
-        },
-        {
-          id: 3,
-          date: '2025/4/8',
-          day: '火',
-          timeSlot: '12:30-13:00',
-          library: '図書室A',
-          members: ['渡辺健太', '中村さくら']
-        },
-        {
-          id: 4,
-          date: '2025/4/10',
-          day: '木',
-          timeSlot: '12:30-13:00',
-          library: '図書室A',
-          members: ['小林和也', '加藤美咲']
-        },
-        {
-          id: 5,
-          date: '2025/4/10',
-          day: '木',
-          timeSlot: '15:30-16:00',
-          library: '図書室A',
-          members: ['山田太郎', '鈴木一郎']
-        },
-        {
-          id: 6,
-          date: '2025/4/11',
-          day: '金',
-          timeSlot: '12:30-13:00',
-          library: '図書室A',
-          members: ['佐藤花子', '高橋明']
-        },
-      ];
-      
-      // 表示する週に合わせてフィルタリング
-      const filteredAssignments = mockAssignments.filter(assignment => {
-        const assignmentDate = new Date(assignment.date.replace(/\//g, '-'));
-        return weekDates.some(date => 
-          date.getFullYear() === assignmentDate.getFullYear() &&
-          date.getMonth() === assignmentDate.getMonth() &&
-          date.getDate() === assignmentDate.getDate()
-        );
-      });
-      
-      setScheduleAssignments(filteredAssignments);
-      setIsLoading(false);
-    }, 500);
-  }, [currentWeekStart, selectedScheduleId]);
+    const fetchSchedules = async () => {
+      setIsLoadingSchedules(true);
+      setErrorSchedules(null);
+      try {
+        const response = await fetch(`${API_BASE_URL}/schedules`);
+        if (!response.ok) throw new Error(`API Error (Schedules): ${response.status} ${response.statusText}`);
+        const data: Schedule[] = await response.json();
+        setSchedules(data);
+        if (data.length > 0 && selectedScheduleId === null) {
+          setSelectedScheduleId(data[0].id); // Default to first schedule
+        }
+      } catch (err) {
+        setErrorSchedules(err instanceof Error ? err.message : 'スケジュールの取得に失敗しました。');
+        console.error(err);
+      } finally {
+        setIsLoadingSchedules(false);
+      }
+    };
+    fetchSchedules();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run once on mount
 
-  // 週の日付を計算
+
+  // Fetch assignments for the selected schedule
+  useEffect(() => {
+    if (!selectedScheduleId) {
+      setAllScheduleAssignments([]); // Clear assignments if no schedule is selected
+      return;
+    }
+
+    const fetchAssignments = async () => {
+      setIsLoadingAssignments(true);
+      setErrorAssignments(null);
+      try {
+        // Using GET /api/schedules/<schedule_id> which returns the schedule object with an 'assignments' array
+        const response = await fetch(`${API_BASE_URL}/schedules/${selectedScheduleId}`);
+        if (!response.ok) throw new Error(`API Error (Assignments): ${response.status} ${response.statusText}`);
+        const scheduleDetails: Schedule & { assignments: BackendScheduleAssignment[] } = await response.json();
+        
+        // The backend returns 'assigned_committee_members' for the members list
+        setAllScheduleAssignments(scheduleDetails.assignments || []);
+      } catch (err) {
+        setErrorAssignments(err instanceof Error ? err.message : '割り当ての取得に失敗しました。');
+        console.error(err);
+        setAllScheduleAssignments([]); // Clear on error
+      } finally {
+        setIsLoadingAssignments(false);
+      }
+    };
+    fetchAssignments();
+  }, [selectedScheduleId]);
+
+
+  // Filter assignments for the current week view
+  useEffect(() => {
+    const weekDatesObjects = calculateWeekDates(currentWeekStart);
+    const weekDateStrings = weekDatesObjects.map(date => formatDateToYYYYMMDD(date));
+
+    const newFilteredAssignments = allScheduleAssignments
+      .filter(assignment => weekDateStrings.includes(assignment.date))
+      .map(backendAssignment => {
+        const assignmentDate = new Date(backendAssignment.date + 'T00:00:00'); // Ensure local time interpretation
+        return {
+          id: backendAssignment.id,
+          date: backendAssignment.date, // YYYY-MM-DD
+          day: daysOfWeek[assignmentDate.getDay()], // Derive day of week
+          timeSlot: backendAssignment.time_slot,
+          library: backendAssignment.library_name,
+          members: backendAssignment.assigned_committee_members || [], // Use assigned_committee_members
+        };
+      });
+    setFilteredAssignmentsForWeek(newFilteredAssignments);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentWeekStart, allScheduleAssignments]);
+  
+
   const weekDates = calculateWeekDates(currentWeekStart);
 
-  // 特定の日付の当番を取得
-  const getAssignmentsForDate = (date: Date) => {
-    const formattedDate = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
-    return scheduleAssignments.filter(assignment => {
-      const [year, month, day] = assignment.date.split('/');
-      return `${year}/${month}/${day}` === formattedDate;
-    });
+  const getAssignmentsForDate = (date: Date): ScheduleAssignment[] => {
+    const targetDateStr = formatDateToYYYYMMDD(date);
+    return filteredAssignmentsForWeek.filter(assignment => assignment.date === targetDateStr);
   };
 
   return (
@@ -192,47 +213,58 @@ export default function WeeklySchedulePage() {
                   <label htmlFor="schedule-select" className="block text-sm font-medium text-gray-700 mb-1">
                     スケジュール選択
                   </label>
-                  <select
-                    id="schedule-select"
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    value={selectedScheduleId}
-                    onChange={(e) => changeSchedule(parseInt(e.target.value))}
-                  >
-                    {schedules.map((schedule) => (
-                      <option key={schedule.id} value={schedule.id}>
-                        {schedule.name}
-                      </option>
-                    ))}
-                  </select>
+                  {isLoadingSchedules ? (
+                    <p className="text-gray-500">スケジュールを読み込み中...</p>
+                  ) : errorSchedules ? (
+                     <p className="text-red-500">エラー: {errorSchedules}</p>
+                  ) : schedules.length === 0 ? (
+                    <p className="text-gray-500">利用可能なスケジュールがありません。</p>
+                  ) : (
+                    <select
+                      id="schedule-select"
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      value={selectedScheduleId ?? ''}
+                      onChange={(e) => handleScheduleChange(e.target.value)}
+                      disabled={schedules.length === 0}
+                    >
+                      {schedules.map((schedule) => (
+                        <option key={schedule.id} value={schedule.id}>
+                          {schedule.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
                 
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={goToPreviousWeek}
-                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded-md font-medium transition-colors"
+                    disabled={isLoadingAssignments}
+                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded-md font-medium transition-colors disabled:opacity-50"
                   >
                     前週
                   </button>
                   <button
                     onClick={goToCurrentWeek}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md font-medium transition-colors"
+                    disabled={isLoadingAssignments}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md font-medium transition-colors disabled:opacity-50"
                   >
                     今週
                   </button>
                   <button
                     onClick={goToNextWeek}
-                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded-md font-medium transition-colors"
+                    disabled={isLoadingAssignments}
+                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded-md font-medium transition-colors disabled:opacity-50"
                   >
                     次週
                   </button>
                 </div>
               </div>
               
-              {isLoading ? (
-                <div className="flex justify-center items-center h-64">
-                  <p className="text-gray-500">読み込み中...</p>
-                </div>
-              ) : (
+              {isLoadingAssignments && <div className="text-center py-10">割り当てを読み込み中...</div>}
+              {errorAssignments && <div className="text-center py-10 text-red-500">エラー: {errorAssignments}</div>}
+              
+              {!isLoadingAssignments && !errorAssignments && selectedScheduleId && (
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
@@ -245,7 +277,7 @@ export default function WeeklySchedulePage() {
                             }`}
                           >
                             <div>{daysOfWeek[date.getDay()]}</div>
-                            <div className="text-sm font-bold text-gray-900">{formatDate(date)}</div>
+                            <div className="text-sm font-bold text-gray-900">{formatDisplayDate(date)}</div>
                           </th>
                         ))}
                       </tr>
@@ -253,16 +285,16 @@ export default function WeeklySchedulePage() {
                     <tbody className="bg-white divide-y divide-gray-200">
                       <tr>
                         {weekDates.map((date, index) => {
-                          const assignments = getAssignmentsForDate(date);
+                          const assignmentsOnDate = getAssignmentsForDate(date);
                           return (
-                            <td key={index} className="px-2 py-4 whitespace-nowrap text-sm text-gray-500 border-r last:border-r-0">
-                              {assignments.length === 0 ? (
+                            <td key={index} className="px-2 py-4 whitespace-nowrap text-sm text-gray-500 border-r last:border-r-0 align-top">
+                              {assignmentsOnDate.length === 0 ? (
                                 <div className="h-24 flex items-center justify-center text-gray-400">
                                   当番なし
                                 </div>
                               ) : (
-                                <div className="space-y-4">
-                                  {assignments.map((assignment) => (
+                                <div className="space-y-2">
+                                  {assignmentsOnDate.map((assignment) => (
                                     <div
                                       key={assignment.id}
                                       className="p-2 bg-blue-50 border border-blue-200 rounded-md"
@@ -270,7 +302,7 @@ export default function WeeklySchedulePage() {
                                       <div className="font-medium text-blue-800">{assignment.timeSlot}</div>
                                       <div className="text-gray-700">{assignment.library}</div>
                                       <div className="mt-1 text-xs text-gray-600">
-                                        {assignment.members.join(', ')}
+                                        {assignment.members.map(mem => mem.name).join(', ') || 'メンバー未定'}
                                       </div>
                                     </div>
                                   ))}
@@ -284,6 +316,9 @@ export default function WeeklySchedulePage() {
                   </table>
                 </div>
               )}
+              {!selectedScheduleId && !isLoadingSchedules && !errorSchedules &&
+                <div className="text-center py-10 text-gray-500">スケジュールを選択してください。</div>
+              }
               
               <div className="mt-6 flex justify-end">
                 <Link href="/schedule/edit">
