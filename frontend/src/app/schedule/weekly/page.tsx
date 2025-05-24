@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface ScheduleAssignment {
   id: number;
@@ -16,7 +17,7 @@ export default function WeeklySchedulePage() {
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(new Date());
   const [scheduleAssignments, setScheduleAssignments] = useState<ScheduleAssignment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [schedules, setSchedules] = useState<{id: number, name: string}[]>([
+  const [schedules] = useState<{id: number, name: string}[]>([
     { id: 1, name: '2025年度前期スケジュール' },
     { id: 2, name: '2025年度後期スケジュール' },
   ]);
@@ -167,7 +168,14 @@ export default function WeeklySchedulePage() {
       <header className="bg-white shadow">
         <div className="flex justify-between items-center px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center">
-            <img src="/images/books-icon.png" alt="本のアイコン" className="h-8 w-8 mr-2" />
+            <Image 
+              src="/images/books-icon.png" 
+              alt="本のアイコン" 
+              width={32} 
+              height={32} 
+              className="h-8 w-8 mr-2"
+              priority
+            />
             <h1 className="text-2xl font-bold text-gray-900">図書当番割り当てくん</h1>
           </div>
           <div className="flex items-center">

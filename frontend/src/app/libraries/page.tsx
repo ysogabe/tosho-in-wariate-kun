@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Library {
   id: number;
@@ -115,7 +116,14 @@ export default function LibrariesPage() {
       <header className="bg-white shadow">
         <div className="flex justify-between items-center px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center">
-            <img src="/book-icon.svg" alt="本のアイコン" className="h-8 w-8 mr-2" />
+            <Image 
+              src="/book-icon.svg" 
+              alt="本のアイコン" 
+              width={32} 
+              height={32} 
+              className="h-8 w-8 mr-2"
+              priority
+            />
             <h1 className="text-2xl font-bold text-gray-900">図書当番割り当てくん</h1>
           </div>
           <div className="flex items-center">

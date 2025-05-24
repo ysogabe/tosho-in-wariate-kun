@@ -4,8 +4,19 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
+// 型定義
+interface Member {
+  id: number;
+  name: string;
+  grade: string;
+  className: string;
+  role: string;
+  active: boolean;
+  notes?: string;
+}
+
 // モックデータ
-const mockMembers = [
+const mockMembers: Member[] = [
   { id: 1, name: '山田太郎', grade: '1年', className: 'A組', role: '委員長', active: true },
   { id: 2, name: '佐藤花子', grade: '1年', className: 'B組', role: '副委員長', active: true },
   { id: 3, name: '鈴木一郎', grade: '2年', className: 'A組', role: '委員', active: true },
@@ -57,7 +68,7 @@ export default function MembersManagement() {
   };
 
   // モーダルを開く（編集）
-  const openEditModal = (member) => {
+  const openEditModal = (member: Member) => {
     setCurrentMember({
       ...member,
       notes: ''
@@ -86,7 +97,7 @@ export default function MembersManagement() {
   };
 
   // 図書委員の削除処理
-  const deleteMember = (id) => {
+  const deleteMember = (id: number) => {
     if (confirm('本当に削除しますか？')) {
       setMembers(members.filter(member => member.id !== id));
     }

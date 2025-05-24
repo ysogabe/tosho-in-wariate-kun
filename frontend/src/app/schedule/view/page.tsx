@@ -90,15 +90,15 @@ export default function ScheduleView() {
   };
 
   // 日付フォーマット関数
-  const formatDate = (date) => {
+  const formatDate = (date: Date | null): string => {
     return date ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}` : '';
   };
 
-  // 日付のスケジュールを取得
-  const getScheduleForDate = (date) => {
-    if (!date) return null;
-    const dateString = formatDate(date);
-    return mockSchedules[dateString] || null;
+  // 指定された日付のスケジュールを取得
+  const getScheduleForDate = (date: Date | null): { room: string; time: string; members: string[] }[] => {
+    if (!date) return [];
+    const dateStr = formatDate(date);
+    return mockSchedules[dateStr as keyof typeof mockSchedules] || [];
   };
 
   return (
@@ -212,11 +212,14 @@ export default function ScheduleView() {
                         <div className="mt-1">
                           {schedule ? (
                             <div className="space-y-1">
-                              {schedule.map((item, idx) => (
-                                <div key={idx} className="p-1 bg-blue-50 border-l-4 border-blue-500 text-xs">
+                              {schedule.map((item: { room: string; time: string; members: string[] }, idx: number) => (
+                                <div key={idx} className="mb-2 p-2 bg-blue-50 border-l-4 border-blue-500 rounded-r text-sm">
                                   <div className="font-medium">{item.room}</div>
-                                  <div>{item.time}</div>
-                                  <div className="truncate">{item.members.join(', ')}</div>
+                                  <div className="text-gray-600">{item.time}</div>
+                                  <div className="text-gray-700 mt-1">
+                                    <span className="font-medium">担当者: </span>
+                                    {item.members.join(', ')}
+                                  </div>
                                 </div>
                               ))}
                             </div>

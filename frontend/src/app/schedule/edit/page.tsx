@@ -4,43 +4,43 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
-// 曜日の配列
-const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+// 型定義
+interface Duty {
+  id: number;
+  date: Date;
+  room: string;
+  time: string;
+  members: string[];
+  changeReason?: string;
+}
 
-// モックデータ - 当番スケジュール
-const mockSchedules = {
-  '2025-05-01': [
-    { id: 1, room: '図書室A', time: '12:30-13:00', members: ['山田太郎', '佐藤花子'] },
-  ],
-  '2025-05-02': [
-    { id: 2, room: '図書室A', time: '12:30-13:00', members: ['鈴木一郎', '高橋明'] },
-  ],
-  '2025-05-05': [
-    { id: 3, room: '図書室B', time: '15:30-16:00', members: ['渡辺健太', '中村さくら'] },
-  ],
-  '2025-05-08': [
-    { id: 4, room: '図書室A', time: '12:30-13:00', members: ['小林和也', '加藤美咲'] },
-  ],
-  '2025-05-12': [
-    { id: 5, room: '図書室B', time: '15:30-16:00', members: ['山田太郎', '高橋明'] },
-  ],
-  '2025-05-15': [
-    { id: 6, room: '図書室A', time: '12:30-13:00', members: ['佐藤花子', '渡辺健太'] },
-  ],
-  '2025-05-19': [
-    { id: 7, room: '図書室B', time: '15:30-16:00', members: ['鈴木一郎', '中村さくら'] },
-  ],
-  '2025-05-22': [
-    { id: 8, room: '図書室A', time: '12:30-13:00', members: ['小林和也', '山田太郎'] },
-    { id: 9, room: '図書室B', time: '15:30-16:00', members: ['加藤美咲', '高橋明'] },
-  ],
-  '2025-05-26': [
-    { id: 10, room: '図書室A', time: '12:30-13:00', members: ['佐藤花子', '鈴木一郎'] },
-  ],
-  '2025-05-29': [
-    { id: 11, room: '図書室B', time: '15:30-16:00', members: ['渡辺健太', '小林和也'] },
-  ],
-};
+interface CalendarCell {
+  date: Date | null;
+  isCurrentMonth: boolean;
+  isToday: boolean;
+}
+
+// 曜日の配列
+const weekdays: string[] = ['日', '月', '火', '水', '木', '金', '土'];
+
+// 現在の日付を取得
+const today = new Date();
+const nextWeek = new Date(today);
+nextWeek.setDate(today.getDate() + 7);
+
+// モックデータ: 当番スケジュール
+const mockDuties: Duty[] = [
+  { id: 1, date: today, room: '図書室A', time: '12:30-13:00', members: ['山田太郎', '佐藤花子'] },
+  { id: 2, date: today, room: '図書室A', time: '15:30-16:00', members: ['鈴木一郎', '高橋明'] },
+  { id: 3, date: today, room: '図書室B', time: '12:30-13:00', members: ['渡辺健太', '中村さくら'] },
+  { id: 4, date: nextWeek, room: '図書室A', time: '12:30-13:00', members: ['小林和也', '加藤美咲'] },
+  { id: 5, date: nextWeek, room: '図書室B', time: '15:30-16:00', members: ['山田太郎', '鈴木一郎'] },
+  { id: 6, date: nextWeek, room: '図書室A', time: '12:30-13:00', members: ['佐藤花子', '高橋明'] },
+  { id: 7, date: nextWeek, room: '図書室B', time: '12:30-13:00', members: ['渡辺健太', '中村さくら'] },
+  { id: 8, date: nextWeek, room: '図書室A', time: '15:30-16:00', members: ['小林和也', '加藤美咲'] },
+  { id: 9, date: nextWeek, room: '図書室B', time: '12:30-13:00', members: ['山田太郎', '佐藤花子'] },
+  { id: 10, date: nextWeek, room: '図書室A', time: '12:30-13:00', members: ['鈴木一郎', '高橋明'] },
+];
 
 // モックデータ - スケジュール一覧
 const mockScheduleList = [
@@ -50,24 +50,27 @@ const mockScheduleList = [
 
 // モックデータ - 図書委員一覧
 const mockMembers = [
-  { id: 1, name: '山田太郎', grade: '1年', className: 'A組' },
-  { id: 2, name: '佐藤花子', grade: '1年', className: 'B組' },
-  { id: 3, name: '鈴木一郎', grade: '2年', className: 'A組' },
-  { id: 4, name: '高橋明', grade: '2年', className: 'C組' },
-  { id: 5, name: '渡辺健太', grade: '3年', className: 'B組' },
-  { id: 6, name: '中村さくら', grade: '3年', className: 'A組' },
-  { id: 7, name: '小林和也', grade: '1年', className: 'C組' },
-  { id: 8, name: '加藤美咲', grade: '2年', className: 'B組' },
+  { id: 1, name: '山田 太郎', grade: '1年', className: 'A組' },
+  { id: 2, name: '佐藤 花子', grade: '1年', className: 'B組' },
+  { id: 3, name: '鈴木 一郎', grade: '2年', className: 'A組' },
+  { id: 4, name: '高橋 さくら', grade: '2年', className: 'C組' },
+  { id: 5, name: '伊藤 健太', grade: '3年', className: 'B組' },
+  { id: 6, name: '渡辺 恵', grade: '3年', className: 'A組' },
+  { id: 7, name: '中村 大輔', grade: '1年', className: 'C組' },
+  { id: 8, name: '小林 由美', grade: '2年', className: 'B組' },
+  { id: 9, name: '加藤 隆', grade: '3年', className: 'A組' },
+  { id: 10, name: '吉田 優子', grade: '1年', className: 'B組' },
 ];
 
 export default function ScheduleEdit() {
-  const [selectedSchedule, setSelectedSchedule] = useState(1);
-  const [currentDate, setCurrentDate] = useState(new Date(2025, 4, 1)); // 2025年5月
-  const [isPublished, setIsPublished] = useState(mockScheduleList[0].isPublished);
+  const [selectedSchedule, setSelectedSchedule] = useState<number>(1);
+  const [currentDate, setCurrentDate] = useState<Date>(new Date(2025, 4, 1)); // 2025年5月
+  const [isPublished, setIsPublished] = useState<boolean>(mockScheduleList[0].isPublished);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentDuty, setCurrentDuty] = useState(null);
-  const [newMembers, setNewMembers] = useState([]);
+  const [currentDuty, setCurrentDuty] = useState<Duty | null>(null);
+  const [newMembers, setNewMembers] = useState<string[]>([]);
   const [changeReason, setChangeReason] = useState('');
+  const [duties, setDuties] = useState<Duty[]>(mockDuties);
 
   // 現在の年月を取得
   const year = currentDate.getFullYear();
@@ -77,24 +80,8 @@ export default function ScheduleEdit() {
   const firstDayOfMonth = new Date(year, month, 1);
   const lastDayOfMonth = new Date(year, month + 1, 0);
 
-  // 月の最初の日の曜日（0: 日曜日, 1: 月曜日, ..., 6: 土曜日）
-  const firstDayOfWeek = firstDayOfMonth.getDay();
-
   // 月のカレンダー日数（前月の余り + 当月の日数）
   const daysInMonth = lastDayOfMonth.getDate();
-
-  // カレンダーの日付を生成
-  const calendarDays = [];
-  
-  // 前月の余白を追加
-  for (let i = 0; i < firstDayOfWeek; i++) {
-    calendarDays.push(null);
-  }
-  
-  // 当月の日付を追加
-  for (let day = 1; day <= daysInMonth; day++) {
-    calendarDays.push(new Date(year, month, day));
-  }
 
   // 前月へ移動
   const goToPreviousMonth = () => {
@@ -106,42 +93,142 @@ export default function ScheduleEdit() {
     setCurrentDate(new Date(year, month + 1, 1));
   };
 
-  // 日付フォーマット関数
-  const formatDate = (date) => {
-    return date ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}` : '';
-  };
-
-  // 日付のスケジュールを取得
-  const getScheduleForDate = (date) => {
-    if (!date) return null;
-    const dateString = formatDate(date);
-    return mockSchedules[dateString] || null;
-  };
-
-  // 当番編集モーダルを開く
-  const openEditModal = (duty, date) => {
-    setCurrentDuty({
-      ...duty,
-      date: date
+  // 日付をクリックしたときの処理
+  const handleDateClick = (date: Date) => {
+    // クリックした日付の当番を取得
+    const dutiesForDate = duties.filter(duty => {
+      return duty.date.toDateString() === date.toDateString();
     });
-    setNewMembers(duty.members);
-    setChangeReason('');
+    
+    if (dutiesForDate.length > 0) {
+      // 既存の当番を編集
+      const dutyToEdit = dutiesForDate[0];
+      setCurrentDuty(dutyToEdit);
+      setNewMembers([...dutyToEdit.members]);
+      setChangeReason(dutyToEdit.changeReason || '');
+    } else {
+      // 新しい当番を作成
+      const newDuty: Duty = {
+        id: Date.now(),
+        date: date,
+        room: '図書室A',
+        time: '12:30-13:00',
+        members: [],
+        changeReason: '新規作成',
+      };
+      setCurrentDuty(newDuty);
+      setNewMembers([]);
+      setChangeReason('新規作成');
+    }
     setIsModalOpen(true);
   };
 
-  // 当番編集モーダルを閉じる
+
+
+  // カレンダーセルを生成
+  const generateCalendarCells = (): CalendarCell[] => {
+    // 月の最初の日の曜日（0: 日曜日, 1: 月曜日, ..., 6: 土曜日）
+    const firstDayOfWeek = firstDayOfMonth.getDay();
+    const cells: CalendarCell[] = [];
+    
+    // 前月の日付を追加
+    const prevMonthLastDay = new Date(year, month, 0).getDate();
+    for (let i = firstDayOfWeek; i > 0; i--) {
+      const date = new Date(year, month - 1, prevMonthLastDay - i + 1);
+      cells.push({
+        date,
+        isCurrentMonth: false,
+        isToday: false
+      });
+    }
+    
+    // 当月の日付を追加
+    for (let i = 1; i <= daysInMonth; i++) {
+      const date = new Date(year, month, i);
+      const isToday = date.toDateString() === new Date().toDateString();
+      cells.push({
+        date,
+        isCurrentMonth: true,
+        isToday
+      });
+    }
+    
+    // 次月の日付を追加（6行目まで埋める）
+    const remainingCells = 42 - cells.length; // 6行×7日
+    for (let i = 1; i <= remainingCells; i++) {
+      const date = new Date(year, month + 1, i);
+      cells.push({
+        date,
+        isCurrentMonth: false,
+        isToday: false
+      });
+    }
+    
+    return cells;
+  };
+
+  // 日付をフォーマットする関数
+  const formatDate = (date: Date | null): string => {
+    if (!date) return '';
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  // 指定された日付のスケジュールを取得
+  const getScheduleForDate = (date: Date | null): Duty[] | null => {
+    if (!date) return null;
+    const dutiesForDate = duties.filter(duty => {
+      return duty.date.toDateString() === date.toDateString();
+    });
+    return dutiesForDate.length > 0 ? dutiesForDate : null;
+  };
+
+  // モーダルを開いて当番を編集
+  const openEditModal = (duty: Duty, date: Date) => {
+    setCurrentDuty(duty);
+    setNewMembers([...duty.members]);
+    setChangeReason('');
+    setIsModalOpen(true);
+    // 日付をセット
+    setCurrentDate(date);
+  };
+
+  // モーダルを閉じる
   const closeModal = () => {
     setIsModalOpen(false);
-    setCurrentDuty(null);
-    setNewMembers([]);
-    setChangeReason('');
+    // 少し遅らせて状態をリセット（アニメーションのため）
+    setTimeout(() => {
+      setCurrentDuty(null);
+      setNewMembers([]);
+      setChangeReason('');
+    }, 300);
   };
 
   // 当番の変更を保存
   const saveDutyChanges = () => {
-    // 実際のアプリケーションでは、ここでAPIを呼び出してデータを更新します
-    // このモックでは、変更を表示するだけです
-    alert(`当番変更を保存しました。\n日付: ${formatDate(currentDuty.date)}\n図書室: ${currentDuty.room}\n担当者: ${newMembers.join(', ')}\n変更理由: ${changeReason || 'なし'}`);
+    if (!currentDuty) return;
+    
+    const updatedDuty: Duty = {
+      ...currentDuty,
+      members: [...newMembers],
+      changeReason: changeReason || '変更なし'
+    };
+    
+    // 既存の当番を更新または新規追加
+    setDuties(prevDuties => {
+      const existingIndex = prevDuties.findIndex(d => d.id === updatedDuty.id);
+      if (existingIndex >= 0) {
+        const newDuties = [...prevDuties];
+        newDuties[existingIndex] = updatedDuty;
+        return newDuties;
+      } else {
+        return [...prevDuties, updatedDuty];
+      }
+    });
+    
+    // モーダルを閉じる
     closeModal();
   };
 
@@ -197,7 +284,7 @@ export default function ScheduleEdit() {
                     onChange={(e) => {
                       const schedId = Number(e.target.value);
                       setSelectedSchedule(schedId);
-                      setIsPublished(mockScheduleList.find(s => s.id === schedId).isPublished);
+                      setIsPublished(mockScheduleList.find(s => s.id === schedId)?.isPublished || false);
                     }}
                     className="w-64 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   >
@@ -246,68 +333,62 @@ export default function ScheduleEdit() {
                 </button>
               </div>
             </div>
-          </div>
 
-          {/* 月間カレンダー */}
-          <div className="bg-white rounded-md shadow-sm overflow-hidden">
-            <div className="grid grid-cols-7 gap-px bg-gray-200">
-              {weekdays.map((day, index) => (
-                <div 
-                  key={index} 
-                  className={`p-2 text-center font-medium ${index === 0 ? 'text-red-500' : index === 6 ? 'text-blue-500' : 'text-gray-700'}`}
-                >
-                  {day}
-                </div>
-              ))}
-            </div>
-            <div className="grid grid-cols-7 gap-px bg-gray-200">
-              {calendarDays.map((date, index) => {
-                const schedule = getScheduleForDate(date);
-                const isToday = date && new Date().toDateString() === date.toDateString();
-                const isWeekend = date && (date.getDay() === 0 || date.getDay() === 6);
-                
-                return (
+            {/* 月間カレンダー */}
+            <div className="bg-white rounded-md shadow-sm overflow-hidden mb-6">
+              <div className="grid grid-cols-7 gap-px bg-gray-200">
+                {weekdays.map((day, index) => (
                   <div 
                     key={index} 
-                    className={`min-h-32 bg-white p-2 ${isToday ? 'ring-2 ring-blue-500' : ''}`}
+                    className={`p-2 text-center font-medium ${index === 0 ? 'text-red-500' : index === 6 ? 'text-blue-500' : 'text-gray-700'}`}
                   >
-                    {date && (
-                      <>
-                        <div className={`text-right font-medium ${date.getDay() === 0 ? 'text-red-500' : date.getDay() === 6 ? 'text-blue-500' : 'text-gray-700'}`}>
-                          {date.getDate()}
-                        </div>
-                        <div className="mt-1">
-                          {schedule ? (
-                            <div className="space-y-1">
-                              {schedule.map((item) => (
-                                <div 
-                                  key={item.id} 
-                                  className="p-1 bg-blue-50 border-l-4 border-blue-500 text-xs cursor-pointer hover:bg-blue-100"
-                                  onClick={() => openEditModal(item, date)}
-                                >
-                                  <div className="font-medium">{item.room}</div>
-                                  <div>{item.time}</div>
-                                  <div className="truncate">{item.members.join(', ')}</div>
-                                </div>
-                              ))}
-                            </div>
-                          ) : isWeekend ? (
-                            <div className="text-xs text-gray-400 italic">休日</div>
-                          ) : null}
-                        </div>
-                      </>
-                    )}
+                    {day}
                   </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* 凡例 */}
-          <div className="mt-6 bg-white p-4 rounded-md shadow-sm">
-            <h3 className="text-lg font-medium text-gray-800 mb-2">操作方法</h3>
-            <div className="text-sm text-gray-700">
-              <p>当番をクリックすると、担当者を変更できます。変更後は検証ボタンを押して、ルール違反がないか確認してください。</p>
+                ))}
+              </div>
+              <div className="grid grid-cols-7 gap-px bg-gray-200">
+                {generateCalendarCells().map((cell, index) => {
+                  if (!cell.date) return <div key={index} className="min-h-32 bg-white p-2"></div>;
+                  
+                  const schedule = getScheduleForDate(cell.date);
+                  const isToday = cell.date.toDateString() === new Date().toDateString();
+                  const isWeekend = cell.date.getDay() === 0 || cell.date.getDay() === 6;
+                  
+                  return (
+                    <div 
+                      key={index} 
+                      className={`min-h-32 bg-white p-2 ${isToday ? 'ring-2 ring-blue-500' : ''}`}
+                      onClick={() => handleDateClick(cell.date as Date)}
+                    >
+                      <div className={`text-right font-medium ${
+                        cell.date.getDay() === 0 ? 'text-red-500' : 
+                        cell.date.getDay() === 6 ? 'text-blue-500' : 'text-gray-700'
+                      }`}>
+                        {cell.date.getDate()}
+                      </div>
+                      <div className="mt-1" onClick={(e) => e.stopPropagation()}>
+                        {schedule ? (
+                          <div className="space-y-1">
+                            {schedule.map((item) => (
+                              <div 
+                                key={item.id} 
+                                className="p-1 bg-blue-50 border-l-4 border-blue-500 text-xs cursor-pointer hover:bg-blue-100"
+                                onClick={() => openEditModal(item, cell.date as Date)}
+                              >
+                                <div className="font-medium">{item.room}</div>
+                                <div>{item.time}</div>
+                                <div className="truncate">{item.members.join(', ')}</div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : isWeekend ? (
+                          <div className="text-xs text-gray-400 italic">休日</div>
+                        ) : null}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
@@ -316,12 +397,12 @@ export default function ScheduleEdit() {
       {/* フッター */}
       <footer className="bg-gray-800 text-white p-4">
         <div className="container mx-auto text-center">
-          <p>© 2025 図書当番割り当てくん</p>
+          <p> 2025 図書当番割り当てくん</p>
         </div>
       </footer>
 
       {/* 当番編集モーダル */}
-      {isModalOpen && currentDuty && (
+      {isModalOpen && currentDuty && currentDuty.date && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg w-full max-w-md">
             <div className="p-6">
@@ -359,7 +440,7 @@ export default function ScheduleEdit() {
                     value={newMembers}
                     onChange={(e) => {
                       const options = e.target.options;
-                      const selectedValues = [];
+                      const selectedValues: string[] = [];
                       for (let i = 0; i < options.length; i++) {
                         if (options[i].selected) {
                           selectedValues.push(options[i].value);
@@ -379,30 +460,35 @@ export default function ScheduleEdit() {
                   <p className="text-xs text-gray-500 mt-1">Ctrlキーを押しながら複数選択できます</p>
                 </div>
 
-                <div>
-                  <label htmlFor="changeReason" className="block text-sm font-medium text-gray-700 mb-1">変更理由</label>
+                <div className="mb-4">
+                  <label htmlFor="changeReason" className="block text-sm font-medium text-gray-700 mb-1">
+                    変更理由（任意）
+                  </label>
                   <textarea
                     id="changeReason"
                     value={changeReason}
                     onChange={(e) => setChangeReason(e.target.value)}
-                    rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="変更理由を入力してください"
+                    rows={3}
+                    placeholder="変更理由を入力してください（任意）"
                   />
                 </div>
               </div>
+
               <div className="flex justify-end space-x-3">
                 <button
+                  type="button"
                   onClick={closeModal}
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md font-medium transition-colors"
+                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
                 >
                   キャンセル
                 </button>
                 <button
+                  type="button"
                   onClick={saveDutyChanges}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors"
+                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
-                  保存
+                  保存する
                 </button>
               </div>
             </div>

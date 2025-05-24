@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 interface ValidationResult {
   id: number;
@@ -23,7 +24,7 @@ interface ScheduleSummary {
 export default function ScheduleVerifyPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const [scheduleName, setScheduleName] = useState('2025年度前期スケジュール');
+  const [scheduleName] = useState('2025年度前期スケジュール');
   const [validationResults, setValidationResults] = useState<ValidationResult[]>([]);
   const [scheduleSummary, setScheduleSummary] = useState<ScheduleSummary | null>(null);
 
@@ -150,7 +151,14 @@ export default function ScheduleVerifyPage() {
       <header className="bg-white shadow">
         <div className="flex justify-between items-center px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center">
-            <img src="/images/books-icon.png" alt="本のアイコン" className="h-8 w-8 mr-2" />
+            <Image 
+              src="/images/books-icon.png" 
+              alt="本のアイコン" 
+              width={32} 
+              height={32} 
+              className="h-8 w-8 mr-2"
+              priority
+            />
             <h1 className="text-2xl font-bold text-gray-900">図書当番割り当てくん</h1>
           </div>
           <div className="flex items-center">
