@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { FaUsers, FaSchool, FaBook, FaDoorOpen, FaCalendarAlt, FaCog, FaArrowLeft } from 'react-icons/fa';
+import { FaUsers, FaBook, FaDoorOpen, FaCalendarAlt, FaCog, FaArrowLeft } from 'react-icons/fa';
 import ManagementCard from '../_components/ManagementCard';
 import PageLayout from '../_components/PageLayout';
 import { Button } from '@/components/ui/button';
@@ -16,12 +16,6 @@ export default function ManagementPage() {
 
   const managementItems = {
     basic: [
-      {
-        title: '学年管理',
-        icon: <FaSchool />,
-        description: '学年情報の登録・編集・削除を行います',
-        link: '/management/grades'
-      },
       {
         title: 'クラス管理',
         icon: <FaUsers />,

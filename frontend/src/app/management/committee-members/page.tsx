@@ -1,8 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { FaArrowLeft, FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaArrowLeft, FaPlus, FaSearch, FaFilter } from 'react-icons/fa';
+import dynamic from 'next/dynamic';
+
+// MembersTable コンポーネントを dynamic インポートでクライアントサイドでのみレンダリング
+const MembersTable = dynamic(() => import('./MembersTable'), {
+  ssr: false, // サーバーサイドレンダリングを無効化
+  loading: () => <p className="text-center py-4">テーブルを読み込み中...</p>
+});
 
 interface CommitteeMember {
   id: number;
@@ -41,6 +48,25 @@ export default function CommitteeMembersPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [filterGrade, setFilterGrade] = useState<number | null>(null);
+  const [filterName, setFilterName] = useState<string>('');
+  
+  // 学年リストを作成（重複なし）
+  const availableGrades = useMemo(() => {
+    if (!availableClasses.length) return [];
+    
+    const grades = availableClasses.reduce<{id: number, name: string}[]>((acc, cls) => {
+      if (!acc.some(g => g.id === cls.grade_id)) {
+        acc.push({
+          id: cls.grade_id,
+          name: cls.grade_name
+        });
+      }
+      return acc;
+    }, []);
+    
+    return grades.sort((a, b) => a.id - b.id);
+  }, [availableClasses]);
 
   const fetchMembers = async () => {
     setIsLoading(true);
@@ -163,79 +189,100 @@ export default function CommitteeMembersPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 animate-fadeIn">
-      <div className="flex items-center mb-6">
-        <Link href="/management" className="mr-4 text-primary hover:text-primary-dark transition-colors">
-          <FaArrowLeft className="text-2xl" />
-        </Link>
-        <h1 className="text-3xl font-bold text-text">✨ 図書委員管理 ✨</h1>
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center">
+          <Link href="/management" className="text-primary hover:text-primary-dark mr-4">
+            <FaArrowLeft className="text-xl" />
+          </Link>
+          <h1 className="text-3xl font-bold text-text">図書委員管理</h1>
+        </div>
+        <button
+          onClick={startAddingNew}
+          disabled={isLoading || availableClasses.length === 0}
+          className="flex items-center bg-primary text-white px-4 py-2 rounded-full hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <FaPlus className="mr-2" />
+          新規追加
+        </button>
       </div>
 
-      <div className="bg-white bg-opacity-80 rounded-2xl p-6 shadow-md border-2 border-dashed border-secondary mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-text">図書委員一覧</h2>
-          <button
-            onClick={startAddingNew}
-            disabled={isLoading || availableClasses.length === 0}
-            className="px-6 py-2 bg-primary text-white rounded-full hover:bg-primary-dark transition-colors flex items-center disabled:opacity-50"
-            title={availableClasses.length === 0 ? "利用可能なクラスがありません" : "新規追加"}
-          >
-            <FaPlus className="mr-2" />
-            新規追加
-          </button>
-        </div>
-        
-        {isLoading && members.length === 0 && <p className="text-center text-gray-500">データを読み込み中...</p>}
-        {error && <p className="text-center text-red-500 my-4">エラー: {error}</p>}
-        {!isLoading && !error && members.length === 0 && <p className="text-center text-gray-500">登録されている図書委員データがありません。</p>}
+      {/* フィルタリングセクション */}
+      <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex-1 min-w-[200px]">
+            <label htmlFor="nameFilter" className="block text-sm font-medium text-gray-700 mb-1">
+              <FaSearch className="inline mr-2" />名前で検索
+            </label>
+            <input
+              id="nameFilter"
+              type="text"
+              value={filterName}
+              onChange={(e) => setFilterName(e.target.value)}
+              placeholder="名前を入力..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
 
-        {members.length > 0 && (
+          <div className="flex-1 min-w-[200px]">
+            <label htmlFor="gradeFilter" className="block text-sm font-medium text-gray-700 mb-1">
+              <FaFilter className="inline mr-2" />学年で絞り込み
+            </label>
+            <select
+              id="gradeFilter"
+              value={filterGrade === null ? '' : filterGrade}
+              onChange={(e) => setFilterGrade(e.target.value ? Number(e.target.value) : null)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="">すべての学年</option>
+              {availableGrades.map((grade) => (
+                <option key={grade.id} value={grade.id}>
+                  {grade.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* メインコンテンツ */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <h2 className="text-xl font-semibold mb-4">図書委員一覧</h2>
+        
+        {isLoading && members.length === 0 && (
+          <div className="text-center py-8 text-gray-500">
+            データを読み込み中...
+          </div>
+        )}
+        
+        {error && (
+          <div className="text-center py-4 text-red-500">
+            エラー: {error}
+          </div>
+        )}
+        
+        {!isLoading && members.length === 0 && (
+          <div className="text-center py-8 text-gray-500">
+            委員データがありません。新しい委員を追加してください。
+          </div>
+        )}
+        
+        {!isLoading && members.length > 0 && (
           <div className="overflow-x-auto">
-            <table className="min-w-full bg-white">
-              <thead>
-                <tr className="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
-                  <th className="py-3 px-6 text-left">ID</th>
-                  <th className="py-3 px-6 text-left">名前</th>
-                  <th className="py-3 px-6 text-left">学年</th>
-                  <th className="py-3 px-6 text-left">クラス</th>
-                  <th className="py-3 px-6 text-left">役割</th>
-                  <th className="py-3 px-6 text-center">操作</th>
-                </tr>
-              </thead>
-              <tbody className="text-gray-600 text-sm">
-                {members.map((member) => (
-                  <tr key={member.id} className="border-b border-gray-200 hover:bg-gray-50">
-                    <td className="py-3 px-6 text-left">{member.id}</td>
-                    <td className="py-3 px-6 text-left">{member.name}</td>
-                    <td className="py-3 px-6 text-left">{member.grade_name}</td> {/* Display grade_name */}
-                    <td className="py-3 px-6 text-left">{member.class_name}</td> {/* Display class_name */}
-                    <td className="py-3 px-6 text-left">{member.role}</td>
-                    <td className="py-3 px-6 text-center">
-                      <div className="flex item-center justify-center">
-                        <button
-                          onClick={() => startEditing(member)}
-                          disabled={isLoading || availableClasses.length === 0}
-                          className="transform hover:text-blue-500 hover:scale-110 transition-all mx-2 disabled:opacity-50"
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          onClick={() => deleteMember(member.id)}
-                          disabled={isLoading}
-                          className="transform hover:text-red-500 hover:scale-110 transition-all mx-2 disabled:opacity-50"
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <MembersTable 
+              members={members} 
+              isLoading={isLoading} 
+              availableClasses={availableClasses} 
+              startEditing={startEditing} 
+              deleteMember={deleteMember}
+              filterGrade={filterGrade}
+              filterName={filterName}
+            />
           </div>
         )}
       </div>
 
+      {/* 編集モーダル */}
       {showForm && editingMember && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md">
@@ -289,7 +336,7 @@ export default function CommitteeMembersPage() {
                   <option value="副委員長">副委員長</option>
                   <option value="書記">書記</option>
                   <option value="会計">会計</option>
-                  <option value="メンバー">メンバー</option> {/* Changed "委員" to "メンバー" to match seed data */}
+                  <option value="メンバー">メンバー</option>
                 </select>
               </div>
               <div className="flex justify-end space-x-2">

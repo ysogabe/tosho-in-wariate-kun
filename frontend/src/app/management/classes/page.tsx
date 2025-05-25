@@ -187,7 +187,6 @@ export default function ClassesManagementPage() {
                 <tr className="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
                   <th className="py-3 px-6 text-left">ID</th>
                   <th className="py-3 px-6 text-left">クラス名</th>
-                  <th className="py-3 px-6 text-left">学年</th>
                   {/* <th className="py-3 px-6 text-left">定員</th> Backend doesn't support capacity for classes table */}
                   <th className="py-3 px-6 text-center">操作</th>
                 </tr>
@@ -197,7 +196,6 @@ export default function ClassesManagementPage() {
                   <tr key={cls.id} className="border-b border-gray-200 hover:bg-gray-50">
                     <td className="py-3 px-6 text-left">{cls.id}</td>
                     <td className="py-3 px-6 text-left">{cls.name}</td>
-                    <td className="py-3 px-6 text-left">{cls.grade_name}</td>
                     {/* <td className="py-3 px-6 text-left">{cls.capacity}人</td> */}
                     <td className="py-3 px-6 text-center">
                       <div className="flex item-center justify-center">

@@ -1,8 +1,15 @@
 import sqlite3
 import random
+import os
 
-def seed_data():
-    conn = sqlite3.connect('mock_backend/database.db')
+# デフォルトのデータベースパス
+db_dir = os.path.dirname(os.path.abspath(__file__))
+db_path = os.path.join(db_dir, 'database.db')
+
+def seed_data(custom_db_path=None):
+    # カスタムパスが指定されていればそれを使用
+    conn_path = custom_db_path if custom_db_path else db_path
+    conn = sqlite3.connect(conn_path)
     cursor = conn.cursor()
 
     # Seed Grades
@@ -17,15 +24,33 @@ def seed_data():
     classes_data = []
     grade_ids = [row[0] for row in cursor.execute("SELECT id FROM grades").fetchall()]
     for grade_id in grade_ids:
-        for i in range(1, random.randint(2, 4)): # 2 or 3 classes per grade
-            classes_data.append((f'{cursor.execute("SELECT name FROM grades WHERE id = ?", (grade_id,)).fetchone()[0]} {i}組', grade_id))
+        # 5年生は3クラス、5年生は4クラスに設定
+        grade_name = cursor.execute("SELECT name FROM grades WHERE id = ?", (grade_id,)).fetchone()[0]
+        if grade_name == '5年生':
+            class_count = 3
+        elif grade_name == '6年生':
+            class_count = 4
+        else:
+            class_count = random.randint(2, 3)  # その他の学年は2、4クラス
+        
+        for i in range(1, class_count + 1):
+            # 学年名から"生"を取り除いて「6年1組」のような形式にする
+            grade_short_name = grade_name.replace('生', '')
+            classes_data.append((f'{grade_short_name}{i}組', grade_id))
     cursor.executemany("INSERT INTO classes (name, grade_id) VALUES (?, ?)", classes_data)
     conn.commit()
     print("Seeded classes")
 
     # Seed Committee Members
     committee_members_data = []
-    class_ids = [row[0] for row in cursor.execute("SELECT id FROM classes").fetchall()]
+    # 5年生と6年生のクラスIDのみを取得（図書委員は5年生と6年生だけ）
+    class_ids = cursor.execute("""
+        SELECT c.id FROM classes c
+        JOIN grades g ON c.grade_id = g.id
+        WHERE g.name IN ('5年生', '6年生')
+    """).fetchall()
+    class_ids = [row[0] for row in class_ids]
+    
     roles = ['委員長', '副委員長', '書記', '会計', 'メンバー']
     first_names = ['太郎', '花子', '一郎', '二郎', '三郎', '桜', '桃子', '一郎', '次郎', '三郎']
     last_names = ['佐藤', '鈴木', '高橋', '田中', '渡辺', '伊藤', '山本', '中村', '小林', '加藤']
@@ -46,8 +71,8 @@ def seed_data():
 
     # Seed Libraries
     libraries_data = [
-        ('中央図書館', '北区中央1-1-1', 100, True),
-        ('南図書館', '南区南町2-2-2', 75, True)
+        ('第一図書室', '校舎1階', 50, True),
+        ('第二図書室', '校舎2階', 40, True)
     ]
     cursor.executemany("INSERT INTO libraries (name, location, capacity, is_active) VALUES (?, ?, ?, ?)", libraries_data)
     conn.commit()

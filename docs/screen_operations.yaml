@@ -1,0 +1,92 @@
+# 図書委員当番くん画面操作ガイド
+
+# 画面遷移
+screens:
+  - name: ログイン画面
+    path: /login
+    operations:
+      - action: ログインボタンをクリック
+        target: button:has-text("ログイン")
+        next: /dashboard
+
+  - name: ダッシュボード
+    path: /dashboard
+    operations:
+      - action: 管理画面へ移動
+        target: a[href="/management"]
+        next: /management
+      
+  - name: 管理画面
+    path: /management
+    operations:
+      - action: 基本情報管理タブを選択
+        target: button:has-text("基本情報管理")
+        next: null
+      - action: スケジュール管理タブを選択
+        target: button:has-text("スケジュール管理")
+        next: null
+      - action: クラス管理へ移動
+        target: a[href="/management/classes"]
+        next: /management/classes
+      - action: 図書委員管理へ移動
+        target: a[href="/management/committee-members"]
+        next: /management/committee-members
+      - action: 図書室管理へ移動
+        target: a[href="/management/libraries"]
+        next: /management/libraries
+      - action: スケジュールルール設定へ移動
+        target: a[href="/management/schedule-rules"]
+        next: /management/schedule-rules
+      - action: スケジュール生成へ移動
+        target: a[href="/management/generate-schedule"]
+        next: /management/generate-schedule
+      - action: スケジュール検証へ移動
+        target: a[href="/management/validate-schedule"]
+        next: /management/validate-schedule
+      - action: ダッシュボードへ戻る
+        target: a[href="/dashboard"]
+        next: /dashboard
+
+# 修正要件
+modifications:
+  - requirement: 図書委員は5年生と6年生だけ
+    files:
+      - path: /mock_backend/seed_data.py
+        changes:
+          - description: 図書委員のデータを5年生と6年生のみに制限する
+  
+  - requirement: 図書室管理画面で登録するデータが図書館になっている
+    files:
+      - path: /mock_backend/seed_data.py
+        changes:
+          - description: 図書館データを第一図書室、第二図書室に変更する
+  
+  - requirement: 管理画面の学年管理は不要
+    files:
+      - path: /frontend/src/app/management/page.tsx
+        changes:
+          - description: 学年管理の項目を削除する
+  
+  - requirement: クラス一覧で学年のカラムは不要
+    files:
+      - path: /frontend/src/app/management/classes/page.tsx
+        changes:
+          - description: クラス一覧から学年カラムを削除する
+  
+  - requirement: スケジュール管理の画面で全てのリンクが存在するか確認
+    files:
+      - path: /frontend/src/app/management/page.tsx
+        changes:
+          - description: スケジュール管理タブのリンクが正しく設定されているか確認する
+  
+  - requirement: ダッシュボードの週間スケジュールがAPIからデータを取得しているか確認
+    files:
+      - path: /frontend/src/app/dashboard/page.tsx
+        changes:
+          - description: 週間スケジュールのデータをAPIから取得するように修正する
+  
+  - requirement: ダッシュボード表示でスケジュールが登録されていない場合の表示
+    files:
+      - path: /frontend/src/app/_components/WeeklySchedule.tsx
+        changes:
+          - description: スケジュールがない場合にスケジュール作成を促すメッセージを表示する

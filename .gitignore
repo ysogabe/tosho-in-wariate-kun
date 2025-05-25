@@ -5,6 +5,11 @@ node_modules/
 
 # Testing
 /coverage
+htmlcov/
+.coverage
+.pytest_cache/
+coverage.xml
+reports/
 
 # Next.js
 .next/
@@ -33,3 +38,22 @@ yarn-error.log*
 # TypeScript
 *.tsbuildinfo
 .DS_Store
+__pycache__/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+venv/
+
+# SQLite database files
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.sqlite-journal
+*.db-shm
+*.db-wal
+mock_backend/reports/

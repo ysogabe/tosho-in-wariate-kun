@@ -1,7 +1,14 @@
 import sqlite3
+import os
 
-def setup_database():
-    conn = sqlite3.connect('mock_backend/database.db')
+# デフォルトのデータベースパス
+db_dir = os.path.dirname(os.path.abspath(__file__))
+DATABASE_PATH = os.path.join(db_dir, 'database.db')
+
+def setup_database(custom_db_path=None):
+    # カスタムパスが指定されていればそれを使用
+    db_path = custom_db_path if custom_db_path else DATABASE_PATH
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Create tables
@@ -81,6 +88,7 @@ def setup_database():
         committee_member_id INTEGER, -- This can be NULL if assignment_members is used
         date TEXT, -- YYYY-MM-DD
         time_slot TEXT, -- e.g., '09:00-10:00'
+        day_of_week INTEGER, -- 1 for Monday, 2 for Tuesday, etc.
         FOREIGN KEY (schedule_id) REFERENCES schedules(id),
         FOREIGN KEY (library_id) REFERENCES libraries(id),
         FOREIGN KEY (committee_member_id) REFERENCES committee_members(id)

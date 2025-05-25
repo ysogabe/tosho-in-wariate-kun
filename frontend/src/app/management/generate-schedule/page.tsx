@@ -1,29 +1,98 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { FaArrowLeft, FaCalendarAlt, FaSpinner } from 'react-icons/fa';
+import { FaArrowLeft, FaCalendarAlt, FaSpinner, FaChevronDown } from 'react-icons/fa';
 
 export default function GenerateSchedulePage() {
-  const [semester, setSemester] = useState('first'); // 前期・後期
-  const [year, setYear] = useState(new Date().getFullYear().toString());
+  const [academicYear, setAcademicYear] = useState('2025年度');
+  const [semester, setSemester] = useState('前期（4月～9月）');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedSchedule, setGeneratedSchedule] = useState<null | { success: boolean, message: string }>(null);
+  const [generatedSchedule, setGeneratedSchedule] = useState<null | { success: boolean, message: string, scheduleId?: number }>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
+  const [semesterDropdownOpen, setSemesterDropdownOpen] = useState(false);
+
+  // 年度のオプション
+  const yearOptions = ['2025年度', '2026年度', '2027年度', '2028年度', '2029年度'];
+  
+  // 学期のオプション
+  const semesterOptions = ['前期（4月～9月）', '後期（10月～3月）'];
+
+  // 年度と学期に基づいて日付範囲を設定
+  useEffect(() => {
+    const year = parseInt(academicYear.replace('年度', ''));
+    
+    if (semester === '前期（4月～9月）') {
+      setStartDate(`${year}-04-01`);
+      setEndDate(`${year}-09-30`);
+    } else {
+      setStartDate(`${year}-10-01`);
+      setEndDate(`${year + 1}-03-31`);
+    }
+  }, [academicYear, semester]);
 
   // スケジュールを生成
-  const generateSchedule = () => {
+  const generateSchedule = async () => {
+    if (!startDate || !endDate || !academicYear) {
+      setError('期間および学年度を入力してください');
+      return;
+    }
+
     setIsGenerating(true);
     setGeneratedSchedule(null);
+    setError(null);
 
-    // 実際のアプリケーションではAPIを呼び出してスケジュールを生成する
-    // ここではシミュレーションとして3秒後に完了する
-    setTimeout(() => {
+    try {
+      // APIを呼び出してスケジュールを生成
+      const response = await fetch('http://localhost:5001/api/generate-schedule', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: `${academicYear}${semester}スケジュール`,
+          description: `${academicYear}の${semester}の図書委員当番スケジュール`,
+          startDate,
+          endDate,
+          academicYear: academicYear.replace('年度', ''),
+          isFirstHalf: semester.includes('前期')
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`APIエラー: ${response.status}`);
+      }
+
+      const result = await response.json();
       setIsGenerating(false);
       setGeneratedSchedule({
         success: true,
-        message: `${year}年度${semester === 'first' ? '前期' : '後期'}のスケジュールが正常に生成されました。`
+        message: result.message || 'スケジュールが正常に生成されました',
+        scheduleId: result.scheduleId
       });
-    }, 3000);
+    } catch (error) {
+      console.error('スケジュール生成中にエラーが発生しました:', error);
+      setIsGenerating(false);
+      setGeneratedSchedule({
+        success: false,
+        message: `スケジュール生成中にエラーが発生しました: ${error instanceof Error ? error.message : String(error)}`
+      });
+    }
+  };
+
+  // 年度を選択
+  const selectYear = (year: string) => {
+    setAcademicYear(year);
+    setYearDropdownOpen(false);
+  };
+
+  // 学期を選択
+  const selectSemester = (sem: string) => {
+    setSemester(sem);
+    setSemesterDropdownOpen(false);
   };
 
   return (
@@ -35,35 +104,70 @@ export default function GenerateSchedulePage() {
         <h1 className="text-3xl font-bold text-text">✨ スケジュール生成 ✨</h1>
       </div>
 
-      <div className="bg-white bg-opacity-80 rounded-2xl p-6 shadow-md border-2 border-dashed border-secondary mb-8">
-        <h2 className="text-2xl font-bold text-text mb-6">年度と学期を指定してスケジュールを生成</h2>
+      <div className="bg-white bg-opacity-80 rounded-2xl p-6 shadow-md border-2 border-dashed border-pink-200 mb-8">
+        <h2 className="text-2xl font-bold text-text mb-6">スケジュールの詳細を入力</h2>
         <p className="text-text-light mb-6">
-          スケジュールは年2回（前期・後期）の修正を行います。曜日単位で図書委員を割り当てます。
+          スケジュール名と期間を設定し、担当する図書委員を選択してください。
         </p>
 
+        {error && (
+          <h2 className="text-xl font-bold text-text mb-6">年度と学期を指定してスケジュールを生成</h2>
+        )}
+        <p className="text-gray-600 mb-6">スケジュールは半期（前期・後期）の修正を行い、曜日単位で図書委員を割り当てます。</p>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div>
-            <label className="block text-text-light mb-2">年度</label>
-            <select
-              value={year}
-              onChange={(e) => setYear(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg border-2 border-secondary focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(year => (
-                <option key={year} value={year}>{year}年度</option>
-              ))}
-            </select>
+            <label className="block text-gray-700 mb-2">年度</label>
+            <div className="relative">
+              <button 
+                onClick={() => setYearDropdownOpen(!yearDropdownOpen)}
+                className="w-full px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300"
+              >
+                <span>{academicYear}</span>
+                <FaChevronDown className="text-gray-400" />
+              </button>
+              
+              {yearDropdownOpen && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
+                  {yearOptions.map((year) => (
+                    <button
+                      key={year}
+                      onClick={() => selectYear(year)}
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100 focus:outline-none"
+                    >
+                      {year}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
+          
           <div>
-            <label className="block text-text-light mb-2">学期</label>
-            <select
-              value={semester}
-              onChange={(e) => setSemester(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg border-2 border-secondary focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="first">前期（4月〜9月）</option>
-              <option value="second">後期（10月〜3月）</option>
-            </select>
+            <label className="block text-gray-700 mb-2">学期</label>
+            <div className="relative">
+              <button 
+                onClick={() => setSemesterDropdownOpen(!semesterDropdownOpen)}
+                className="w-full px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-300"
+              >
+                <span>{semester}</span>
+                <FaChevronDown className="text-gray-400" />
+              </button>
+              
+              {semesterDropdownOpen && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
+                  {semesterOptions.map((sem) => (
+                    <button
+                      key={sem}
+                      onClick={() => selectSemester(sem)}
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100 focus:outline-none"
+                    >
+                      {sem}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -71,7 +175,7 @@ export default function GenerateSchedulePage() {
           <button
             onClick={generateSchedule}
             disabled={isGenerating}
-            className={`px-8 py-3 bg-primary text-white rounded-full hover:bg-primary-dark transition-colors flex items-center ${isGenerating ? 'opacity-70 cursor-not-allowed' : ''}`}
+            className={`px-8 py-3 bg-cyan-500 text-white rounded-full hover:bg-cyan-600 transition-colors flex items-center ${isGenerating ? 'opacity-70 cursor-not-allowed' : ''}`}
           >
             {isGenerating ? (
               <>
@@ -93,7 +197,7 @@ export default function GenerateSchedulePage() {
             {generatedSchedule.success && (
               <div className="mt-4 flex justify-center">
                 <Link
-                  href="/management/validate-schedule"
+                  href={generatedSchedule.scheduleId ? `/management/validate-schedule?id=${generatedSchedule.scheduleId}` : "/management/validate-schedule"}
                   className="px-6 py-2 bg-primary text-white rounded-full hover:bg-primary-dark transition-colors"
                 >
                   生成されたスケジュールを確認
@@ -104,7 +208,7 @@ export default function GenerateSchedulePage() {
         )}
       </div>
 
-      <div className="bg-white bg-opacity-80 rounded-2xl p-6 shadow-md border-2 border-dashed border-secondary">
+      <div className="bg-white bg-opacity-80 rounded-2xl p-6 shadow-md border-2 border-dashed border-pink-200">
         <h2 className="text-xl font-bold text-text mb-4">スケジュール生成について</h2>
         <p className="text-text-light mb-3">
           このツールは設定されたルールに基づいて図書委員の当番スケジュールを自動生成します。

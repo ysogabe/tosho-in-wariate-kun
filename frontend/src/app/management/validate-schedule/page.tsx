@@ -1,86 +1,176 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { FaArrowLeft, FaCheck, FaTimes, FaEdit, FaSave } from 'react-icons/fa';
+import api from '@/services/api';
+import { FaArrowLeft, FaCheck, FaEdit, FaTimes, FaSpinner, FaSave } from 'react-icons/fa';
+
+// 型定義
+interface Member {
+  name: string;
+  icon: string;
+}
+
+interface Duty {
+  location: string;
+  members: Member[];
+}
+
+interface ScheduleItem {
+  id: number;
+  name: string;
+  description?: string;
+  start_date: string;
+  end_date: string;
+  day_of_week: number;
+  day: string;
+  duties: Duty[];
+  approved: boolean;
+  year: number;
+  semester: string;
+}
+
+interface ApiSchedule {
+  id: number;
+  name: string;
+  description?: string;
+  start_date: string;
+  end_date: string;
+  year: number;
+  semester: string;
+  assignments: Array<{
+    id: number;
+    library_id: number;
+    library_name: string;
+    date: string;
+    time_slot: string;
+    assigned_committee_members: Array<{
+      id: number;
+      name: string;
+      role: string;
+    }>;
+  }>;
+}
+
+// スケジュール関連の型定義は上記のみを使用
 
 export default function ValidateSchedulePage() {
-  // 編集中のスケジュールの型定義
-  type Member = { name: string; icon: string };
-  type Duty = { location: string; members: Member[] };
-  type ScheduleItem = {
-    id: number;
-    semester: string;
-    year: string;
-    day: string;
-    duties: Duty[];
-    approved: boolean;
-  };
-  type EditingSchedule = { id: number; duties: Duty[] };
+  const searchParams = useSearchParams();
+  const scheduleIdParam = searchParams.get('id');
 
-  // スケジュールデータ - 曜日単位で図書委員を割り当て
-  const [schedule, setSchedule] = useState<ScheduleItem[]>([
-    { 
-      id: 1, 
-      semester: '前期', // 前期・後期
-      year: '2023', // 年度
-      day: '月', 
-      duties: [
-        { location: '図書室A', members: [{ name: '山田花子', icon: '🌸' }, { name: '佐藤太郎', icon: '🚀' }] },
-        { location: '図書室B', members: [{ name: '鈴木一郎', icon: '📚' }] }
-      ],
-      approved: true 
-    },
-    { 
-      id: 2, 
-      semester: '前期',
-      year: '2023',
-      day: '火', 
-      duties: [
-        { location: '図書室A', members: [{ name: '田中めぐみ', icon: '🌺' }, { name: '高橋健太', icon: '🏃' }] },
-        { location: '図書室B', members: [{ name: '伊藤さくら', icon: '🌸' }] }
-      ],
-      approved: false 
-    },
-    { 
-      id: 3, 
-      semester: '前期',
-      year: '2023',
-      day: '水', 
-      duties: [
-        { location: '図書室A', members: [{ name: '渡辺結衣', icon: '🌼' }, { name: '小林大輔', icon: '🏆' }] },
-        { location: '図書室B', members: [{ name: '加藤悠真', icon: '📖' }] }
-      ],
-      approved: false 
-    },
-    { 
-      id: 4, 
-      semester: '前期',
-      year: '2023',
-      day: '木', 
-      duties: [
-        { location: '図書室A', members: [{ name: '松本さやか', icon: '🌻' }, { name: '井上拓海', icon: '🌊' }] },
-        { location: '図書室B', members: [{ name: '佐々木美咲', icon: '🌷' }] }
-      ],
-      approved: false 
-    },
-    { 
-      id: 5, 
-      semester: '前期',
-      year: '2023',
-      day: '金', 
-      duties: [
-        { location: '図書室A', members: [{ name: '山本航', icon: '✈️' }, { name: '中村あおい', icon: '🌊' }] },
-        { location: '図書室B', members: [{ name: '斉藤健', icon: '🏃' }] }
-      ],
-      approved: false 
-    },
-  ]);
-
-  const [editingSchedule, setEditingSchedule] = useState<EditingSchedule | null>(null);
+  // 状態管理
+  const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
+  const [editingSchedule, setEditingSchedule] = useState<ScheduleItem | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-  const [filter, setFilter] = useState('all'); // 'all', 'approved', 'pending'
+  const [filter, setFilter] = useState<'all' | 'approved' | 'pending'>('all');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // スケジュールデータの初期化
+  useEffect(() => {
+    // データ取得はスケジュールのみに簡素化
+    // 必要に応じて後で図書室と図書委員のデータを取得するように変更
+  }, []);
+
+  // スケジュールデータを取得
+  useEffect(() => {
+    const fetchSchedules = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // 特定のスケジュールIDが指定されている場合はそれを取得、なければ全て取得
+        if (scheduleIdParam) {
+          const scheduleId = parseInt(scheduleIdParam, 10);
+          // スケジュールデータを取得
+          const scheduleData = await api.schedules.getById(scheduleId) as ApiSchedule;
+          processScheduleData([scheduleData]);
+        } else {
+          const schedulesData = await api.schedules.getAll();
+          // 各スケジュールの詳細情報を取得
+          const detailedSchedules = await Promise.all(
+            schedulesData.map(schedule => api.schedules.getById(schedule.id))
+          ) as ApiSchedule[];
+          
+          processScheduleData(detailedSchedules);
+        }
+      } catch (error) {
+        console.error('スケジュールの取得に失敗しました:', error);
+        setError('スケジュールの取得に失敗しました');
+        setLoading(false);
+      }
+    };
+
+    fetchSchedules();
+  }, [scheduleIdParam]);
+
+  // APIから取得したスケジュールデータを処理
+  const processScheduleData = (apiSchedules: ApiSchedule[]) => {
+    const dayMapping: Record<number, string> = {
+      0: '日曜日',
+      1: '月曜日',
+      2: '火曜日',
+      3: '水曜日',
+      4: '木曜日',
+      5: '金曜日',
+      6: '土曜日'
+    };
+
+    // APIから取得したデータを整形
+    const processedSchedules = apiSchedules.map(apiSchedule => {
+      // 曜日を取得（日付から曜日を計算）
+      const date = new Date(apiSchedule.start_date);
+      const dayOfWeek = date.getDay();
+      const day = dayMapping[dayOfWeek];
+
+      // 担当者情報を整形
+      const duties = apiSchedule.assignments.reduce((acc: Duty[], assignment) => {
+        const existingDutyIndex = acc.findIndex(duty => duty.location === assignment.library_name);
+        
+        // アイコンをランダムに選択
+        const icons = ['🌸', '🚀', '📚', '🌺', '🏃', '🌼', '🏆', '📖', '🌻', '🌊', '🌷', '✈️'];
+        
+        if (existingDutyIndex >= 0) {
+          // 既に同じ図書室の担当がある場合は、そこにメンバーを追加
+          assignment.assigned_committee_members.forEach(member => {
+            acc[existingDutyIndex].members.push({
+              name: member.name,
+              icon: icons[Math.floor(Math.random() * icons.length)]
+            });
+          });
+        } else {
+          // 新しい図書室の担当を追加
+          acc.push({
+            location: assignment.library_name,
+            members: assignment.assigned_committee_members.map(member => ({
+              name: member.name,
+              icon: icons[Math.floor(Math.random() * icons.length)]
+            }))
+          });
+        }
+        
+        return acc;
+      }, []);
+
+      return {
+        id: apiSchedule.id,
+        name: apiSchedule.name,
+        description: apiSchedule.description,
+        start_date: apiSchedule.start_date,
+        end_date: apiSchedule.end_date,
+        day_of_week: dayOfWeek,
+        day,
+        duties,
+        approved: false, // 初期値は未承認
+        year: apiSchedule.year,
+        semester: apiSchedule.semester
+      };
+    });
+
+    setSchedule(processedSchedules);
+    setLoading(false);
+  };
 
   // スケジュールを承認する処理
   const approveSchedule = (id: number) => {
@@ -97,7 +187,7 @@ export default function ValidateSchedulePage() {
   const editSchedule = (id: number, duties: Duty[]) => {
     setSchedule(prevSchedule => 
       prevSchedule.map(item => 
-        item.id === id ? { ...item, duties, approved: false } : item
+        item.id === id ? { ...item, duties } : item
       )
     );
   };
@@ -110,12 +200,12 @@ export default function ValidateSchedulePage() {
     setSuccessMessage('すべてのスケジュールが承認されました');
     setTimeout(() => setSuccessMessage(''), 3000);
   };
-  
+
   // スケジュールの編集を開始
   const startEditing = (id: number) => {
-    const scheduleToEdit = schedule.find(item => item.id === id);
-    if (scheduleToEdit) {
-      setEditingSchedule({ id, duties: JSON.parse(JSON.stringify(scheduleToEdit.duties)) });
+    const targetSchedule = schedule.find(item => item.id === id);
+    if (targetSchedule) {
+      setEditingSchedule(targetSchedule);
       setShowForm(true);
     }
   };
@@ -130,10 +220,10 @@ export default function ValidateSchedulePage() {
   const saveEditing = () => {
     if (editingSchedule) {
       editSchedule(editingSchedule.id, editingSchedule.duties);
-      setEditingSchedule(null);
-      setShowForm(false);
       setSuccessMessage('スケジュールが更新されました');
       setTimeout(() => setSuccessMessage(''), 3000);
+      setShowForm(false);
+      setEditingSchedule(null);
     }
   };
 
@@ -180,31 +270,21 @@ export default function ValidateSchedulePage() {
 
   // フィルタリングされたスケジュール
   const filteredSchedule = useMemo(() => {
-    let filtered = [...schedule];
-    
-    // 承認状態でフィルタリング
-    if (filter === 'approved') {
-      filtered = filtered.filter(item => item.approved);
-    } else if (filter === 'pending') {
-      filtered = filtered.filter(item => !item.approved);
-    }
-    
-    // 曜日順にソート
-    const dayOrder = { '月': 0, '火': 1, '水': 2, '木': 3, '金': 4, '土': 5, '日': 6 };
-    filtered.sort((a, b) => {
-      // まず年度でソート
-      if (a.year !== b.year) return parseInt(a.year) - parseInt(b.year);
-      
-      // 次に学期でソート（前期→後期）
-      if (a.semester !== b.semester) {
-        return a.semester === '前期' ? -1 : 1;
-      }
-      
-      // 最後に曜日でソート
-      return dayOrder[a.day as keyof typeof dayOrder] - dayOrder[b.day as keyof typeof dayOrder];
+    // スケジュールを曜日でソート
+    const sortedSchedule = [...schedule].sort((a, b) => {
+      // 曜日順にソート
+      return a.day_of_week - b.day_of_week;
     });
     
-    return filtered;
+    // 承認状態でフィルタリング
+    switch (filter) {
+      case 'approved':
+        return sortedSchedule.filter(item => item.approved);
+      case 'pending':
+        return sortedSchedule.filter(item => !item.approved);
+      default:
+        return sortedSchedule;
+    }
   }, [schedule, filter]);
   
   // 承認済みと未承認のスケジュール数
@@ -217,157 +297,187 @@ export default function ValidateSchedulePage() {
         <Link href="/management" className="mr-4 text-primary hover:text-primary-dark transition-colors">
           <FaArrowLeft className="text-2xl" />
         </Link>
-        <h1 className="text-3xl font-bold text-text">✨ スケジュール検証 ✨</h1>
+        <h1 className="text-3xl font-bold text-text">✔️ スケジュール検証 ✔️</h1>
       </div>
 
-      {successMessage && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
-          {successMessage}
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <FaSpinner className="animate-spin text-4xl text-primary" />
+          <span className="ml-3 text-xl">スケジュールを読み込み中...</span>
         </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div className="bg-white bg-opacity-80 rounded-2xl p-6 shadow-md">
-          <h3 className="text-xl font-bold text-text mb-4">スケジュール概要</h3>
-          <div className="space-y-2">
-            <p className="text-text-light">総スケジュール数: <span className="font-bold">{schedule.length}</span></p>
-            <p className="text-text-light">承認済み: <span className="font-bold text-green-600">{approvedCount}</span></p>
-            <p className="text-text-light">未承認: <span className="font-bold text-yellow-600">{pendingCount}</span></p>
-          </div>
+      ) : error ? (
+        <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-6">
+          <p>{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          >
+            再読み込み
+          </button>
         </div>
+      ) : (
+        <>
+          {successMessage && (
+            <div className="bg-green-100 text-green-700 p-4 rounded-lg mb-6 animate-fadeIn">
+              {successMessage}
+            </div>
+          )}
 
-        <div className="bg-white bg-opacity-80 rounded-2xl p-6 shadow-md">
-          <h3 className="text-xl font-bold text-text mb-4">アクション</h3>
-          <div className="space-y-4">
-            <button
-              onClick={approveAllSchedule}
-              className="w-full px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark flex items-center justify-center"
-              disabled={pendingCount === 0}
-            >
-              <FaCheck className="mr-2" /> すべてのスケジュールを承認
-            </button>
-            <Link href="/dashboard" className="w-full px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary-dark flex items-center justify-center inline-block text-center">
-              ダッシュボードで確認
-            </Link>
-          </div>
-        </div>
-      </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="bg-white bg-opacity-80 rounded-2xl p-6 shadow-md">
+              <h3 className="text-xl font-bold text-text mb-4">スケジュール概要</h3>
+              <div className="space-y-2">
+                <p className="text-text-light">総スケジュール数: <span className="font-bold">{schedule.length}</span></p>
+                <p className="text-text-light">承認済み: <span className="font-bold text-green-600">{approvedCount}</span></p>
+                <p className="text-text-light">未承認: <span className="font-bold text-yellow-600">{pendingCount}</span></p>
+              </div>
+            </div>
 
-      <div className="bg-white bg-opacity-80 rounded-2xl p-6 shadow-md border-2 border-dashed border-secondary mb-8">
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold text-text mb-6">スケジュール一覧</h2>
-          
-          <div className="mb-6 flex items-center space-x-4">
-            <span className="text-text-light">フィルター:</span>
-            <button 
-              onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-full ${filter === 'all' ? 'bg-primary text-white' : 'bg-white text-text-light'}`}
-            >
-              すべて
-            </button>
-            <button 
-              onClick={() => setFilter('approved')}
-              className={`px-4 py-2 rounded-full ${filter === 'approved' ? 'bg-primary text-white' : 'bg-white text-text-light'}`}
-            >
-              承認済み
-            </button>
-            <button 
-              onClick={() => setFilter('pending')}
-              className={`px-4 py-2 rounded-full ${filter === 'pending' ? 'bg-primary text-white' : 'bg-white text-text-light'}`}
-            >
-              未承認
-            </button>
+            <div className="bg-white bg-opacity-80 rounded-2xl p-6 shadow-md">
+              <h3 className="text-xl font-bold text-text mb-4">アクション</h3>
+              <div className="space-y-4">
+                <button
+                  onClick={approveAllSchedule}
+                  className="w-full px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark flex items-center justify-center"
+                  disabled={pendingCount === 0}
+                >
+                  <FaCheck className="mr-2" /> すべてのスケジュールを承認
+                </button>
+                <Link href="/dashboard" className="w-full px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary-dark flex items-center justify-center text-center">
+                  ダッシュボードで確認
+                </Link>
+              </div>
+            </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white rounded-lg overflow-hidden">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">年度</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">学期</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">曜日</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">図書室</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">担当者</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状態</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">アクション</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {filteredSchedule.map((item) => (
-                  <React.Fragment key={item.id}>
-                    {item.duties.map((duty, dutyIndex) => (
-                      <tr key={`${item.id}-${dutyIndex}`} className={item.approved ? 'bg-green-50' : 'bg-yellow-50'}>
-                        {dutyIndex === 0 && (
-                          <>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" rowSpan={item.duties.length}>{item.year}年度</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" rowSpan={item.duties.length}>{item.semester}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" rowSpan={item.duties.length}>{item.day}曜日</td>
-                          </>
-                        )}
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{duty.location}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {duty.members.map((member, idx) => (
-                            <div key={idx} className="flex items-center mb-1">
-                              <span className="text-xl mr-2" role="img" aria-label="member icon">{member.icon}</span>
-                              <span>{member.name}</span>
-                            </div>
-                          ))}
+          <div className="bg-white bg-opacity-80 rounded-2xl p-6 shadow-md border-2 border-dashed border-secondary mb-8">
+            <h3 className="text-xl font-bold text-text mb-4">フィルター</h3>
+            <div className="flex space-x-4">
+              <button
+                onClick={() => setFilter('all')}
+                className={`px-4 py-2 rounded-lg ${filter === 'all' ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+              >
+                すべて ({schedule.length})
+              </button>
+              <button
+                onClick={() => setFilter('approved')}
+                className={`px-4 py-2 rounded-lg ${filter === 'approved' ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+              >
+                承認済み ({approvedCount})
+              </button>
+              <button
+                onClick={() => setFilter('pending')}
+                className={`px-4 py-2 rounded-lg ${filter === 'pending' ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+              >
+                未承認 ({pendingCount})
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-white bg-opacity-80 rounded-2xl p-6 shadow-md">
+            <h3 className="text-xl font-bold text-text mb-4">スケジュール一覧</h3>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      曜日
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      スケジュール名
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      期間
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      担当者
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      状態
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      アクション
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredSchedule.map((item) => (
+                    <React.Fragment key={item.id}>
+                      <tr className={item.approved ? 'bg-green-50' : 'bg-yellow-50'}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{item.day}</div>
                         </td>
-                        {dutyIndex === 0 && (
-                          <td className="px-6 py-4 whitespace-nowrap text-sm" rowSpan={item.duties.length}>
-                            {item.approved ? (
-                              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                承認済み
-                              </span>
-                            ) : (
-                              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                未承認
-                              </span>
-                            )}
-                          </td>
-                        )}
-                        {dutyIndex === 0 && (
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 space-x-2" rowSpan={item.duties.length}>
-                            {!item.approved && (
-                              <button
-                                onClick={() => approveSchedule(item.id)}
-                                className="text-green-600 hover:text-green-900"
-                                title="承認"
-                              >
-                                <FaCheck />
-                              </button>
-                            )}
-                            {item.approved && (
-                              <button
-                                onClick={() => rejectSchedule(item.id)}
-                                className="text-red-600 hover:text-red-900"
-                                title="非承認"
-                              >
-                                <FaTimes />
-                              </button>
-                            )}
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{item.name}</div>
+                          <div className="text-sm text-gray-500">{item.description}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{item.year}年度{item.semester === 'first' ? '前期' : '後期'}</div>
+                          <div className="text-sm text-gray-500">{item.start_date} 〜 {item.end_date}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-900">
+                            {item.duties.map((duty, dutyIndex) => (
+                              <div key={dutyIndex} className="mb-2">
+                                <div className="font-medium">{duty.location}</div>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {duty.members.map((member, memberIndex) => (
+                                    <span key={memberIndex} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                      {member.icon} {member.name}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {item.approved ? (
+                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                              承認済み
+                            </span>
+                          ) : (
+                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                              未承認
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          {item.approved ? (
                             <button
-                              onClick={() => startEditing(item.id)}
-                              className="text-blue-600 hover:text-blue-900"
-                              title="編集"
+                              onClick={() => rejectSchedule(item.id)}
+                              className="text-red-600 hover:text-red-900 mr-3"
                             >
-                              <FaEdit />
+                              非承認
                             </button>
-                          </td>
-                        )}
+                          ) : (
+                            <button
+                              onClick={() => approveSchedule(item.id)}
+                              className="text-green-600 hover:text-green-900 mr-3"
+                            >
+                              承認
+                            </button>
+                          )}
+                          <button
+                            onClick={() => startEditing(item.id)}
+                            className="text-primary hover:text-primary-dark"
+                          >
+                            <FaEdit className="inline" /> 編集
+                          </button>
+                        </td>
                       </tr>
-                    ))}
-                  </React.Fragment>
-                ))}
-              </tbody>
-            </table>
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
 
-        {filteredSchedule.length === 0 && (
-          <p className="text-center text-text-light py-4">表示するスケジュールがありません</p>
-        )}
-      </div>
+          {filteredSchedule.length === 0 && (
+            <p className="text-center text-text-light py-4">表示するスケジュールがありません</p>
+          )}
+        </>
+      )}
 
       {/* 編集フォーム */}
       {showForm && editingSchedule && (

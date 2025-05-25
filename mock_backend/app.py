@@ -4,11 +4,27 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
+# --- Logging Middleware ---
+import logging
+logging.basicConfig(level=logging.INFO, format='[MOCK_BACKEND LOG] %(asctime)s %(levelname)s: %(message)s')
+logger = logging.getLogger("mock_backend")
+
+# --- Import Schedule Generator ---
+from schedule_generator import ScheduleGenerator, get_schedule_stats, generate_schedule_with_class
+
+@app.before_request
+def log_request_info():
+    logger.info(f"{request.method} {request.path}")
+    if request.method in ['POST', 'PUT', 'PATCH']:
+        logger.info(f"Body: {request.get_data(as_text=True)}")
+
+
 import sqlite3
 from flask import request, jsonify
 
 # --- Database Helper Functions ---
-DATABASE_PATH = 'mock_backend/database.db'
+import os
+DATABASE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'database.db')
 
 def get_db_connection():
     conn = sqlite3.connect(DATABASE_PATH)
@@ -24,6 +40,19 @@ def get_grades():
     grades = [dict(row) for row in grades_cursor.fetchall()]
     conn.close()
     return jsonify(grades)
+
+@app.route('/api/grades/<int:grade_id>', methods=['GET'])
+def get_grade(grade_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM grades WHERE id = ?', (grade_id,))
+    grade = cursor.fetchone()
+    conn.close()
+    
+    if grade is None:
+        return jsonify({"error": "Grade not found"}), 404
+        
+    return jsonify(dict(grade))
 
 @app.route('/api/grades', methods=['POST'])
 def add_grade():
@@ -1119,6 +1148,107 @@ def delete_schedule_assignment(assignment_id):
 @app.route('/')
 def hello_world():
     return 'Hello, World! This is the mock backend.'
+
+# --- API Endpoint for Schedule Generation ---
+@app.route('/api/generate-schedule', methods=['POST'])
+def generate_schedule_api():
+    data = request.json
+    if not data:
+        return jsonify({"error": "Request body cannot be empty"}), 400
+    
+    logger.info(f"Received schedule generation request: {data}")
+    
+    # フロントエンドからのデータを処理
+    name = data.get('name')
+    description = data.get('description', '')
+    start_date = data.get('startDate')
+    end_date = data.get('endDate')
+    selected_members = data.get('selectedMembers', [])
+    excluded_dates = data.get('excludedDates', [])
+    
+    # 年度と学期の取得（フロントエンドから送信された場合はそれを使用）
+    academic_year = data.get('academicYear')
+    is_first_half = data.get('isFirstHalf')
+    
+    # 基本的なバリデーション
+    if not name:
+        return jsonify({"error": "スケジュール名が必要です"}), 400
+    
+    if not start_date or not end_date:
+        return jsonify({"error": "開始日と終了日が必要です"}), 400
+    
+    # selectedMembersが空の場合、全ての図書委員を取得
+    if not selected_members:
+        try:
+            conn = get_db_connection()
+            cursor = conn.execute("""
+                SELECT cm.id FROM committee_members cm
+                JOIN classes c ON cm.class_id = c.id
+                JOIN grades g ON c.grade_id = g.id
+                WHERE g.name IN ('5年生', '6年生')
+            """)
+            all_members = [row['id'] for row in cursor.fetchall()]
+            conn.close()
+            selected_members = all_members
+            logger.info(f"selectedMembersが空のため、全図書委員を使用: {selected_members}")
+        except Exception as e:
+            logger.error(f"図書委員取得エラー: {e}")
+            return jsonify({"error": "図書委員の取得に失敗しました"}), 500
+    
+    if len(selected_members) < 2:
+        return jsonify({"error": "少なくとも2人の図書委員が必要です"}), 400
+    
+    # 年度と学期の自動判定（フロントエンドから送信されていない場合）
+    if not academic_year or is_first_half is None:
+        try:
+            from datetime import datetime
+            start_dt = datetime.strptime(start_date, '%Y-%m-%d')
+            
+            # 年度の判定（4月始まりとして）
+            if start_dt.month >= 4:
+                auto_academic_year = str(start_dt.year)
+            else:
+                auto_academic_year = str(start_dt.year - 1)
+            
+            # 学期の判定（4-9月が前期、10-3月が後期）
+            auto_is_first_half = start_dt.month >= 4 and start_dt.month <= 9
+            
+            # フロントエンドからの値がない場合のみ自動判定値を使用
+            if not academic_year:
+                academic_year = auto_academic_year
+            if is_first_half is None:
+                is_first_half = auto_is_first_half
+                
+            logger.info(f"自動判定: 年度={academic_year}, 前期={is_first_half}")
+            
+        except ValueError:
+            return jsonify({"error": "無効な日付形式です"}), 400
+    else:
+        logger.info(f"フロントエンドから受信: 年度={academic_year}, 前期={is_first_half}")
+    
+    try:
+        # デバッグ用にパラメータを出力
+        logger.info(f"generate_schedule params: name={name}, description={description}, start_date={start_date}, end_date={end_date}, academic_year={academic_year}, is_first_half={is_first_half}")
+        
+        result = generate_schedule_with_class(
+            academic_year=academic_year,
+            is_first_half=is_first_half,
+            name=name,
+            description=description,
+            start_date=start_date,
+            end_date=end_date
+        )
+        
+        if result.get('success'):
+            return jsonify(result), 201
+        else:
+            return jsonify(result), 500
+            
+    except Exception as e:
+        import traceback
+        error_traceback = traceback.format_exc()
+        logger.error(f"スケジュール生成中にエラーが発生しました: {str(e)}\n{error_traceback}")
+        return jsonify({"error": f"スケジュール生成中にエラーが発生しました: {str(e)}"}), 500
 
 if __name__ == '__main__':
     # It's good practice to set up the database if it doesn't exist or is empty before running the app

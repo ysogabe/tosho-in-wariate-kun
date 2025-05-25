@@ -1,14 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 
 interface Member {
   id: number;
   name: string;
-  grade: string;
-  className: string;
+  grade_name: string;
+  class_name: string;
+  role: string;
+  grade_id: number;
+  class_id: number;
 }
 
 interface ExcludedDate {
@@ -18,17 +22,13 @@ interface ExcludedDate {
   reason: string;
 }
 
+const API_BASE_URL = 'http://localhost:5001/api';
+
 export default function ScheduleGeneratePage() {
-  const [members] = useState<Member[]>([
-    { id: 1, name: '山田太郎', grade: '1年', className: 'A組' },
-    { id: 2, name: '佐藤花子', grade: '1年', className: 'B組' },
-    { id: 3, name: '鈴木一郎', grade: '2年', className: 'A組' },
-    { id: 4, name: '高橋明', grade: '2年', className: 'C組' },
-    { id: 5, name: '渡辺健太', grade: '3年', className: 'B組' },
-    { id: 6, name: '中村さくら', grade: '3年', className: 'A組' },
-    { id: 7, name: '小林和也', grade: '1年', className: 'C組' },
-    { id: 8, name: '加藤美咲', grade: '2年', className: 'B組' },
-  ]);
+  const router = useRouter();
+  const [members, setMembers] = useState<Member[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
   const [scheduleName, setScheduleName] = useState('');
   const [description, setDescription] = useState('');
@@ -105,9 +105,41 @@ export default function ScheduleGeneratePage() {
     const member = members.find(m => m.id === memberId);
     return member ? member.name : '';
   };
+  
+  // メンバー情報を表示
+  const getMemberInfo = (member: Member) => {
+    return `${member.name} (${member.grade_name} ${member.class_name})`;
+  };
+
+  // 図書委員データを取得
+  useEffect(() => {
+    const fetchMembers = async () => {
+      setLoading(true);
+      setErrorMessage(null);
+      try {
+        const response = await fetch(`${API_BASE_URL}/committee-members`);
+        if (!response.ok) {
+          throw new Error(`API Error: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        // 5年生と6年生のみをフィルタリング
+        const filteredMembers = data.filter((member: Member) => 
+          member.grade_name.includes('5') || member.grade_name.includes('6')
+        );
+        setMembers(filteredMembers);
+      } catch (err) {
+        setErrorMessage(err instanceof Error ? err.message : '図書委員データの取得に失敗しました');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMembers();
+  }, []);
 
   // スケジュールを生成
-  const generateSchedule = () => {
+  const generateSchedule = async () => {
     // バリデーション
     if (!scheduleName.trim()) {
       alert('スケジュール名を入力してください');
@@ -134,11 +166,56 @@ export default function ScheduleGeneratePage() {
       return;
     }
 
-    // 実際のアプリではAPIにリクエストを送信する
-    alert('スケジュール生成を開始しました。完了までしばらくお待ちください。');
-    
-    // 生成が完了したら編集画面に遷移する想定
-    // router.push('/schedule/edit');
+    setLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const formData = {
+        name: scheduleName,
+        description: description,
+        startDate: startDate,
+        endDate: endDate,
+        selectedMembers: selectedMembers,
+        excludedDates: excludedDates,
+      };
+
+      // バリデーションチェック
+      if (!formData.name || !formData.startDate || !formData.endDate) {
+        setErrorMessage('必須項目を入力してください');
+        return;
+      }
+
+      if (formData.selectedMembers.length < 2) {
+        setErrorMessage('少なくとも2人の図書委員を選択してください');
+        return;
+      }
+
+      // スケジュール生成APIを呼び出す
+      const response = await fetch(`${API_BASE_URL}/generate-schedule`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'スケジュール生成に失敗しました');
+      }
+
+      const data = await response.json();
+      alert('スケジュールが正常に生成されました');
+      
+      // 生成されたスケジュールの詳細ページに遷移
+      router.push(`/schedule/detail/${data.scheduleId}`);
+    } catch (err) {
+      console.error('スケジュール生成エラー:', err);
+      setErrorMessage(err instanceof Error ? err.message : 'スケジュール生成に失敗しました');
+      alert('スケジュール生成に失敗しました');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // フォームをクリア
@@ -180,8 +257,16 @@ export default function ScheduleGeneratePage() {
       </header>
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <h2 className="text-2xl font-bold mb-6">スケジュール生成</h2>
+      {/* エラーメッセージ */}
+      {errorMessage && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+          <span className="block sm:inline">{errorMessage}</span>
+        </div>
+      )}
+      
+      {/* フォーム */}
+      <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <h2 className="text-xl font-bold mb-6">スケジュール生成</h2>
           
           <div className="bg-white shadow overflow-hidden sm:rounded-lg">
             <div className="px-4 py-5 sm:p-6">
@@ -242,16 +327,16 @@ export default function ScheduleGeneratePage() {
                   </label>
                   <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                     {members.map((member) => (
-                      <div key={member.id} className="flex items-center">
+                      <div className="flex items-center mb-2" key={member.id}>
                         <input
                           type="checkbox"
                           id={`member-${member.id}`}
                           checked={selectedMembers.includes(member.id)}
                           onChange={() => toggleMemberSelection(member.id)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                         />
-                        <label htmlFor={`member-${member.id}`} className="ml-2 block text-sm text-gray-900">
-                          {member.name} ({member.grade} {member.className})
+                        <label htmlFor={`member-${member.id}`} className="ml-2 text-sm text-gray-700">
+                          {getMemberInfo(member)}
                         </label>
                       </div>
                     ))}
@@ -309,9 +394,10 @@ export default function ScheduleGeneratePage() {
                 <button
                   type="button"
                   onClick={generateSchedule}
+                  disabled={loading}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors"
                 >
-                  スケジュール生成
+                  {loading ? 'スケジュール生成中...' : 'スケジュールを生成'}
                 </button>
               </div>
             </div>
@@ -332,16 +418,16 @@ export default function ScheduleGeneratePage() {
                   図書委員
                 </label>
                 <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   value={selectedMemberForExclusion || ''}
-                  onChange={(e) => setSelectedMemberForExclusion(parseInt(e.target.value) || null)}
+                  onChange={(e) => setSelectedMemberForExclusion(Number(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="">選択してください</option>
+                  <option value="">図書委員を選択</option>
                   {members
                     .filter(member => selectedMembers.includes(member.id))
                     .map((member) => (
                       <option key={member.id} value={member.id}>
-                        {member.name} ({member.grade} {member.className})
+                        {getMemberInfo(member)}
                       </option>
                     ))}
                 </select>

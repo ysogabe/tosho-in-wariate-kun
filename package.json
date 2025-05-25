@@ -1,0 +1,31 @@
+{
+  "name": "tosho-in-wariate-kun",
+  "version": "1.0.0",
+  "description": "図書委員当番くんは、学校の図書委員の当番管理をサポートするウェブアプリケーションです。",
+  "main": "playwright.config.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:headed": "playwright test --headed"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ysogabe/tosho-in-wariate-kun.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ysogabe/tosho-in-wariate-kun/issues"
+  },
+  "homepage": "https://github.com/ysogabe/tosho-in-wariate-kun#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "@types/node": "^22.15.21"
+  }
+}

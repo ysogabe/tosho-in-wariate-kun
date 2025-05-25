@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { FaArrowLeft, FaSave, FaPlus, FaEdit, FaTrash, FaRegCalendarAlt } from 'react-icons/fa';
 import { useSchool } from '../../../contexts/SchoolContext'; // Assuming this context is still relevant for school name
