@@ -6,7 +6,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-def init_database(db_path='tosho_in_wariate.db'):
+def init_database(db_path='database.db'):
     """データベースの初期化"""
     logger.debug(f"データベースの初期化を開始します: {db_path}")
     
@@ -22,55 +22,96 @@ def init_database(db_path='tosho_in_wariate.db'):
     
     logger.debug("テーブルを作成します")
     
-    # grades テーブル
+    # schools テーブル
     cursor.execute('''
-    CREATE TABLE grades (
-        id INTEGER PRIMARY KEY,
-        name TEXT NOT NULL,
-        description TEXT
+    CREATE TABLE schools (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        school_name TEXT NOT NULL,
+        first_term_start DATE,
+        first_term_end DATE,
+        second_term_start DATE,
+        second_term_end DATE,
+        active BOOLEAN NOT NULL DEFAULT TRUE,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+    ''')
+    
+    # positions テーブル
+    cursor.execute('''
+    CREATE TABLE positions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        position_name TEXT NOT NULL,
+        description TEXT,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
     )
     ''')
     
     # classes テーブル
     cursor.execute('''
     CREATE TABLE classes (
-        id INTEGER PRIMARY KEY,
-        name TEXT NOT NULL,
-        grade_id INTEGER NOT NULL,
-        FOREIGN KEY (grade_id) REFERENCES grades (id)
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        school_id INTEGER NOT NULL,
+        grade INTEGER NOT NULL,
+        class_number INTEGER NOT NULL,
+        class_name TEXT NOT NULL,
+        homeroom_teacher TEXT,
+        active BOOLEAN NOT NULL DEFAULT TRUE,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (school_id) REFERENCES schools (id) ON DELETE RESTRICT
     )
     ''')
     
     # committee_members テーブル
     cursor.execute('''
     CREATE TABLE committee_members (
-        id INTEGER PRIMARY KEY,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        school_id INTEGER NOT NULL,
+        student_id TEXT NOT NULL,
         name TEXT NOT NULL,
-        role TEXT,
         class_id INTEGER NOT NULL,
-        FOREIGN KEY (class_id) REFERENCES classes (id)
+        position_id INTEGER,
+        academic_year INTEGER NOT NULL,
+        active BOOLEAN NOT NULL DEFAULT TRUE,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (school_id) REFERENCES schools (id) ON DELETE RESTRICT,
+        FOREIGN KEY (class_id) REFERENCES classes (id) ON DELETE RESTRICT,
+        FOREIGN KEY (position_id) REFERENCES positions (id) ON DELETE RESTRICT
     )
     ''')
     
-    # libraries テーブル
+    # library_rooms テーブル
     cursor.execute('''
-    CREATE TABLE libraries (
-        id INTEGER PRIMARY KEY,
-        name TEXT NOT NULL,
-        location TEXT,
-        capacity INTEGER,
-        is_active INTEGER DEFAULT 1
+    CREATE TABLE library_rooms (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        school_id INTEGER NOT NULL,
+        room_id INTEGER NOT NULL,
+        room_name TEXT NOT NULL,
+        capacity INTEGER NOT NULL DEFAULT 1,
+        description TEXT,
+        active BOOLEAN NOT NULL DEFAULT TRUE,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (school_id) REFERENCES schools (id) ON DELETE RESTRICT
     )
     ''')
     
     # schedules テーブル
     cursor.execute('''
     CREATE TABLE schedules (
-        id INTEGER PRIMARY KEY,
-        name TEXT NOT NULL,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        school_id INTEGER NOT NULL,
+        schedule_name TEXT NOT NULL,
         description TEXT,
-        start_date TEXT,
-        end_date TEXT
+        academic_year INTEGER NOT NULL,
+        is_first_half BOOLEAN NOT NULL DEFAULT TRUE,
+        status TEXT NOT NULL DEFAULT 'draft',
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (school_id) REFERENCES schools (id) ON DELETE RESTRICT
     )
     ''')
     
@@ -78,71 +119,109 @@ def init_database(db_path='tosho_in_wariate.db'):
     cursor.execute('''
     CREATE TABLE schedule_assignments (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        schedule_id INTEGER,
-        library_id INTEGER,
-        committee_member_id INTEGER, -- This can be NULL if assignment_members is used
-        date TEXT, -- YYYY-MM-DD
-        time_slot TEXT, -- e.g., '09:00-10:00'
-        FOREIGN KEY (schedule_id) REFERENCES schedules(id),
-        FOREIGN KEY (library_id) REFERENCES libraries(id),
-        FOREIGN KEY (committee_member_id) REFERENCES committee_members(id)
+        schedule_id INTEGER NOT NULL,
+        day_of_week INTEGER NOT NULL,
+        library_room_id INTEGER NOT NULL,
+        committee_member_id INTEGER NOT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (schedule_id) REFERENCES schedules (id) ON DELETE CASCADE,
+        FOREIGN KEY (library_room_id) REFERENCES library_rooms (id) ON DELETE RESTRICT,
+        FOREIGN KEY (committee_member_id) REFERENCES committee_members (id) ON DELETE RESTRICT
     )
     ''')
     
-    # assignment_members テーブル（現在は使用しない）
-    # cursor.execute('''
-    # CREATE TABLE assignment_members (
-    #     id INTEGER PRIMARY KEY,
-    #     assignment_id INTEGER NOT NULL,
-    #     committee_member_id INTEGER NOT NULL,
-    #     FOREIGN KEY (assignment_id) REFERENCES schedule_assignments (id),
-    #     FOREIGN KEY (committee_member_id) REFERENCES committee_members (id)
-    # )
-    # ''')
+    logger.debug("インデックスを作成します")
+    
+    # インデックスの作成
+    cursor.execute('CREATE UNIQUE INDEX idx_schools_name ON schools (school_name)')
+    cursor.execute('CREATE UNIQUE INDEX idx_positions_name ON positions (position_name)')
+    cursor.execute('CREATE UNIQUE INDEX idx_classes_school_grade_class_number ON classes (school_id, grade, class_number)')
+    cursor.execute('CREATE UNIQUE INDEX idx_classes_school_class_name ON classes (school_id, class_name)')
+    cursor.execute('CREATE UNIQUE INDEX idx_committee_members_student_id_year ON committee_members (school_id, student_id, academic_year)')
+    cursor.execute('CREATE INDEX idx_committee_members_class_id ON committee_members (class_id)')
+    cursor.execute('CREATE INDEX idx_committee_members_position_id ON committee_members (position_id)')
+    cursor.execute('CREATE INDEX idx_committee_members_academic_year ON committee_members (academic_year)')
+    cursor.execute('CREATE UNIQUE INDEX idx_library_rooms_school_room_id ON library_rooms (school_id, room_id)')
+    cursor.execute('CREATE UNIQUE INDEX idx_library_rooms_school_name ON library_rooms (school_id, room_name)')
+    cursor.execute('CREATE UNIQUE INDEX idx_schedules_school_year_term_active ON schedules (school_id, academic_year, is_first_half, status)')
+    cursor.execute('CREATE INDEX idx_schedules_academic_year ON schedules (academic_year)')
+    cursor.execute('CREATE INDEX idx_schedules_status ON schedules (status)')
+    cursor.execute('CREATE UNIQUE INDEX idx_assignments_unique ON schedule_assignments (schedule_id, day_of_week, library_room_id, committee_member_id)')
+    cursor.execute('CREATE INDEX idx_assignments_schedule_id ON schedule_assignments (schedule_id)')
+    cursor.execute('CREATE INDEX idx_assignments_day_of_week ON schedule_assignments (day_of_week)')
+    cursor.execute('CREATE INDEX idx_assignments_library_room_id ON schedule_assignments (library_room_id)')
+    cursor.execute('CREATE INDEX idx_assignments_committee_member_id ON schedule_assignments (committee_member_id)')
     
     logger.debug("テーブルの作成が完了しました")
     
     # サンプルデータの挿入
     logger.debug("サンプルデータを挿入します")
     
-    # grades
-    cursor.execute("INSERT INTO grades (id, name, description) VALUES (1, '5年', '5年生')")
-    cursor.execute("INSERT INTO grades (id, name, description) VALUES (2, '6年', '6年生')")
+    # schools
+    cursor.execute("""
+        INSERT INTO schools (school_name, first_term_start, first_term_end, second_term_start, second_term_end)
+        VALUES ('中央小学校', '2025-04-01', '2025-09-30', '2025-10-01', '2026-03-31')
+    """)
+    school_id = cursor.lastrowid
+    
+    # positions
+    positions_data = [
+        ('委員長', '図書委員会の代表者'),
+        ('副委員長', '委員長の補佐'),
+        ('書記', '書記')
+    ]
+    cursor.executemany("INSERT INTO positions (position_name, description) VALUES (?, ?)", positions_data)
     
     # classes
-    cursor.execute("INSERT INTO classes (id, name, grade_id) VALUES (1, '5年1組', 1)")
-    cursor.execute("INSERT INTO classes (id, name, grade_id) VALUES (2, '5年2組', 1)")
-    cursor.execute("INSERT INTO classes (id, name, grade_id) VALUES (3, '6年1組', 2)")
-    cursor.execute("INSERT INTO classes (id, name, grade_id) VALUES (4, '6年2組', 2)")
+    classes_data = [
+        (school_id, 5, 1, '5A', '田中先生'),
+        (school_id, 5, 2, '5B', '佐藤先生'),
+        (school_id, 6, 1, '6A', '山田先生'),
+        (school_id, 6, 2, '6B', '鈴木先生')
+    ]
+    cursor.executemany("INSERT INTO classes (school_id, grade, class_number, class_name, homeroom_teacher) VALUES (?, ?, ?, ?, ?)", classes_data)
+    
+    # library_rooms
+    library_rooms_data = [
+        (school_id, 1, '第一図書室', 2, 'メイン図書室'),
+        (school_id, 2, '第二図書室', 1, 'サブ図書室')
+    ]
+    cursor.executemany("INSERT INTO library_rooms (school_id, room_id, room_name, capacity, description) VALUES (?, ?, ?, ?, ?)", library_rooms_data)
     
     # committee_members
-    for i in range(1, 4):  # 5年1組に3人
-        cursor.execute(f"INSERT INTO committee_members (id, name, class_id) VALUES ({i}, '5年1組生徒{i}', 1)")
+    committee_members_data = [
+        (school_id, 'S001', '田中太郎', 1, 1, 2025),  # 5A, 委員長
+        (school_id, 'S002', '佐藤花子', 1, 2, 2025),  # 5A, 副委員長
+        (school_id, 'S003', '山田次郎', 2, 3, 2025),  # 5B, 書記
+        (school_id, 'S004', '鈴木美咲', 2, None, 2025),  # 5B, 一般委員
+        (school_id, 'S005', '高橋健太', 3, None, 2025),  # 6A, 一般委員
+        (school_id, 'S006', '伊藤美香', 3, None, 2025),  # 6A, 一般委員
+        (school_id, 'S007', '渡辺大輔', 4, None, 2025),  # 6B, 一般委員
+        (school_id, 'S008', '中村綾乃', 4, None, 2025)   # 6B, 一般委員
+    ]
+    cursor.executemany("INSERT INTO committee_members (school_id, student_id, name, class_id, position_id, academic_year) VALUES (?, ?, ?, ?, ?, ?)", committee_members_data)
     
-    for i in range(4, 7):  # 5年2組に3人
-        cursor.execute(f"INSERT INTO committee_members (id, name, class_id) VALUES ({i}, '5年2組生徒{i-3}', 2)")
-    
-    for i in range(7, 10):  # 6年1組に3人
-        cursor.execute(f"INSERT INTO committee_members (id, name, class_id) VALUES ({i}, '6年1組生徒{i-6}', 3)")
-    
-    for i in range(10, 13):  # 6年2組に3人
-        cursor.execute(f"INSERT INTO committee_members (id, name, class_id) VALUES ({i}, '6年2組生徒{i-9}', 4)")
-    
-    # libraries
-    cursor.execute("INSERT INTO libraries (id, name, is_active) VALUES (1, '図書室A', 1)")
-    cursor.execute("INSERT INTO libraries (id, name, is_active) VALUES (2, '図書室B', 1)")
-    
-    # 前期スケジュール（後期テスト用）
+    # schedules
     cursor.execute("""
-    INSERT INTO schedules (id, name, description, start_date, end_date) 
-    VALUES (1, '2025年度前期図書委員スケジュール', '前期スケジュール', '2025-04-01', '2025-09-30')
-    """)
+        INSERT INTO schedules (school_id, schedule_name, description, academic_year, is_first_half, status)
+        VALUES (?, '2025年度前期当番表', '2025年度前期の図書委員当番割り当て', 2025, TRUE, 'active')
+    """, (school_id,))
+    schedule_id = cursor.lastrowid
     
-    # 前期の水曜・金曜割り当て
-    cursor.execute("""INSERT INTO schedule_assignments (id, schedule_id, library_id, committee_member_id, date, time_slot) 
-                      VALUES (1, 1, 1, 1, '2025-04-02', '09:00-10:00')""")  # 水曜日
-    cursor.execute("""INSERT INTO schedule_assignments (id, schedule_id, library_id, committee_member_id, date, time_slot) 
-                      VALUES (2, 1, 1, 4, '2025-04-04', '09:00-10:00')""")  # 金曜日
+    # schedule_assignments (前期サンプル)
+    schedule_assignments_data = [
+        (schedule_id, 1, 1, 1),  # 月曜日・第一図書室・田中太郎
+        (schedule_id, 1, 2, 2),  # 月曜日・第二図書室・佐藤花子
+        (schedule_id, 2, 1, 3),  # 火曜日・第一図書室・山田次郎
+        (schedule_id, 2, 2, 4),  # 火曜日・第二図書室・鈴木美咲
+        (schedule_id, 3, 1, 5),  # 水曜日・第一図書室・高橋健太
+        (schedule_id, 3, 2, 6),  # 水曜日・第二図書室・伊藤美香
+        (schedule_id, 4, 1, 7),  # 木曜日・第一図書室・渡辺大輔
+        (schedule_id, 4, 2, 8),  # 木曜日・第二図書室・中村綾乃
+        (schedule_id, 5, 1, 1),  # 金曜日・第一図書室・田中太郎
+        (schedule_id, 5, 2, 2)   # 金曜日・第二図書室・佐藤花子
+    ]
+    cursor.executemany("INSERT INTO schedule_assignments (schedule_id, day_of_week, library_room_id, committee_member_id) VALUES (?, ?, ?, ?)", schedule_assignments_data)
     
     conn.commit()
     logger.debug("サンプルデータの挿入が完了しました")

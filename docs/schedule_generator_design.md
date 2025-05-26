@@ -1,22 +1,29 @@
-# スケジュール生成クラス設計書
+# スケジュール生成エンジン設計書
 
 ## 概要
 
-図書委員の当番スケジュールを自動生成するためのクラスを設計・実装する。このクラスは指定されたルールに従って、図書委員を曜日単位で割り当てる。
+図書委員の当番スケジュールを自動生成するためのエンジンを設計・実装する。このエンジンは`database_design.md`で定義されたテーブル構造を使用し、指定されたルールに従って図書委員を曜日単位で割り当てる。生成されたスケジュールは`schedules`テーブルと`schedule_assignments`テーブルに格納される。
 
 ## 要件
 
-- 5年、6年生が担当
+### 基本要件
+- 5年、6年生が担当（database_design.mdでは全学年対応だが、運用上は5-6年生を想定）
 - 各学年は2以上の任意クラスで構成
 - 各クラスには、2−3人の図書委員がいる
-- 図書室は1つ以上任意の数がある。データベースから図書室一覧を取得し、割り当てる
-- 月曜日から金曜日に図書委員の当番を割り当てる
+- 図書室は複数あり、database_design.mdの`library_rooms`テーブルから取得
+- 月曜日から金曜日に図書委員の当番を割り当てる（曜日コード：1-5）
 - 予定表は、年二回作成し当番を入れ替える（前期・後期）
 - 前半、水曜日と金曜日の当番だった図書委員は、後半水曜日と金曜日の担当とならないようにする
 - 各図書委員は、週二回担当日がある
 - 同じクラスの図書員は同じ曜日の担当とならないようにする
 - 各学年の委員が均等に配置、曜日によって偏らないようにする
 - 割り当ては曜日単位で行い、日単位では行わない
+
+### データベース制約
+- 図書室の収容人数（`capacity`）を考慮した割り当て
+- アクティブな図書委員のみを対象（`active = TRUE`）
+- 指定された学年度（`academic_year`）の図書委員のみを対象
+- 役職（`position_id`）を考慮した適切な配置
 
 ## クラス設計
 
@@ -25,52 +32,151 @@
 
 #### 属性
 
-- `committee_members`: 図書委員リスト
-- `libraries`: 図書室リスト
+- `school_id`: 学校ID（外部キー）
+- `committee_members`: 図書委員リスト（committee_membersテーブルから取得）
+- `library_rooms`: 図書室リスト（library_roomsテーブルから取得）
+- `classes`: クラス情報リスト（classesテーブルから取得）
+- `positions`: 役職情報リスト（positionsテーブルから取得）
 - `schedule_id`: 生成されたスケジュールID
 - `is_first_half`: 前期か後期かのフラグ
 - `academic_year`: 学年度
+- `previous_assignments`: 前期の割り当て情報（後期生成時のローテーション用）
 
 #### メソッド
 
-- `__init__(self, academic_year: str, is_first_half: bool)`: コンストラクタ
-- `load_committee_members(self) -> List[Dict]`: 図書委員データの読み込み
-- `load_libraries(self) -> List[Dict]`: 図書室データの読み込み
-- `create_schedule(self, name: str, description: str, start_date: str, end_date: str) -> int`: スケジュールの基本情報を作成
+- `__init__(self, school_id: int, academic_year: int, is_first_half: bool)`: コンストラクタ
+- `load_committee_members(self) -> List[Dict]`: アクティブな図書委員データの読み込み
+- `load_library_rooms(self) -> List[Dict]`: アクティブな図書室データの読み込み
+- `load_classes(self) -> List[Dict]`: クラス情報の読み込み
+- `load_positions(self) -> List[Dict]`: 役職情報の読み込み
+- `load_previous_assignments(self) -> Dict`: 前期の割り当て情報の読み込み（後期生成時）
+- `create_schedule(self, name: str, description: str) -> int`: スケジュールの基本情報を作成
+- `validate_constraints(self) -> bool`: 制約条件の検証
 - `assign_members_to_weekdays(self) -> Dict`: 図書委員を曜日に割り当て
-- `save_assignments(self, assignments: Dict, schedule_id: int) -> None`: 割り当てをデータベースに保存
-- `generate(self, name: str, description: str, start_date: str, end_date: str) -> int`: スケジュール生成のメインメソッド
+- `apply_rotation_rules(self, assignments: Dict) -> Dict`: ローテーションルールの適用
+- `validate_assignments(self, assignments: Dict) -> List[str]`: 割り当て結果の検証
+- `save_assignments(self, assignments: Dict, schedule_id: int) -> None`: 割り当てをschedule_assignmentsテーブルに保存
+- `generate(self, name: str, description: str) -> Dict`: スケジュール生成のメインメソッド
 
 ## アルゴリズム概要
 
-1. 学年度と前期/後期の情報を受け取る
-2. 図書委員と図書室のデータを読み込む
-3. スケジュールの基本情報をデータベースに作成
-4. 曜日ごとに図書委員を割り当てる
+### フェーズ1: データ読み込みと検証
+1. 学校ID、学年度、前期/後期の情報を受け取る
+2. 必要なマスタデータを読み込む：
+   - アクティブな図書委員（`committee_members`テーブル、`active=TRUE`, 指定学年度）
+   - アクティブな図書室（`library_rooms`テーブル、`active=TRUE`）
+   - クラス情報（`classes`テーブル、学年フィルタ）
+   - 役職情報（`positions`テーブル）
+3. 後期の場合、前期の割り当て情報を読み込む（`schedule_assignments`テーブル）
+4. 制約条件の検証（委員数、図書室数、収容人数など）
+
+### フェーズ2: 割り当てアルゴリズム
+5. スケジュールの基本情報を`schedules`テーブルに作成
+6. 曜日ごとに図書委員を割り当てる：
    - 各図書委員が週2回担当になるよう割り当て
+   - 図書室の収容人数制約を考慮
    - 同じクラスの図書委員が同じ曜日にならないよう調整
    - 各学年の委員が均等に配置されるよう調整
+   - 役職を考慮した適切な配置
    - 後期の場合、前期に水曜・金曜担当だった委員は水曜・金曜に割り当てない
-5. 割り当て結果をデータベースに保存
-6. スケジュールIDを返す
 
-## データベース設計
+### フェーズ3: 検証と保存
+7. 割り当て結果の検証（ルール違反チェック）
+8. 割り当て結果を`schedule_assignments`テーブルに保存
+9. 結果サマリー（成功/失敗、統計情報）を返す
 
-既存のデータベース構造を利用し、以下のテーブルにデータを格納する：
+## データベーステーブル構造
 
-- `schedules`: スケジュールの基本情報
-- `schedule_assignments`: 割り当て情報（スケジュールID、図書室ID、曜日）
-- `assignment_members`: 割り当てられた図書委員情報
+### 使用するテーブル
+
+#### 1. `schedules`テーブル（スケジュール基本情報）
+- `id`: スケジュールID（主キー、自動生成）
+- `school_id`: 学校ID（外部キー）
+- `schedule_name`: スケジュール名
+- `description`: 説明
+- `academic_year`: 学年度
+- `is_first_half`: 前期フラグ（TRUE: 前期, FALSE: 後期）
+- `status`: ステータス（'draft', 'active', 'completed'）
+
+#### 2. `schedule_assignments`テーブル（割り当て情報）
+- `id`: 割り当てID（主キー、自動生成）
+- `schedule_id`: スケジュールID（外部キー）
+- `day_of_week`: 曜日（1:月, 2:火, 3:水, 4:木, 5:金）
+- `library_room_id`: 図書室ID（外部キー）
+- `committee_member_id`: 図書委員ID（外部キー）
+
+#### 3. 参照テーブル
+- `committee_members`: 図書委員マスタ
+- `library_rooms`: 図書室マスタ
+- `classes`: クラスマスタ
+- `positions`: 役職マスタ
+- `schools`: 学校マスタ
+
+### データ関連性
+- 1つのスケジュールに対して複数の割り当て（1:N）
+- 1つの割り当てに対して1人の図書委員（1:1）
+- 1つの割り当てに対して1つの図書室（1:1）
+- 図書委員は複数の割り当てを持つことができる（週2回ルール）
 
 ## APIエンドポイント
 
-`/api/generate-schedule` エンドポイントを修正し、新しいパラメータを受け付けるようにする：
+### `/api/generate-schedule` エンドポイント
 
-- `academicYear`: 学年度（例: "2025"）
-- `isFirstHalf`: 前期か後期か（true/false）
+#### リクエストパラメータ
+```json
+{
+  "school_id": 1,
+  "academic_year": 2025,
+  "is_first_half": true,
+  "schedule_name": "2025年度前期当番表",
+  "description": "2025年度前期の図書委員当番割り当て"
+}
+```
+
+#### レスポンス
+```json
+{
+  "success": true,
+  "schedule_id": 123,
+  "message": "スケジュールが正常に生成されました",
+  "statistics": {
+    "total_assignments": 50,
+    "total_members": 25,
+    "total_libraries": 2,
+    "assignments_per_member": 2.0
+  },
+  "warnings": [],
+  "errors": []
+}
+```
+
+### `/api/validate-schedule/{schedule_id}` エンドポイント
+生成されたスケジュールの検証用
+
+### `/api/schedule-stats/{schedule_id}` エンドポイント
+スケジュールの統計情報取得用
 
 ## フロントエンド変更
 
-- スケジュール生成画面から「スケジュールルール設定」を削除
-- スケジュール生成画面に「学年度」と「前期/後期」の選択肢を追加
-- APIとの連携部分を修正
+### スケジュール生成画面の修正
+- 「学年度」選択フィールドの追加（数値入力、デフォルト: 現在年度）
+- 「前期/後期」ラジオボタンの追加
+- 「学校ID」の自動設定（ログインユーザーの学校情報から取得）
+- スケジュール名とメモの入力フィールド
+- 生成ボタンとプレビュー機能
+
+### 結果表示画面の追加
+- 生成結果の表示（成功/失敗）
+- 統計情報の表示（割り当て数、委員あたりの担当日数など）
+- 警告・エラーメッセージの表示
+- スケジュール編集画面への遷移ボタン
+
+### APIとの連携
+- `/api/generate-schedule`エンドポイントへのPOSTリクエスト
+- エラーハンドリングとユーザーフィードバック
+- 生成プロセスの進行状況表示（可能であれば）
+
+### 検証機能の統合
+- 生成後の自動検証
+- 検証結果の視覚的表示
+- 問題がある場合の修正提案

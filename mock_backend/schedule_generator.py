@@ -10,21 +10,25 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %
 logger = logging.getLogger(__name__)
 
 class ScheduleGenerator:
-    """スケジュールジェネレータークラス（修正版）"""
+    """スケジュールジェネレータークラス（新スキーマ対応版）"""
     
-    def __init__(self, academic_year: str, is_first_half: bool):
+    def __init__(self, school_id: int, academic_year: int, is_first_half: bool):
         """
         コンストラクタ
         
         Args:
-            academic_year: 学年度 (例: "2025")
+            school_id: 学校ID
+            academic_year: 学年度 (例: 2025)
             is_first_half: 前期か後期かのフラグ (True: 前期, False: 後期)
         """
-        logger.debug(f"ScheduleGenerator初期化: academic_year={academic_year}, is_first_half={is_first_half}")
+        logger.debug(f"ScheduleGenerator初期化: school_id={school_id}, academic_year={academic_year}, is_first_half={is_first_half}")
+        self.school_id = school_id
         self.academic_year = academic_year
         self.is_first_half = is_first_half
         self.committee_members = []
-        self.libraries = []
+        self.library_rooms = []
+        self.classes = []
+        self.positions = []
         self.wed_fri_members = set()  # 水曜・金曜担当の委員IDs
         self.schedule_id = None
         self.conn = None
@@ -49,21 +53,27 @@ class ScheduleGenerator:
             self.conn = None
     
     def load_committee_members(self) -> List[Dict]:
-        """図書委員データの読み込み"""
+        """図書委員データの読み込み（新スキーマ対応）"""
         logger.debug("図書委員データの読み込みを開始します")
         conn = self.get_db_connection()
         
-        # 5年、6年生の図書委員を取得
+        # 5年、6年生の図書委員を取得（新スキーマ対応）
         query = """
-        SELECT cm.id, cm.name, cm.role, c.id as class_id, c.name as class_name, 
-               g.id as grade_id, g.name as grade_name
+        SELECT cm.id, cm.name, cm.student_id, cm.class_id, cm.position_id, cm.academic_year,
+               c.id as class_id, c.class_name, c.grade,
+               p.position_name,
+               s.school_name
         FROM committee_members cm
         JOIN classes c ON cm.class_id = c.id
-        JOIN grades g ON c.grade_id = g.id
-        WHERE g.name LIKE '5%' OR g.name LIKE '6%'
+        JOIN schools s ON cm.school_id = s.id
+        LEFT JOIN positions p ON cm.position_id = p.id
+        WHERE cm.school_id = ? 
+        AND cm.academic_year = ? 
+        AND cm.active = 1
+        AND (c.grade = 5 OR c.grade = 6)
         """
         
-        cursor = conn.execute(query)
+        cursor = conn.execute(query, (self.school_id, self.academic_year))
         self.committee_members = [dict(row) for row in cursor.fetchall()]
         logger.debug(f"図書委員データを {len(self.committee_members)} 件読み込みました")
         
@@ -71,23 +81,25 @@ class ScheduleGenerator:
         if not self.is_first_half:
             logger.debug("後期のため、前期の水曜・金曜担当者を取得します")
             # 前期のスケジュールを検索
-            cursor = conn.execute(
-                "SELECT id FROM schedules WHERE name LIKE ? AND name LIKE '%前期%' ORDER BY id DESC LIMIT 1",
-                (f"%{self.academic_year}%",)
-            )
+            cursor = conn.execute("""
+                SELECT id FROM schedules 
+                WHERE school_id = ? 
+                AND academic_year = ? 
+                AND is_first_half = 1 
+                AND status = 'active'
+                ORDER BY id DESC LIMIT 1
+            """, (self.school_id, self.academic_year))
+            
             first_half_schedule = cursor.fetchone()
             
             if first_half_schedule:
                 first_half_id = first_half_schedule['id']
                 logger.debug(f"前期スケジュールID: {first_half_id}")
-                # 水曜日と金曜日の割り当てを取得（簡易的に日付ベースで判定）
+                # 水曜日と金曜日の割り当てを取得
                 cursor = conn.execute("""
                     SELECT DISTINCT committee_member_id
                     FROM schedule_assignments 
-                    WHERE schedule_id = ? AND (
-                        CAST(strftime('%w', date) AS INTEGER) = 3 OR 
-                        CAST(strftime('%w', date) AS INTEGER) = 5
-                    )
+                    WHERE schedule_id = ? AND (day_of_week = 3 OR day_of_week = 5)
                 """, (first_half_id,))
                 
                 self.wed_fri_members = {row['committee_member_id'] for row in cursor.fetchall()}
@@ -95,38 +107,41 @@ class ScheduleGenerator:
         
         return self.committee_members
     
-    def load_libraries(self) -> List[Dict]:
-        """図書室データの読み込み"""
+    def load_library_rooms(self) -> List[Dict]:
+        """図書室データの読み込み（新スキーマ対応）"""
         logger.debug("図書室データの読み込みを開始します")
         conn = self.get_db_connection()
-        cursor = conn.execute('SELECT * FROM libraries WHERE is_active = 1')
-        self.libraries = [dict(row) for row in cursor.fetchall()]
-        logger.debug(f"図書室データを {len(self.libraries)} 件読み込みました")
-        return self.libraries
+        cursor = conn.execute("""
+            SELECT * FROM library_rooms 
+            WHERE school_id = ? AND active = 1
+        """, (self.school_id,))
+        self.library_rooms = [dict(row) for row in cursor.fetchall()]
+        logger.debug(f"図書室データを {len(self.library_rooms)} 件読み込みました")
+        return self.library_rooms
     
-    def create_schedule(self, name: str, description: str, start_date: str, end_date: str) -> int:
-        """スケジュールの基本情報を作成"""
+    def create_schedule(self, name: str, description: str = "") -> int:
+        """スケジュールの基本情報を作成（新スキーマ対応）"""
         logger.debug(f"スケジュール基本情報を作成します: {name}")
         conn = self.get_db_connection()
         cursor = conn.cursor()
-        cursor.execute(
-            'INSERT INTO schedules (name, description, start_date, end_date) VALUES (?, ?, ?, ?)',
-            (name, description, start_date, end_date)
-        )
+        cursor.execute("""
+            INSERT INTO schedules (school_id, schedule_name, description, academic_year, is_first_half, status) 
+            VALUES (?, ?, ?, ?, ?, 'draft')
+        """, (self.school_id, name, description, self.academic_year, self.is_first_half))
         self.schedule_id = cursor.lastrowid
         conn.commit()
         logger.debug(f"スケジュールを作成しました。ID: {self.schedule_id}")
         return self.schedule_id
     
     def assign_members_to_weekdays(self) -> Dict:
-        """図書委員を曜日と図書室に割り当て"""
+        """図書委員を曜日と図書室に割り当て（新スキーマ対応）"""
         logger.debug("図書委員の曜日・図書室割り当てを開始します")
         
         # 図書室ごと、曜日ごとの割り当てを初期化
         assignments = {}
-        for library in self.libraries:
-            library_id = library['id']
-            assignments[library_id] = {
+        for library_room in self.library_rooms:
+            library_room_id = library_room['id']
+            assignments[library_room_id] = {
                 1: [],  # 月曜日
                 2: [],  # 火曜日
                 3: [],  # 水曜日
@@ -155,19 +170,20 @@ class ScheduleGenerator:
             # この曜日に既に割り当てられた委員を追跡
             assigned_members_today = set()
             
-            # 各図書室に2人ずつ割り当て
-            for library in self.libraries:
-                library_id = library['id']
-                logger.debug(f"図書室 {library['name']} の割り当てを処理します")
+            # 各図書室に図書委員を割り当て（収容人数まで）
+            for library_room in self.library_rooms:
+                library_room_id = library_room['id']
+                capacity = library_room.get('capacity', 1)  # デフォルト1人
+                logger.debug(f"図書室 {library_room['room_name']} (収容人数: {capacity}) の割り当てを処理します")
                 
                 # 図書委員をシャッフル
                 members = list(self.committee_members)
                 random.shuffle(members)
                 
-                # 2人の図書委員を割り当て
+                # 収容人数分の図書委員を割り当て
                 assigned_count = 0
                 for member in members:
-                    if assigned_count >= 2:
+                    if assigned_count >= capacity:
                         break
                         
                     member_id = member['id']
@@ -196,61 +212,64 @@ class ScheduleGenerator:
                         continue
                         
                     # 条件を満たす場合、割り当てを行う
-                    assignments[library_id][weekday].append(member)
+                    assignments[library_room_id][weekday].append(member)
                     member_assignments[member_id] += 1
                     member_weekdays[member_id].add(weekday)
                     class_weekdays[class_id].add(weekday)
                     assigned_members_today.add(member_id)
                     assigned_count += 1
-                    logger.debug(f"委員ID {member_id} を曜日 {weekday}、図書室ID {library_id} に割り当てました")
+                    logger.debug(f"委員ID {member_id} を曜日 {weekday}、図書室ID {library_room_id} に割り当てました")
         
         # 割り当て結果のログ
-        for library_id in assignments:
-            for weekday, members in assignments[library_id].items():
-                logger.debug(f"図書室ID {library_id} 曜日 {weekday} の割り当て: {[m['id'] for m in members]}")
+        for library_room_id in assignments:
+            for weekday, members in assignments[library_room_id].items():
+                logger.debug(f"図書室ID {library_room_id} 曜日 {weekday} の割り当て: {[m['id'] for m in members]}")
         
         return assignments
     
     def save_assignments(self, assignments: Dict, schedule_id: int) -> None:
-        """割り当てをデータベースに保存"""
+        """割り当てをデータベースに保存（新スキーマ対応）"""
         logger.debug(f"割り当てをデータベースに保存します。スケジュールID: {schedule_id}")
         conn = self.get_db_connection()
         cursor = conn.cursor()
         
         # 各図書室と曜日の組み合わせに対して割り当てを保存
-        for library_id, weekday_assignments in assignments.items():
-            logger.debug(f"図書室ID {library_id} の割り当てを保存します")
+        for library_room_id, weekday_assignments in assignments.items():
+            logger.debug(f"図書室ID {library_room_id} の割り当てを保存します")
             
             # 各曜日の割り当てを保存
             for weekday, members in weekday_assignments.items():
                 if not members:
                     continue
                     
-                # 各メンバーに対してスケジュール割り当てを作成
+                # 各メンバーに対してスケジュール割り当てを作成（新スキーマ：曜日ベース）
                 for member in members:
-                    # 曜日番号を実際の日付に変換（仮の実装）
-                    base_date = datetime.datetime.strptime('2025-04-01', '%Y-%m-%d')
-                    # 最初の該当曜日を見つける
-                    days_ahead = weekday - base_date.isoweekday()
-                    if days_ahead < 0:
-                        days_ahead += 7
-                    actual_date = base_date + datetime.timedelta(days=days_ahead)
-                    
-                    cursor.execute(
-                        'INSERT INTO schedule_assignments (schedule_id, library_id, committee_member_id, date, time_slot) VALUES (?, ?, ?, ?, ?)',
-                        (schedule_id, library_id, member['id'], actual_date.strftime('%Y-%m-%d'), '09:00-10:00')
-                    )
-                    logger.debug(f"委員ID {member['id']} の割り当てを作成しました: 図書館ID {library_id}, 曜日 {weekday}")
+                    cursor.execute("""
+                        INSERT INTO schedule_assignments 
+                        (schedule_id, day_of_week, library_room_id, committee_member_id) 
+                        VALUES (?, ?, ?, ?)
+                    """, (schedule_id, weekday, library_room_id, member['id']))
+                    logger.debug(f"委員ID {member['id']} の割り当てを作成しました: 図書室ID {library_room_id}, 曜日 {weekday}")
         
         conn.commit()
         logger.debug("割り当ての保存が完了しました")
     
-    def generate(self, name: str, description: str, start_date: str, end_date: str) -> int:
-        """スケジュール生成のメインメソッド"""
+    def generate(self, name: str, description: str = "") -> Dict:
+        """スケジュール生成のメインメソッド（新スキーマ対応）"""
         logger.debug(f"スケジュール生成を開始します: {name}")
         try:
+            # 必要なデータを読み込み
+            self.load_committee_members()
+            self.load_library_rooms()
+            
+            # データの検証
+            if not self.committee_members:
+                raise ValueError("図書委員が見つかりません")
+            if not self.library_rooms:
+                raise ValueError("図書室が見つかりません")
+            
             # スケジュールの基本情報を作成
-            schedule_id = self.create_schedule(name, description, start_date, end_date)
+            schedule_id = self.create_schedule(name, description)
             
             # 図書委員を曜日に割り当て
             assignments = self.assign_members_to_weekdays()
@@ -258,17 +277,48 @@ class ScheduleGenerator:
             # 割り当てをデータベースに保存
             self.save_assignments(assignments, schedule_id)
             
+            # スケジュールステータスを'active'に更新
+            conn = self.get_db_connection()
+            conn.execute("UPDATE schedules SET status = 'active' WHERE id = ?", (schedule_id,))
+            conn.commit()
+            
+            # 統計情報を計算
+            total_assignments = sum(len(members) for weekday_assignments in assignments.values() 
+                                   for members in weekday_assignments.values())
+            
+            result = {
+                "success": True,
+                "schedule_id": schedule_id,
+                "message": "スケジュールが正常に生成されました",
+                "statistics": {
+                    "total_assignments": total_assignments,
+                    "total_members": len(self.committee_members),
+                    "total_library_rooms": len(self.library_rooms),
+                    "assignments_per_member": total_assignments / len(self.committee_members) if self.committee_members else 0
+                },
+                "warnings": [],
+                "errors": []
+            }
+            
             logger.debug(f"スケジュール生成が完了しました。ID: {schedule_id}")
-            return schedule_id
+            return result
+            
         except Exception as e:
             logger.error(f"スケジュール生成中にエラーが発生しました: {e}", exc_info=True)
-            raise
+            return {
+                "success": False,
+                "schedule_id": None,
+                "message": f"スケジュール生成に失敗しました: {str(e)}",
+                "statistics": {},
+                "warnings": [],
+                "errors": [str(e)]
+            }
         finally:
             # 処理完了後にデータベース接続を閉じる
             self.close_db_connection()
     
     def get_schedule_assignments(self, schedule_id: int) -> List[Dict]:
-        """スケジュール割り当ての取得"""
+        """スケジュール割り当ての取得（新スキーマ対応）"""
         logger.debug(f"スケジュール割り当てを取得します。スケジュールID: {schedule_id}")
         conn = self.get_db_connection()
         cursor = conn.cursor()
@@ -277,17 +327,19 @@ class ScheduleGenerator:
             SELECT 
                 sa.id,
                 sa.schedule_id,
-                sa.library_id,
-                sa.date,
-                sa.time_slot,
-                l.name as library_name,
+                sa.day_of_week,
+                sa.library_room_id,
+                lr.room_name as library_room_name,
                 sa.committee_member_id,
-                cm.name as member_name
+                cm.name as member_name,
+                c.class_name,
+                c.grade
             FROM schedule_assignments sa
-            LEFT JOIN libraries l ON sa.library_id = l.id
+            LEFT JOIN library_rooms lr ON sa.library_room_id = lr.id
             LEFT JOIN committee_members cm ON sa.committee_member_id = cm.id
+            LEFT JOIN classes c ON cm.class_id = c.id
             WHERE sa.schedule_id = ?
-            ORDER BY sa.date, sa.library_id, cm.name
+            ORDER BY sa.day_of_week, sa.library_room_id, cm.name
         ''', (schedule_id,))
         
         assignments = []
@@ -295,48 +347,41 @@ class ScheduleGenerator:
             assignment = {
                 'id': row[0],
                 'schedule_id': row[1],
-                'library_id': row[2],
-                'date': row[3],
-                'time_slot': row[4],
-                'library_name': row[5],
-                'committee_member_id': row[6],
-                'member_name': row[7]
+                'day_of_week': row[2],
+                'library_room_id': row[3],
+                'library_room_name': row[4],
+                'committee_member_id': row[5],
+                'member_name': row[6],
+                'class_name': row[7],
+                'grade': row[8]
             }
             assignments.append(assignment)
         
         logger.debug(f"取得した割り当て数: {len(assignments)}")
         return assignments
 
-    def generate_schedule_logic(self, name: str, description: str, start_date: str, end_date: str) -> dict:
-        """スケジュール生成のロジック（フロントエンド連携用）"""
+    def generate_schedule_logic(self, name: str, description: str = "") -> dict:
+        """スケジュール生成のロジック（フロントエンド連携用、新スキーマ対応）"""
         logger.info(f"スケジュール生成ロジック開始: {name}")
         
         try:
-            # 図書委員データを読み込み
-            self.load_committee_members()
+            # スケジュールを生成（内部でデータ読み込みも実行）
+            result = self.generate(name, description)
             
-            # 図書室データを読み込み
-            self.load_libraries()
+            if result["success"]:
+                # 生成されたスケジュールの詳細を取得
+                assignments = self.get_schedule_assignments(result["schedule_id"])
+                
+                result.update({
+                    "name": name,
+                    "description": description,
+                    "academic_year": self.academic_year,
+                    "is_first_half": self.is_first_half,
+                    "assignmentCount": len(assignments),
+                    "assignments": assignments
+                })
             
-            # スケジュールを生成
-            schedule_id = self.generate(name, description, start_date, end_date)
-            
-            # 生成されたスケジュールの詳細を取得
-            assignments = self.get_schedule_assignments(schedule_id)
-            
-            result = {
-                "success": True,
-                "message": "スケジュールが正常に生成されました",
-                "scheduleId": schedule_id,
-                "name": name,
-                "description": description,
-                "startDate": start_date,
-                "endDate": end_date,
-                "assignmentCount": len(assignments),
-                "assignments": assignments
-            }
-            
-            logger.info(f"スケジュール生成完了: ID={schedule_id}, 割り当て数={len(assignments)}")
+            logger.info(f"スケジュール生成完了: ID={result.get('schedule_id')}, 成功={result['success']}")
             return result
             
         except Exception as e:
@@ -344,7 +389,10 @@ class ScheduleGenerator:
             return {
                 "success": False,
                 "message": f"スケジュール生成に失敗しました: {str(e)}",
-                "scheduleId": None
+                "schedule_id": None,
+                "statistics": {},
+                "warnings": [],
+                "errors": [str(e)]
             }
 
 # Helper functions for testing
@@ -355,11 +403,13 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-def get_committee_members(grade_ids=None):
-    """図書委員のリストを取得
+def get_committee_members(school_id=1, academic_year=2025, grade_filter=None):
+    """図書委員のリストを取得（新スキーマ対応）
     
     Args:
-        grade_ids (list, optional): 対象の学年IDリスト。Noneの場合は全学年
+        school_id (int): 学校ID
+        academic_year (int): 学年度
+        grade_filter (list, optional): 対象の学年リスト。Noneの場合は全学年
     
     Returns:
         list: 図書委員リスト
@@ -367,67 +417,45 @@ def get_committee_members(grade_ids=None):
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # テーブル構造を確認
-    cursor.execute("PRAGMA table_info(committee_members)")
-    cm_columns = [row[1] for row in cursor.fetchall()]
+    # 新スキーマに対応したクエリ
+    base_query = """
+        SELECT cm.*, c.class_name, c.grade, p.position_name, s.school_name
+        FROM committee_members cm
+        JOIN classes c ON cm.class_id = c.id
+        JOIN schools s ON cm.school_id = s.id
+        LEFT JOIN positions p ON cm.position_id = p.id
+        WHERE cm.school_id = ? AND cm.academic_year = ? AND cm.active = 1
+    """
     
-    # テーブル構造に応じてクエリを調整
-    if 'grade_id' in cm_columns:
-        # 新しいスキーマ: committee_membersテーブルに直接grade_idがある
-        if grade_ids is None:
-            cursor.execute("""
-                SELECT cm.*, g.name as grade_name, c.name as class_name 
-                FROM committee_members cm
-                LEFT JOIN grades g ON cm.grade_id = g.id
-                LEFT JOIN classes c ON cm.class_id = c.id
-                ORDER BY cm.grade_id, cm.class_id, cm.name
-            """)
-        else:
-            placeholders = ','.join(['?' for _ in grade_ids])
-            cursor.execute(f"""
-                SELECT cm.*, g.name as grade_name, c.name as class_name 
-                FROM committee_members cm
-                LEFT JOIN grades g ON cm.grade_id = g.id
-                LEFT JOIN classes c ON cm.class_id = c.id
-                WHERE cm.grade_id IN ({placeholders})
-                ORDER BY cm.grade_id, cm.class_id, cm.name
-            """, grade_ids)
-    else:
-        # 古いスキーマ: classesテーブル経由でgrade_idを取得
-        if grade_ids is None:
-            cursor.execute("""
-                SELECT cm.*, g.name as grade_name, c.name as class_name 
-                FROM committee_members cm
-                JOIN classes c ON cm.class_id = c.id
-                JOIN grades g ON c.grade_id = g.id
-                ORDER BY g.id, c.id, cm.name
-            """)
-        else:
-            placeholders = ','.join(['?' for _ in grade_ids])
-            cursor.execute(f"""
-                SELECT cm.*, g.name as grade_name, c.name as class_name 
-                FROM committee_members cm
-                JOIN classes c ON cm.class_id = c.id
-                JOIN grades g ON c.grade_id = g.id
-                WHERE g.id IN ({placeholders})
-                ORDER BY g.id, c.id, cm.name
-            """, grade_ids)
-        
+    params = [school_id, academic_year]
+    
+    if grade_filter:
+        placeholders = ','.join(['?' for _ in grade_filter])
+        base_query += f" AND c.grade IN ({placeholders})"
+        params.extend(grade_filter)
+    
+    base_query += " ORDER BY c.grade, c.class_name, cm.name"
+    
+    cursor.execute(base_query, params)
     members = [dict(row) for row in cursor.fetchall()]
     conn.close()
     return members
 
-def get_libraries():
-    """図書室のリストを取得"""
+def get_library_rooms(school_id=1):
+    """図書室のリストを取得（新スキーマ対応）"""
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM libraries ORDER BY id")
-    libraries = [dict(row) for row in cursor.fetchall()]
+    cursor.execute("""
+        SELECT * FROM library_rooms 
+        WHERE school_id = ? AND active = 1 
+        ORDER BY room_id
+    """, (school_id,))
+    library_rooms = [dict(row) for row in cursor.fetchall()]
     conn.close()
-    return libraries
+    return library_rooms
 
 def get_schedule_stats(schedule_id: int):
-    """スケジュールの統計情報を取得"""
+    """スケジュールの統計情報を取得（新スキーマ対応）"""
     conn = get_db_connection()
     cursor = conn.cursor()
     
@@ -452,11 +480,11 @@ def get_schedule_stats(schedule_id: int):
     
     # 図書室別の割り当て数
     cursor.execute("""
-        SELECT l.name, COUNT(*) as assignment_count
+        SELECT lr.room_name, COUNT(*) as assignment_count
         FROM schedule_assignments sa
-        JOIN libraries l ON sa.library_id = l.id
+        JOIN library_rooms lr ON sa.library_room_id = lr.id
         WHERE sa.schedule_id = ?
-        GROUP BY l.id, l.name
+        GROUP BY lr.id, lr.room_name
         ORDER BY assignment_count DESC
     """, (schedule_id,))
     library_stats = [{"name": row[0], "count": row[1]} for row in cursor.fetchall()]
@@ -469,14 +497,9 @@ def get_schedule_stats(schedule_id: int):
         "library_stats": library_stats
     }
 
-def generate_schedule(academic_year: str, is_first_half: bool, name: str, 
-                     description: str, start_date: str, end_date: str):
-    """スケジュールを生成（レガシー関数）"""
-    return generate_schedule_with_class(academic_year, is_first_half, name, description, start_date, end_date)
-
-def generate_schedule_with_class(academic_year: str, is_first_half: bool, name: str = None, 
-                                description: str = None, start_date: str = None, end_date: str = None):
-    """スケジュールジェネレータークラスを使用してスケジュールを生成"""
+def generate_schedule_with_class(school_id: int, academic_year: int, is_first_half: bool, 
+                                name: str = None, description: str = None):
+    """スケジュールジェネレータークラスを使用してスケジュールを生成（新スキーマ対応）"""
     try:
         # デフォルト値の設定
         if name is None:
@@ -487,26 +510,13 @@ def generate_schedule_with_class(academic_year: str, is_first_half: bool, name: 
             semester = "前期" if is_first_half else "後期"
             description = f"{academic_year}年度{semester}の図書当番スケジュール"
         
-        # 年度に基づく期間の自動設定
-        if start_date is None or end_date is None:
-            year = int(academic_year)
-            if is_first_half:
-                # 前期: 4月1日 - 9月30日
-                start_date = f"{year}-04-01"
-                end_date = f"{year}-09-30"
-            else:
-                # 後期: 10月1日 - 3月31日（翌年）
-                start_date = f"{year}-10-01"
-                end_date = f"{year + 1}-03-31"
-        
         logger.info(f"スケジュール生成開始: {name}")
-        logger.info(f"期間: {start_date} - {end_date}")
         
         # ScheduleGeneratorのインスタンスを作成
-        generator = ScheduleGenerator(academic_year, is_first_half)
+        generator = ScheduleGenerator(school_id, academic_year, is_first_half)
         
         # スケジュールを生成
-        result = generator.generate_schedule_logic(name, description, start_date, end_date)
+        result = generator.generate_schedule_logic(name, description)
         
         # データベース接続を閉じる
         generator.close_db_connection()
@@ -517,8 +527,11 @@ def generate_schedule_with_class(academic_year: str, is_first_half: bool, name: 
         logger.error(f"スケジュール生成エラー: {str(e)}")
         raise e
 
-def get_library_availability():
-    """図書室の利用可能性を取得
+def get_library_availability(school_id=1):
+    """図書室の利用可能性を取得（新スキーマ対応）
+    
+    Args:
+        school_id (int): 学校ID
     
     Returns:
         dict: 図書室IDをキーとし、各曜日の利用可能性を含む辞書
@@ -526,17 +539,20 @@ def get_library_availability():
     """
     try:
         conn = get_db_connection()
-        cursor = conn.execute("SELECT id, name FROM libraries")
-        libraries = cursor.fetchall()
+        cursor = conn.execute("""
+            SELECT id, room_name FROM library_rooms 
+            WHERE school_id = ? AND active = 1
+        """, (school_id,))
+        library_rooms = cursor.fetchall()
         
         # 各図書室について曜日別の利用可能時間を設定
         availability = {}
-        for library in libraries:
-            library_id = library['id']
-            availability[library_id] = {}
+        for library_room in library_rooms:
+            library_room_id = library_room['id']
+            availability[library_room_id] = {}
             # 月曜日から金曜日まで
             for day in range(1, 6):
-                availability[library_id][day] = ['09:00-10:00', '10:00-11:00']
+                availability[library_room_id][day] = ['09:00-10:00', '10:00-11:00']
             
         logger.debug(f"図書室利用可能性: {availability}")
         return availability
