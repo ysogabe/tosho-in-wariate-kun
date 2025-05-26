@@ -4,6 +4,7 @@ import '@fontsource/noto-sans-jp/500.css';
 import '@fontsource/noto-sans-jp/700.css';
 import "./globals.css";
 import { SchoolProvider } from "../contexts/SchoolContext";
+import { Toaster } from "@/components/ui/toaster";
 
 const fontFamily = 'Noto Sans JP, sans-serif';
 
@@ -47,6 +48,7 @@ export default function RootLayout({
             {children}
           </SchoolProvider>
         </div>
+        <Toaster />
       </body>
     </html>
   );

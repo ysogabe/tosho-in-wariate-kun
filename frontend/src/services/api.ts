@@ -25,6 +25,62 @@ async function fetchApi<T>(url: string, options: RequestInit = {}): Promise<T> {
   }
 }
 
+// School API
+export interface School {
+  id: number;
+  school_name: string;
+  first_term_start: string | null;
+  first_term_end: string | null;
+  second_term_start: string | null;
+  second_term_end: string | null;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export const schoolsApi = {
+  getAll: () => fetchApi<School[]>('/schools'),
+  getById: (id: number) => fetchApi<School>(`/schools/${id}`),
+  create: (school: Omit<School, 'id' | 'created_at' | 'updated_at'>) => 
+    fetchApi<School>('/schools', {
+      method: 'POST',
+      body: JSON.stringify(school),
+    }),
+  update: (id: number, school: Partial<Omit<School, 'id' | 'created_at' | 'updated_at'>>) => 
+    fetchApi<School>(`/schools/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(school),
+    }),
+};
+
+// Positions API
+export interface Position {
+  id: number;
+  position_name: string;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export const positionsApi = {
+  getAll: () => fetchApi<Position[]>('/positions'),
+  getById: (id: number) => fetchApi<Position>(`/positions/${id}`),
+  create: (position: Omit<Position, 'id' | 'created_at' | 'updated_at'>) => 
+    fetchApi<Position>('/positions', {
+      method: 'POST',
+      body: JSON.stringify(position),
+    }),
+  update: (id: number, position: Partial<Omit<Position, 'id' | 'created_at' | 'updated_at'>>) => 
+    fetchApi<Position>(`/positions/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(position),
+    }),
+  delete: (id: number) => 
+    fetchApi<{ message: string }>(`/positions/${id}`, {
+      method: 'DELETE',
+    }),
+};
+
 // Grades API
 export interface Grade {
   id: number;
@@ -188,6 +244,8 @@ export const scheduleAssignmentsApi = {
 };
 
 const api = {
+  schools: schoolsApi,
+  positions: positionsApi,
   grades: gradesApi,
   classes: classesApi,
   committeeMembers: committeeMembersApi,

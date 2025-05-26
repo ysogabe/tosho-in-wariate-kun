@@ -17,6 +17,12 @@ export default function ManagementPage() {
   const managementItems = {
     basic: [
       {
+        title: '学校基本情報管理',
+        icon: <FaCog />,
+        description: '学校情報、役職、図書室、クラスを一元管理します',
+        link: '/school'
+      },
+      {
         title: 'クラス管理',
         icon: <FaUsers />,
         description: 'クラス情報の登録・編集・削除を行います',
