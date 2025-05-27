@@ -62,3 +62,7 @@ flask.log
 frontend.log
 server.log
 backend.log
+
+# Script logs and PID files
+logs/
+.test-env-*.pid
