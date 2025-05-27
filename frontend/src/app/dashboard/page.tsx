@@ -35,6 +35,7 @@ const DashboardPage = () => {
   const [userName] = useState('管理者');
   const { schoolName } = useSchool(); // SchoolContextから学校名を取得
   const [currentDay, setCurrentDay] = useState<string>('');
+  const [currentDate, setCurrentDate] = useState<string>('');
   
   // 週間スケジュール情報 - APIから取得
   const [weeklySchedule, setWeeklySchedule] = useState<DaySchedule[]>([]);
@@ -130,14 +131,20 @@ const DashboardPage = () => {
     fetchWeeklySchedule();
   }, []);
   
-  // 現在の曜日を取得して本日の当番を設定
+  // 現在の曜日と日付を取得して本日の当番を設定
   useEffect(() => {
-    const getDayOfWeek = () => {
-      const days = ['日', '月', '火', '水', '木', '金', '土'];
-      return days[new Date().getDay()];
-    };
+    const now = new Date();
+    const days = ['日', '月', '火', '水', '木', '金', '土'];
+    const dayOfWeek = days[now.getDay()];
     
-    setCurrentDay(getDayOfWeek());
+    // 日付をYYYY/MM/DD形式にフォーマット
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const date = String(now.getDate()).padStart(2, '0');
+    const fullDate = `${year}/${month}/${date} ${dayOfWeek}曜日`;
+    
+    setCurrentDay(dayOfWeek);
+    setCurrentDate(fullDate);
   }, []);
   
   // 本日のスケジュールをメモ化
@@ -150,7 +157,7 @@ const DashboardPage = () => {
       <div className="grid grid-cols-1 gap-8 animate-fadeIn">
         {/* 今日の当番 */}
         <Card className="p-6">
-          <TodayDuties currentDay={currentDay} duties={todaySchedule?.duties} />
+          <TodayDuties currentDate={currentDate} duties={todaySchedule?.duties} />
         </Card>
         
         {/* 週間スケジュール */}

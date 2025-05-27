@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import api from '@/services/api';
 
 interface AssignmentMember {
   id: number;
@@ -22,6 +23,15 @@ interface BackendScheduleAssignment {
   assigned_committee_members: AssignmentMember[];
 }
 
+interface ScheduleDetails {
+  id: number;
+  name: string;
+  description?: string;
+  start_date: string;
+  end_date: string;
+  assignments: BackendScheduleAssignment[];
+}
+
 interface LibrarySchedule {
   libraryId: number;
   libraryName: string;
@@ -35,8 +45,6 @@ interface ScheduleWeeklyViewProps {
   className?: string;
   showEmpty?: boolean;
 }
-
-const API_BASE_URL = 'http://localhost:5012/api';
 
 export default function ScheduleWeeklyView({ scheduleId, className = '', showEmpty = true }: ScheduleWeeklyViewProps) {
   const [assignments, setAssignments] = useState<BackendScheduleAssignment[]>([]);
@@ -57,10 +65,7 @@ export default function ScheduleWeeklyView({ scheduleId, className = '', showEmp
       setIsLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${API_BASE_URL}/schedules/${scheduleId}`);
-        if (!response.ok) throw new Error(`API Error: ${response.status} ${response.statusText}`);
-        
-        const scheduleDetails = await response.json();
+        const scheduleDetails = await api.schedules.getById(scheduleId) as unknown as ScheduleDetails;
         setAssignments(scheduleDetails.assignments || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : '割り当ての取得に失敗しました。');

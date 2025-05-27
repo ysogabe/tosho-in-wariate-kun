@@ -1493,4 +1493,6 @@ if __name__ == '__main__':
         finally:
             conn_check.close()
 
-    app.run(debug=True, port=5012)
+    import os
+    port = int(os.environ.get('FLASK_PORT', 5200))
+    app.run(debug=True, port=port)

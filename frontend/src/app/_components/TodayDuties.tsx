@@ -13,15 +13,15 @@ interface Duty {
 }
 
 interface TodayDutiesProps {
-  currentDay: string;
+  currentDate: string;
   duties: Duty[] | undefined;
 }
 
-const TodayDuties = memo(({ currentDay, duties }: TodayDutiesProps) => {
+const TodayDuties = memo(({ currentDate, duties }: TodayDutiesProps) => {
   if (!duties) {
     return (
       <div>
-        <h2 className="text-xl font-bold mb-4 text-[hsl(340,80%,45%)]">今日の当番</h2>
+        <h2 className="text-xl font-bold mb-4 text-[hsl(340,80%,45%)]">今日の当番（{currentDate}）</h2>
         <p className="text-center py-4 text-[hsl(340,60%,50%)]">今日は図書室の当番はありません</p>
       </div>
     );
@@ -29,7 +29,7 @@ const TodayDuties = memo(({ currentDay, duties }: TodayDutiesProps) => {
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-4 text-[hsl(340,80%,45%)]">今日の当番（{currentDay}曜日）</h2>
+      <h2 className="text-xl font-bold mb-4 text-[hsl(340,80%,45%)]">今日の当番（{currentDate}）</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {duties.map((duty, index) => (
