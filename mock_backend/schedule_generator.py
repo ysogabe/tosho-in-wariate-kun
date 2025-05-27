@@ -179,7 +179,7 @@ class ScheduleGenerator:
             raise
     
     def assign_members_to_weekdays(self) -> Dict:
-        """図書委員を曜日と図書室に割り当て（新スキーマ対応）"""
+        """図書委員を曜日と図書室に割り当て（制約充足アルゴリズム）"""
         logger.debug("図書委員の曜日・図書室割り当てを開始します")
         
         # 図書室ごと、曜日ごとの割り当てを初期化
@@ -194,81 +194,404 @@ class ScheduleGenerator:
                 5: []   # 金曜日
             }
         
-        # 図書委員の割り当て回数を追跡
+        # 制約充足による最適化された割り当て
+        success = self._assign_with_constraints(assignments)
+        
+        if not success:
+            logger.warning("制約充足による割り当てに失敗しました。フォールバックアルゴリズムを使用します。")
+            # フォールバック: 元のアルゴリズムを使用
+            return self._fallback_assignment()
+        
+        # 割り当て結果のログと統計
+        self._log_assignment_statistics(assignments)
+        
+        return assignments
+    
+    def _assign_with_constraints(self, assignments: Dict) -> bool:
+        """制約充足による割り当て実行（改良版）"""
+        logger.debug("制約充足アルゴリズムによる割り当てを開始します")
+        
+        # 各委員が週2回担当する制約
+        target_assignments_per_member = 2
+        total_required_assignments = len(self.committee_members) * target_assignments_per_member
+        
+        # 各曜日の必要人数を計算
+        daily_capacity = sum(room.get('capacity', 1) for room in self.library_rooms)
+        total_weekly_capacity = daily_capacity * 5
+        
+        logger.debug(f"委員数: {len(self.committee_members)}, 必要割り当て総数: {total_required_assignments}")
+        logger.debug(f"週間総収容人数: {total_weekly_capacity}, 日次収容人数: {daily_capacity}")
+        
+        if total_required_assignments > total_weekly_capacity:
+            logger.error(f"制約充足不可能: 必要割り当て数({total_required_assignments}) > 収容可能数({total_weekly_capacity})")
+            return False
+        
+        # より効果的な割り当て戦略：グリーディアプローチ + 最適化
+        return self._greedy_assign_with_optimization(assignments)
+    
+    def _greedy_assign_with_optimization(self, assignments: Dict) -> bool:
+        """グリーディアプローチによる最適化割り当て"""
+        logger.debug("グリーディアプローチによる割り当てを開始します")
+        
+        # 割り当て状況を追跡
         member_assignments = {member['id']: 0 for member in self.committee_members}
-        
-        # 図書委員の曜日割り当てを追跡（同一委員が同じ曜日に複数回割り当てられることを防ぐ）
         member_weekdays = {member['id']: set() for member in self.committee_members}
+        class_weekdays = {member['class_id']: set() for member in self.committee_members}
         
-        # クラスの曜日割り当てを追跡
-        class_weekdays = {}
+        # 各委員に2回ずつ確実に割り当てるアプローチ
         for member in self.committee_members:
+            member_id = member['id']
             class_id = member['class_id']
-            if class_id not in class_weekdays:
-                class_weekdays[class_id] = set()
+            
+            assignments_needed = 2
+            attempts = 0
+            max_attempts = 50
+            
+            while assignments_needed > 0 and attempts < max_attempts:
+                attempts += 1
+                best_slot = self._find_best_assignment_slot(
+                    member, assignments, member_weekdays, class_weekdays, member_assignments
+                )
+                
+                if best_slot is None:
+                    logger.warning(f"委員ID {member_id} の割り当てスロットが見つかりません（残り{assignments_needed}回）")
+                    break
+                
+                weekday, library_room_id = best_slot
+                library_room = next(room for room in self.library_rooms if room['id'] == library_room_id)
+                
+                # 割り当て実行
+                assignments[library_room_id][weekday].append(member)
+                member_assignments[member_id] += 1
+                member_weekdays[member_id].add(weekday)
+                class_weekdays[class_id].add(weekday)
+                assignments_needed -= 1
+                
+                logger.debug(f"委員ID {member_id} を{weekday}曜日の{library_room['room_name']}に割り当て")
         
-        # 曜日ごとに図書委員を割り当て
-        for weekday in range(1, 6):  # 月曜から金曜
-            logger.debug(f"曜日 {weekday} の割り当てを処理します")
-            is_wed_or_fri = weekday in [3, 5]  # 水曜日または金曜日
+        # 割り当て完了チェック
+        incomplete_members = [
+            member for member in self.committee_members 
+            if member_assignments[member['id']] < 2
+        ]
+        
+        if incomplete_members:
+            logger.warning(f"完全な割り当てに失敗: {len(incomplete_members)}人が未完了")
+            # 不完全な委員について追加試行
+            self._fill_incomplete_assignments(
+                incomplete_members, assignments, member_assignments, 
+                member_weekdays, class_weekdays
+            )
+        
+        return True
+    
+    def _find_best_assignment_slot(self, member: Dict, assignments: Dict, 
+                                  member_weekdays: Dict, class_weekdays: Dict,
+                                  member_assignments: Dict) -> tuple:
+        """委員にとって最適な割り当てスロットを検索"""
+        member_id = member['id']
+        class_id = member['class_id']
+        
+        candidates = []
+        
+        for weekday in range(1, 6):
+            # 後期の水曜・金曜制約チェック
+            is_wed_or_fri = weekday in [3, 5]
+            if not self.is_first_half and is_wed_or_fri and member_id in self.wed_fri_members:
+                continue
             
-            # この曜日に既に割り当てられた委員を追跡
-            assigned_members_today = set()
+            # 既に割り当て済みの曜日はスキップ
+            if weekday in member_weekdays[member_id]:
+                continue
             
-            # 各図書室に図書委員を割り当て（収容人数まで）
+            # 同じクラスの他の委員が既に割り当て済みの曜日はスキップ
+            if weekday in class_weekdays[class_id]:
+                continue
+            
             for library_room in self.library_rooms:
                 library_room_id = library_room['id']
-                capacity = library_room.get('capacity', 1)  # デフォルト1人
-                logger.debug(f"図書室 {library_room['room_name']} (収容人数: {capacity}) の割り当てを処理します")
+                current_capacity = len(assignments[library_room_id][weekday])
+                max_capacity = library_room.get('capacity', 1)
                 
-                # 図書委員をシャッフル
-                members = list(self.committee_members)
-                random.shuffle(members)
-                
-                # 収容人数分の図書委員を割り当て
-                assigned_count = 0
-                for member in members:
-                    if assigned_count >= capacity:
-                        break
-                        
-                    member_id = member['id']
-                    class_id = member['class_id']
-                    
-                    # 既にこの日に割り当てられている場合はスキップ
-                    if member_id in assigned_members_today:
-                        continue
-                    
-                    # 割り当て条件のチェック
-                    # 1. 既に週2回割り当てられていないか
-                    if member_assignments[member_id] >= 2:
-                        continue
-                        
-                    # 2. 既にこの曜日に割り当てられていないか
-                    if weekday in member_weekdays[member_id]:
-                        continue
-                        
-                    # 3. 同じクラスの他の図書委員がこの曜日に割り当てられていないか
-                    if weekday in class_weekdays[class_id]:
-                        continue
-                        
-                    # 4. 後期の場合、前期に水曜・金曜担当だった委員は水曜・金曜に割り当てない
-                    if not self.is_first_half and is_wed_or_fri and member_id in self.wed_fri_members:
-                        logger.debug(f"前期に水曜・金曜担当だった委員ID {member_id} を除外します")
-                        continue
-                        
-                    # 条件を満たす場合、割り当てを行う
-                    assignments[library_room_id][weekday].append(member)
-                    member_assignments[member_id] += 1
-                    member_weekdays[member_id].add(weekday)
-                    class_weekdays[class_id].add(weekday)
-                    assigned_members_today.add(member_id)
-                    assigned_count += 1
-                    logger.debug(f"委員ID {member_id} を曜日 {weekday}、図書室ID {library_room_id} に割り当てました")
+                if current_capacity < max_capacity:
+                    # スコア計算（優先度を考慮）
+                    score = self._calculate_assignment_score(
+                        member, weekday, library_room_id, assignments, member_assignments
+                    )
+                    candidates.append((score, weekday, library_room_id))
         
-        # 割り当て結果のログ
+        if not candidates:
+            return None
+        
+        # 最高スコアのスロットを選択
+        candidates.sort(reverse=True)
+        _, best_weekday, best_room_id = candidates[0]
+        return (best_weekday, best_room_id)
+    
+    def _calculate_assignment_score(self, member: Dict, weekday: int, library_room_id: int,
+                                   assignments: Dict, member_assignments: Dict) -> float:
+        """割り当てスロットのスコアを計算"""
+        score = 0.0
+        
+        # 基本スコア
+        score += 10.0
+        
+        # 学年バランスを考慮
+        grade = member['grade']
+        current_day_assignments = []
+        for room_id in assignments:
+            current_day_assignments.extend(assignments[room_id][weekday])
+        
+        grade_count_today = sum(1 for m in current_day_assignments if m.get('grade') == grade)
+        if grade_count_today == 0:
+            score += 5.0  # この学年がまだいない曜日を優先
+        
+        # 図書室収容バランスを考慮
+        library_room = next(room for room in self.library_rooms if room['id'] == library_room_id)
+        current_capacity = len(assignments[library_room_id][weekday])
+        max_capacity = library_room.get('capacity', 1)
+        capacity_ratio = current_capacity / max_capacity
+        score += (1.0 - capacity_ratio) * 3.0  # 空きの多い図書室を優先
+        
+        # 委員の現在の割り当て数を考慮
+        current_assignments = member_assignments[member['id']]
+        if current_assignments == 0:
+            score += 2.0  # まだ割り当てのない委員を優先
+        
+        return score
+    
+    def _fill_incomplete_assignments(self, incomplete_members: list, assignments: Dict,
+                                   member_assignments: Dict, member_weekdays: Dict, 
+                                   class_weekdays: Dict):
+        """不完全な割り当ての委員を追加で処理"""
+        logger.debug(f"不完全な割り当ての委員 {len(incomplete_members)} 人を追加処理します")
+        
+        for member in incomplete_members:
+            member_id = member['id']
+            needed = 2 - member_assignments[member_id]
+            
+            # 制約を緩和して割り当て試行
+            for weekday in range(1, 6):
+                if needed <= 0:
+                    break
+                    
+                # 既に割り当て済みの曜日はスキップ
+                if weekday in member_weekdays[member_id]:
+                    continue
+                
+                for library_room in self.library_rooms:
+                    library_room_id = library_room['id']
+                    current_capacity = len(assignments[library_room_id][weekday])
+                    max_capacity = library_room.get('capacity', 1)
+                    
+                    if current_capacity < max_capacity:
+                        # クラス制約を一時的に緩和してでも2回割り当てを優先
+                        assignments[library_room_id][weekday].append(member)
+                        member_assignments[member_id] += 1
+                        member_weekdays[member_id].add(weekday)
+                        needed -= 1
+                        logger.debug(f"制約緩和により委員ID {member_id} を追加割り当て")
+                        break
+    
+    def _group_members_by_grade(self) -> Dict:
+        """委員を学年別にグループ化"""
+        grade_groups = {}
+        for member in self.committee_members:
+            grade = member['grade']
+            if grade not in grade_groups:
+                grade_groups[grade] = []
+            grade_groups[grade].append(member)
+        logger.debug(f"学年別グループ: {[(grade, len(members)) for grade, members in grade_groups.items()]}")
+        return grade_groups
+    
+    def _calculate_member_candidates(self) -> Dict:
+        """各委員の割り当て候補(曜日、図書室)を事前計算"""
+        candidates = {}
+        for member in self.committee_members:
+            member_id = member['id']
+            candidates[member_id] = []
+            
+            for weekday in range(1, 6):
+                # 後期の水曜・金曜制約チェック
+                is_wed_or_fri = weekday in [3, 5]
+                if not self.is_first_half and is_wed_or_fri and member_id in self.wed_fri_members:
+                    continue
+                
+                for library_room in self.library_rooms:
+                    candidates[member_id].append((weekday, library_room['id']))
+            
+            logger.debug(f"委員ID {member_id} の候補数: {len(candidates[member_id])}")
+        
+        return candidates
+    
+    def _backtrack_assign(self, assignments: Dict, member_assignments: Dict, 
+                         member_weekdays: Dict, class_weekdays: Dict,
+                         member_candidates: Dict, member_index: int) -> bool:
+        """バックトラッキングによる割り当て（改良版）"""
+        
+        # すべての委員に2回ずつ割り当てが完了したかチェック
+        if all(member_assignments[member['id']] == 2 for member in self.committee_members):
+            return True
+        
+        if member_index >= len(self.committee_members):
+            # 全委員を巡回したが、まだ割り当てが完了していない場合は最初から再開
+            return self._backtrack_assign(
+                assignments, member_assignments, member_weekdays, class_weekdays,
+                member_candidates, 0
+            )
+        
+        member = self.committee_members[member_index]
+        member_id = member['id']
+        class_id = member['class_id']
+        
+        # この委員に必要な残り割り当て数
+        remaining_assignments = 2 - member_assignments[member_id]
+        
+        if remaining_assignments == 0:
+            # この委員は既に2回割り当て済み、次の委員へ
+            return self._backtrack_assign(
+                assignments, member_assignments, member_weekdays, class_weekdays,
+                member_candidates, member_index + 1
+            )
+        
+        # 候補をシャッフルして公平性を確保
+        candidates = list(member_candidates[member_id])
+        random.shuffle(candidates)
+        
+        for weekday, library_room_id in candidates:
+            # 制約チェック
+            if not self._check_assignment_constraints(
+                member, weekday, library_room_id, assignments,
+                member_weekdays, class_weekdays
+            ):
+                continue
+            
+            # 図書室の収容人数チェック
+            library_room = next(room for room in self.library_rooms if room['id'] == library_room_id)
+            current_capacity = len(assignments[library_room_id][weekday])
+            max_capacity = library_room.get('capacity', 1)
+            
+            if current_capacity >= max_capacity:
+                continue
+            
+            # 仮割り当て
+            assignments[library_room_id][weekday].append(member)
+            member_assignments[member_id] += 1
+            member_weekdays[member_id].add(weekday)
+            class_weekdays[class_id].add(weekday)
+            
+            # 再帰的に次の割り当てを試行（この委員にもう1回割り当てる必要があるかチェック）
+            next_member_index = member_index if remaining_assignments > 1 else member_index + 1
+            
+            if self._backtrack_assign(
+                assignments, member_assignments, member_weekdays, class_weekdays,
+                member_candidates, next_member_index
+            ):
+                return True
+            
+            # バックトラック: 割り当てを取り消し
+            assignments[library_room_id][weekday].remove(member)
+            member_assignments[member_id] -= 1
+            member_weekdays[member_id].discard(weekday)
+            
+            # クラスの曜日制約を正しく更新
+            class_has_other_members = any(
+                weekday in member_weekdays[other_member['id']] 
+                for other_member in self.committee_members 
+                if other_member['class_id'] == class_id and other_member['id'] != member_id
+            )
+            if not class_has_other_members:
+                class_weekdays[class_id].discard(weekday)
+        
+        return False
+    
+    def _check_assignment_constraints(self, member: Dict, weekday: int, library_room_id: int,
+                                    assignments: Dict, member_weekdays: Dict, class_weekdays: Dict) -> bool:
+        """割り当て制約をチェック"""
+        member_id = member['id']
+        class_id = member['class_id']
+        
+        # 1. 同じ曜日に既に割り当て済みでないか
+        if weekday in member_weekdays[member_id]:
+            return False
+        
+        # 2. 同じクラスの他の委員が同じ曜日に割り当て済みでないか
+        if weekday in class_weekdays[class_id]:
+            return False
+        
+        # 3. 後期の水曜・金曜制約
+        is_wed_or_fri = weekday in [3, 5]
+        if not self.is_first_half and is_wed_or_fri and member_id in self.wed_fri_members:
+            return False
+        
+        return True
+    
+    def _fallback_assignment(self) -> Dict:
+        """フォールバック用の簡単な割り当てアルゴリズム"""
+        logger.debug("フォールバックアルゴリズムを実行します")
+        
+        assignments = {}
+        for library_room in self.library_rooms:
+            library_room_id = library_room['id']
+            assignments[library_room_id] = {
+                1: [], 2: [], 3: [], 4: [], 5: []
+            }
+        
+        member_assignments = {member['id']: 0 for member in self.committee_members}
+        
+        # 簡単な順次割り当て
+        weekday = 1
+        for member in self.committee_members:
+            assigned_count = 0
+            attempts = 0
+            max_attempts = 20
+            
+            while assigned_count < 2 and attempts < max_attempts:
+                attempts += 1
+                library_room = self.library_rooms[assigned_count % len(self.library_rooms)]
+                library_room_id = library_room['id']
+                capacity = library_room.get('capacity', 1)
+                
+                if len(assignments[library_room_id][weekday]) < capacity:
+                    assignments[library_room_id][weekday].append(member)
+                    assigned_count += 1
+                    member_assignments[member['id']] += 1
+                    logger.debug(f"フォールバック: 委員ID {member['id']} を曜日 {weekday} に割り当て")
+                
+                weekday = (weekday % 5) + 1
+        
+        return assignments
+    
+    def _log_assignment_statistics(self, assignments: Dict):
+        """割り当て統計をログ出力"""
+        logger.debug("=== 割り当て統計 ===")
+        
+        # 曜日別統計
+        for weekday in range(1, 6):
+            weekday_names = ['', '月曜', '火曜', '水曜', '木曜', '金曜']
+            total_assigned = sum(len(assignments[room_id][weekday]) for room_id in assignments)
+            logger.debug(f"{weekday_names[weekday]}: {total_assigned}人")
+            
+            for library_room in self.library_rooms:
+                room_id = library_room['id']
+                room_assigned = len(assignments[room_id][weekday])
+                capacity = library_room.get('capacity', 1)
+                logger.debug(f"  {library_room['room_name']}: {room_assigned}/{capacity}人")
+        
+        # 委員別統計
+        member_stats = {}
         for library_room_id in assignments:
-            for weekday, members in assignments[library_room_id].items():
-                logger.debug(f"図書室ID {library_room_id} 曜日 {weekday} の割り当て: {[m['id'] for m in members]}")
+            for weekday in assignments[library_room_id]:
+                for member in assignments[library_room_id][weekday]:
+                    member_id = member['id']
+                    if member_id not in member_stats:
+                        member_stats[member_id] = {'name': member['name'], 'count': 0, 'days': []}
+                    member_stats[member_id]['count'] += 1
+                    member_stats[member_id]['days'].append(weekday)
+        
+        logger.debug("委員別割り当て:")
+        for member_id, stats in member_stats.items():
+            logger.debug(f"  {stats['name']}: {stats['count']}回 (曜日: {stats['days']})")
         
         return assignments
     
