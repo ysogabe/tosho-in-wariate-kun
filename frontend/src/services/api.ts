@@ -1,6 +1,6 @@
 // API service for connecting to the mock backend
 
-const API_BASE_URL = 'http://localhost:5001/api';
+const API_BASE_URL = 'http://localhost:5100/api';
 
 // Generic fetch function with error handling
 async function fetchApi<T>(url: string, options: RequestInit = {}): Promise<T> {
@@ -15,6 +15,18 @@ async function fetchApi<T>(url: string, options: RequestInit = {}): Promise<T> {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      // エラーデータをコンソールに出力して確認
+      console.error('API Error Response:', errorData);
+      
+      // エラーメッセージをアラートで表示
+      if (errorData.error) {
+        alert(errorData.error);
+        if (errorData.details) {
+          alert(errorData.details);
+        }
+      }
+      
+      // エラーをスローして呼び出し元に伝える
       throw new Error(errorData.error || `API error: ${response.status}`);
     }
 
