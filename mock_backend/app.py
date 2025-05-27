@@ -685,7 +685,7 @@ def delete_committee_member(member_id):
 def get_library_rooms():
     conn = get_db_connection()
     query = """
-    SELECT lr.id, lr.room_name as name, lr.room_id, lr.capacity, lr.description, 
+    SELECT lr.id, lr.room_name as name, lr.room_id, lr.capacity, lr.description, lr.location,
            lr.active as is_active, lr.school_id, s.school_name
     FROM library_rooms lr
     JOIN schools s ON lr.school_id = s.id
@@ -697,10 +697,26 @@ def get_library_rooms():
     conn.close()
     return jsonify(rooms)
 
-# Backward compatibility endpoint
+# Backward compatibility endpoints
 @app.route('/api/libraries', methods=['GET'])
 def get_libraries():
     return get_library_rooms()
+
+@app.route('/api/libraries', methods=['POST'])
+def add_library():
+    return add_library_room()
+
+@app.route('/api/libraries/<int:library_id>', methods=['GET'])
+def get_library(library_id):
+    return get_library_room(library_id)
+
+@app.route('/api/libraries/<int:library_id>', methods=['PUT'])
+def update_library(library_id):
+    return update_library_room(library_id)
+
+@app.route('/api/libraries/<int:library_id>', methods=['DELETE'])
+def delete_library(library_id):
+    return delete_library_room(library_id)
 
 @app.route('/api/library-rooms', methods=['POST'])
 def add_library_room():
@@ -709,10 +725,11 @@ def add_library_room():
         return jsonify({"error": "Missing name for library room"}), 400
 
     name = data['name']
-    room_id = data.get('room_id', 1)
     capacity = data.get('capacity', 1)
     description = data.get('description', '')
+    location = data.get('location', '')
     school_id = data.get('school_id')
+    room_id = data.get('room_id')
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -726,17 +743,24 @@ def add_library_room():
             return jsonify({"error": "No active school found"}), 404
         school_id = school_result['id']
 
+    # Generate a unique room_id if not provided
+    if not room_id:
+        cursor.execute('SELECT MAX(room_id) as max_id FROM library_rooms WHERE school_id = ?', (school_id,))
+        result = cursor.fetchone()
+        max_id = result['max_id'] if result and result['max_id'] is not None else 0
+        room_id = max_id + 1
+
     try:
         cursor.execute('''
-            INSERT INTO library_rooms (school_id, room_id, room_name, capacity, description)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (school_id, room_id, name, capacity, description))
+            INSERT INTO library_rooms (school_id, room_id, room_name, capacity, description, location)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (school_id, room_id, name, capacity, description, location))
         conn.commit()
         new_room_id = cursor.lastrowid
 
         # Fetch the created room with school info
         query = """
-        SELECT lr.id, lr.room_name as name, lr.room_id, lr.capacity, lr.description,
+        SELECT lr.id, lr.room_name as name, lr.room_id, lr.capacity, lr.description, lr.location,
                lr.active as is_active, lr.school_id, s.school_name
         FROM library_rooms lr
         JOIN schools s ON lr.school_id = s.id
@@ -757,7 +781,7 @@ def add_library_room():
 def get_library_room(room_id):
     conn = get_db_connection()
     query = """
-    SELECT lr.id, lr.room_name as name, lr.room_id, lr.capacity, lr.description,
+    SELECT lr.id, lr.room_name as name, lr.room_id, lr.capacity, lr.description, lr.location,
            lr.active as is_active, lr.school_id, s.school_name
     FROM library_rooms lr
     JOIN schools s ON lr.school_id = s.id
@@ -795,6 +819,7 @@ def update_library_room(room_id):
         'room_id': 'room_id',
         'capacity': 'capacity',
         'description': 'description',
+        'location': 'location',
         'is_active': 'active',
         'school_id': 'school_id'
     }
@@ -838,17 +863,20 @@ def delete_library_room(room_id):
         cursor.execute('SELECT 1 FROM schedule_assignments WHERE library_room_id = ?', (room_id,))
         if cursor.fetchone():
             conn.close()
-            return jsonify({"error": "Cannot delete library room with associated schedule assignments."}), 409
+            return jsonify({
+                "error": "この図書室は現在スケジュールで使用されているため削除できません。",
+                "details": "関連するスケジュール割り当てを先に削除してください。"
+            }), 409
 
         cursor.execute('DELETE FROM library_rooms WHERE id = ?', (room_id,))
         conn.commit()
     except sqlite3.Error as e:
         conn.close()
-        return jsonify({"error": f"Database error: {e}"}), 500
+        return jsonify({"error": f"データベースエラー: {e}"}), 500
     finally:
         conn.close()
 
-    return jsonify({"message": "Library room deleted successfully"}), 200
+    return jsonify({"message": "図書室が正常に削除されました"}), 200
 
 # --- API Endpoints for Schedules ---
 
@@ -892,6 +920,10 @@ def add_schedule():
     is_first_half = data.get('is_first_half', True)
     status = data.get('status', 'draft')
     school_id = data.get('school_id')
+    
+    # Get start_date and end_date from request if provided
+    start_date = data.get('start_date')
+    end_date = data.get('end_date')
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -906,10 +938,34 @@ def add_schedule():
         school_id = school_result['id']
 
     try:
+        # 既存の同じ条件のスケジュールを削除（ユニーク制約違反を防ぐため）
         cursor.execute('''
-            INSERT INTO schedules (school_id, schedule_name, description, academic_year, is_first_half, status)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (school_id, name, description, academic_year, is_first_half, status))
+            DELETE FROM schedule_assignments 
+            WHERE schedule_id IN (SELECT id FROM schedules WHERE school_id = ? AND academic_year = ? AND is_first_half = ?)
+        ''', (school_id, academic_year, is_first_half))
+        
+        cursor.execute('''
+            DELETE FROM schedules 
+            WHERE school_id = ? AND academic_year = ? AND is_first_half = ?
+        ''', (school_id, academic_year, is_first_half))
+        
+        conn.commit()
+        
+        # 日付の設定
+        if not start_date or not end_date:
+            # デフォルトの日付を計算
+            if is_first_half:
+                start_date = f"{academic_year}-04-01"
+                end_date = f"{academic_year}-09-30"
+            else:
+                start_date = f"{academic_year}-10-01"
+                end_date = f"{academic_year + 1}-03-31"
+        
+        # 新しいスケジュールを作成（start_dateとend_dateを含む）
+        cursor.execute('''
+            INSERT INTO schedules (school_id, schedule_name, description, academic_year, is_first_half, status, start_date, end_date)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (school_id, name, description, academic_year, is_first_half, status, start_date, end_date))
         conn.commit()
         new_schedule_id = cursor.lastrowid
         
@@ -927,17 +983,14 @@ def add_schedule():
             "school_name": school_name
         }
         
-        # Add dates for compatibility
-        if is_first_half:
-            created_schedule['start_date'] = f"{academic_year}-04-01"
-            created_schedule['end_date'] = f"{academic_year}-09-30"
-        else:
-            created_schedule['start_date'] = f"{academic_year}-10-01"
-            created_schedule['end_date'] = f"{academic_year + 1}-03-31"
+        # すでに設定された日付をレスポンスに含める
+        created_schedule['start_date'] = start_date
+        created_schedule['end_date'] = end_date
         
-    except sqlite3.IntegrityError as e:
+    except Exception as e:
+        conn.rollback()
         conn.close()
-        return jsonify({"error": f"Failed to create schedule: {e}"}), 409
+        return jsonify({"error": f"Failed to create schedule: {e}"}), 500
     finally:
         conn.close()
     
@@ -948,15 +1001,28 @@ def get_schedule(schedule_id):
     conn = get_db_connection()
     
     # Get schedule basic info
-    query = """
-    SELECT s.id, s.schedule_name as name, s.description, s.academic_year,
-           s.is_first_half, s.status, s.school_id, sc.school_name,
-           s.created_at, s.updated_at
-    FROM schedules s
-    JOIN schools sc ON s.school_id = sc.id
-    WHERE s.id = ?
-    """
-    schedule_cursor = conn.execute(query, (schedule_id,))
+    try:
+        # まず start_date と end_date カラムを含めたクエリを試す
+        query = """
+        SELECT s.id, s.schedule_name as name, s.description, s.academic_year,
+               s.is_first_half, s.status, s.school_id, sc.school_name,
+               s.created_at, s.updated_at, s.start_date, s.end_date
+        FROM schedules s
+        JOIN schools sc ON s.school_id = sc.id
+        WHERE s.id = ?
+        """
+        schedule_cursor = conn.execute(query, (schedule_id,))
+    except sqlite3.OperationalError:
+        # カラムが存在しない場合は、start_dateとend_dateを除外したクエリを使用
+        query = """
+        SELECT s.id, s.schedule_name as name, s.description, s.academic_year,
+               s.is_first_half, s.status, s.school_id, sc.school_name,
+               s.created_at, s.updated_at
+        FROM schedules s
+        JOIN schools sc ON s.school_id = sc.id
+        WHERE s.id = ?
+        """
+        schedule_cursor = conn.execute(query, (schedule_id,))
     schedule = schedule_cursor.fetchone()
 
     if not schedule:
@@ -965,13 +1031,15 @@ def get_schedule(schedule_id):
 
     schedule_dict = dict(schedule)
     
-    # Add dates for compatibility
-    if schedule_dict['is_first_half']:
-        schedule_dict['start_date'] = f"{schedule_dict['academic_year']}-04-01"
-        schedule_dict['end_date'] = f"{schedule_dict['academic_year']}-09-30"
-    else:
-        schedule_dict['start_date'] = f"{schedule_dict['academic_year']}-10-01"
-        schedule_dict['end_date'] = f"{schedule_dict['academic_year'] + 1}-03-31"
+    # 日付の処理: データベースに保存されている値があればそれを使用し、なければ計算する
+    if not schedule_dict.get('start_date') or not schedule_dict.get('end_date'):
+        # 日付が保存されていない場合は計算する
+        if schedule_dict['is_first_half']:
+            schedule_dict['start_date'] = f"{schedule_dict['academic_year']}-04-01"
+            schedule_dict['end_date'] = f"{schedule_dict['academic_year']}-09-30"
+        else:
+            schedule_dict['start_date'] = f"{schedule_dict['academic_year']}-10-01"
+            schedule_dict['end_date'] = f"{schedule_dict['academic_year'] + 1}-03-31"
 
     # Fetch assignments
     assignments_query = """
@@ -1030,7 +1098,9 @@ def update_schedule(schedule_id):
         'academic_year': 'academic_year',
         'is_first_half': 'is_first_half',
         'status': 'status',
-        'school_id': 'school_id'
+        'school_id': 'school_id',
+        'start_date': 'start_date',
+        'end_date': 'end_date'
     }
     
     for field, db_field in field_mapping.items():
@@ -1046,8 +1116,33 @@ def update_schedule(schedule_id):
     params.append(schedule_id)
 
     try:
-        cursor.execute(f'UPDATE schedules SET {", ".join(update_fields)} WHERE id = ?', tuple(params))
-        conn.commit()
+        # start_date と end_date カラムが存在しない場合を考慮
+        try:
+            cursor.execute(f'UPDATE schedules SET {", ".join(update_fields)} WHERE id = ?', tuple(params))
+            conn.commit()
+        except sqlite3.OperationalError as e:
+            # カラムが存在しない場合は、start_dateとend_dateを除外する
+            if 'no such column' in str(e):
+                # start_dateとend_dateを除外したフィールドリストを作成
+                filtered_update_fields = []
+                filtered_params = []
+                for i, field in enumerate(update_fields):
+                    if 'start_date' not in field and 'end_date' not in field:
+                        filtered_update_fields.append(field)
+                        if i < len(params) - 1:  # 最後のパラメータはschedule_idなので除外
+                            filtered_params.append(params[i])
+                
+                # schedule_idを追加
+                filtered_params.append(params[-1])
+                
+                if filtered_update_fields:
+                    cursor.execute(f'UPDATE schedules SET {", ".join(filtered_update_fields)} WHERE id = ?', tuple(filtered_params))
+                    conn.commit()
+                else:
+                    conn.close()
+                    return jsonify({"error": "No valid fields to update"}), 400
+            else:
+                raise
     except sqlite3.Error as e:
         conn.close()
         return jsonify({"error": f"Database error: {e}"}), 500

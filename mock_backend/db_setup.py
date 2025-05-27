@@ -81,10 +81,12 @@ def setup_database(custom_db_path=None):
         room_name TEXT NOT NULL,
         capacity INTEGER NOT NULL DEFAULT 1,
         description TEXT,
+        location TEXT,
         active BOOLEAN NOT NULL DEFAULT TRUE,
         created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE RESTRICT
+        FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE RESTRICT,
+        UNIQUE(school_id, room_id)
     )
     ''')
 
@@ -98,6 +100,8 @@ def setup_database(custom_db_path=None):
         academic_year INTEGER NOT NULL,
         is_first_half BOOLEAN NOT NULL DEFAULT TRUE,
         status TEXT NOT NULL DEFAULT 'draft',
+        start_date TEXT,
+        end_date TEXT,
         created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE RESTRICT

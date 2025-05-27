@@ -2,10 +2,9 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { FaUsers, FaBook, FaDoorOpen, FaCalendarAlt, FaCog, FaArrowLeft } from 'react-icons/fa';
+import { FaUsers, FaBook, FaCalendarAlt, FaCog, FaArrowLeft } from 'react-icons/fa';
 import ManagementCard from '../_components/ManagementCard';
 import PageLayout from '../_components/PageLayout';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useSchool } from '@/contexts/SchoolContext';
 
@@ -33,25 +32,13 @@ export default function ManagementPage() {
         icon: <FaUsers />,
         description: '図書委員の登録・編集・削除を行います',
         link: '/management/committee-members'
-      },
-      {
-        title: '図書室管理',
-        icon: <FaDoorOpen />,
-        description: '図書室情報の登録・編集・削除を行います',
-        link: '/management/libraries'
       }
     ],
     schedule: [
       {
-        title: 'スケジュールルール設定',
-        icon: <FaCog />,
-        description: '当番割り当てのルールを設定します',
-        link: '/management/schedule-rules'
-      },
-      {
         title: 'スケジュール生成',
         icon: <FaCalendarAlt />,
-        description: '設定したルールに基づいてスケジュールを生成します',
+        description: 'スケジュールを生成します',
         link: '/management/generate-schedule'
       },
       {
@@ -75,22 +62,30 @@ export default function ManagementPage() {
 
         <Card className="p-6 mb-8 bg-opacity-70">
           <div className="flex space-x-4 mb-6">
-            <Button
+            <button
               onClick={() => setActiveTab('basic')}
-              variant={activeTab === 'basic' ? 'primary' : 'outline'}
-              size="lg"
-              className="rounded-full"
+              className={`rounded-full px-8 py-2 text-base font-medium transition-colors ${activeTab === 'basic' ? 'shadow-md' : 'opacity-80 hover:opacity-100'}`}
+              style={{
+                backgroundColor: activeTab === 'basic' ? 'hsl(180, 65%, 75%)' : 'hsl(180, 65%, 85%)', 
+                color: 'hsl(180, 65%, 25%)',
+                border: '1px solid hsl(180, 65%, 65%)'
+              }}
             >
+              <FaCog className="inline-block mr-2" />
               基本情報管理
-            </Button>
-            <Button
+            </button>
+            <button
               onClick={() => setActiveTab('schedule')}
-              variant={activeTab === 'schedule' ? 'primary' : 'outline'}
-              size="lg"
-              className="rounded-full"
+              className={`rounded-full px-8 py-2 text-base font-medium transition-colors ${activeTab === 'schedule' ? 'shadow-md' : 'opacity-80 hover:opacity-100'}`}
+              style={{
+                backgroundColor: activeTab === 'schedule' ? 'hsl(0, 65%, 95%)' : 'hsl(0, 65%, 97%)', 
+                color: 'hsl(0, 65%, 35%)',
+                border: '1px solid hsl(0, 65%, 75%)'
+              }}
             >
+              <FaCalendarAlt className="inline-block mr-2" />
               スケジュール管理
-            </Button>
+            </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

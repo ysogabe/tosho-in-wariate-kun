@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,7 +20,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Class, classesApi, Grade, gradesApi } from '@/services/api';
-import { PlusIcon, Pencil, Trash2 } from 'lucide-react';
+import { PlusIcon, Pencil, Trash2, CheckCircle, AlertCircle, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function ClassesTable() {
@@ -34,13 +34,13 @@ export default function ClassesTable() {
   const [searchTerm, setSearchTerm] = useState('');
   const [gradeFilter, setGradeFilter] = useState<string>('');
   const [saving, setSaving] = useState(false);
+  const [confirmSaveDialogOpen, setConfirmSaveDialogOpen] = useState(false);
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [dialogMessage, setDialogMessage] = useState('');
   const { toast } = useToast();
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       const [classesData, gradesData] = await Promise.all([
@@ -59,7 +59,11 @@ export default function ClassesTable() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+  
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleAdd = () => {
     setCurrentClass({
@@ -79,45 +83,42 @@ export default function ClassesTable() {
     setDeleteDialogOpen(true);
   };
 
-  const handleSave = async () => {
+  const confirmSaveAction = () => {
     if (!currentClass?.name || !currentClass?.grade_id) {
-      toast({
-        title: 'エラー',
-        description: 'クラス名と学年は必須です。',
-        variant: 'destructive',
-      });
+      setDialogMessage('クラス名と学年は必須です。');
+      setErrorDialogOpen(true);
       return;
     }
 
+    setDialogMessage(currentClass.id ? 'クラス情報を更新します。よろしいですか？' : 'クラス情報を登録します。よろしいですか？');
+    setConfirmSaveDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    setConfirmSaveDialogOpen(false);
     try {
       setSaving(true);
+      
+      if (!currentClass) return;
       
       if (currentClass.id) {
         // 更新
         await classesApi.update(currentClass.id, currentClass);
-        toast({
-          title: '成功',
-          description: 'クラス情報を更新しました。',
-        });
+        setDialogMessage('クラス情報を更新しました。');
       } else {
         // 新規作成
         await classesApi.create(currentClass as Omit<Class, 'id'>);
-        toast({
-          title: '成功',
-          description: 'クラス情報を作成しました。',
-        });
+        setDialogMessage('クラス情報を登録しました。');
       }
       
       setEditDialogOpen(false);
       setCurrentClass(null);
       await loadData();
+      setSuccessDialogOpen(true);
     } catch (error) {
       console.error('クラス情報の保存に失敗しました:', error);
-      toast({
-        title: 'エラー',
-        description: 'クラス情報の保存に失敗しました。',
-        variant: 'destructive',
-      });
+      setDialogMessage('クラス情報の保存に失敗しました。');
+      setErrorDialogOpen(true);
     } finally {
       setSaving(false);
     }
@@ -128,20 +129,15 @@ export default function ClassesTable() {
 
     try {
       await classesApi.delete(classToDelete.id);
-      toast({
-        title: '成功',
-        description: 'クラス情報を削除しました。',
-      });
+      setDialogMessage('クラス情報を削除しました。');
       setDeleteDialogOpen(false);
       setClassToDelete(null);
       await loadData();
+      setSuccessDialogOpen(true);
     } catch (error) {
       console.error('クラス情報の削除に失敗しました:', error);
-      toast({
-        title: 'エラー',
-        description: 'クラス情報の削除に失敗しました。',
-        variant: 'destructive',
-      });
+      setDialogMessage('クラス情報の削除に失敗しました。');
+      setErrorDialogOpen(true);
     }
   };
 
@@ -152,8 +148,15 @@ export default function ClassesTable() {
 
   const filteredClasses = classes.filter(classItem => {
     const matchesSearch = classItem.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesGrade = gradeFilter === '' || classItem.grade_id.toString() === gradeFilter;
+    const matchesGrade = gradeFilter ? classItem.grade_id === parseInt(gradeFilter) : true;
     return matchesSearch && matchesGrade;
+  });
+
+  const sortedClasses = [...filteredClasses].sort((a, b) => {
+    const gradeA = grades.find(g => g.id === a.grade_id)?.name || '';
+    const gradeB = grades.find(g => g.id === b.grade_id)?.name || '';
+    if (gradeA !== gradeB) return gradeA.localeCompare(gradeB);
+    return a.name.localeCompare(b.name);
   });
 
   if (loading) {
@@ -165,69 +168,101 @@ export default function ClassesTable() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex space-x-4">
-          <Input
-            placeholder="クラス名で検索"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-sm"
-          />
-          <select
-            value={gradeFilter}
-            onChange={(e) => setGradeFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">全ての学年</option>
-            {grades.map(grade => (
-              <option key={grade.id} value={grade.id.toString()}>
-                {grade.name}
-              </option>
-            ))}
-          </select>
+    <div className="p-6 bg-white bg-opacity-90 rounded-xl border-2 border-dashed border-pink-200">
+      <h2 className="text-xl font-bold text-pink-700 mb-6 flex items-center">
+        <span className="text-pink-500 mr-2 text-2xl">👨‍🎓</span> クラス管理
+      </h2>
+      
+      <div className="flex justify-between items-center mb-6 gap-4">
+        <div className="flex items-center gap-4 flex-1">
+          <div className="relative flex-1 max-w-sm">
+            <Input
+              placeholder="クラス名で検索"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 border-2 border-teal-100 focus:border-teal-200 rounded-full h-10"
+            />
+            <div className="absolute left-3 top-2.5 text-teal-400">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </div>
+          </div>
+          
+          <div className="relative">
+            <select
+              value={gradeFilter}
+              onChange={(e) => setGradeFilter(e.target.value)}
+              className="appearance-none pl-4 pr-10 py-2 border-2 border-teal-100 focus:border-teal-200 rounded-full h-10 bg-white focus:outline-none focus:ring-2 focus:ring-teal-200 text-gray-700"
+            >
+              <option value="">全ての学年</option>
+              {grades.map(grade => (
+                <option key={grade.id} value={grade.id.toString()}>
+                  {grade.name}
+                </option>
+              ))}
+            </select>
+            <div className="absolute right-3 top-3 text-teal-400 pointer-events-none">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </div>
+          </div>
         </div>
-        <Button onClick={handleAdd}>
-          <PlusIcon className="mr-2 h-4 w-4" /> 新規クラス
+        
+        <Button 
+          onClick={handleAdd}
+          className="bg-teal-100 hover:bg-teal-200 text-teal-700 rounded-full px-4 h-10 flex items-center gap-1 border-2 border-teal-200"
+        >
+          <PlusIcon className="h-4 w-4" /> 新規クラス
         </Button>
       </div>
 
-      <div className="border rounded-lg">
+      <div className="border-2 border-gray-100 rounded-xl overflow-hidden">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-gray-50">
             <TableRow>
-              <TableHead className="w-[150px]">学年</TableHead>
-              <TableHead className="w-[200px]">クラス名</TableHead>
-              <TableHead className="w-[100px]">操作</TableHead>
+              <TableHead className="text-center w-1/4 text-gray-600 font-semibold">学年</TableHead>
+              <TableHead className="text-center w-1/2 text-gray-600 font-semibold">クラス名</TableHead>
+              <TableHead className="text-center w-1/4 text-gray-600 font-semibold">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredClasses.length === 0 ? (
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={3} className="text-center py-8">
+                  データを読み込み中...
+                </TableCell>
+              </TableRow>
+            ) : sortedClasses.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={3} className="text-center py-8 text-gray-500">
                   クラス情報がありません
                 </TableCell>
               </TableRow>
             ) : (
-              filteredClasses.map((classItem) => (
-                <TableRow key={classItem.id}>
-                  <TableCell className="font-medium">{getGradeName(classItem.grade_id)}</TableCell>
-                  <TableCell>{classItem.name}</TableCell>
+              sortedClasses.map((classItem) => (
+                <TableRow key={classItem.id} className="hover:bg-gray-50 transition-colors">
+                  <TableCell className="font-medium text-center">{getGradeName(classItem.grade_id)}</TableCell>
+                  <TableCell className="text-center">{classItem.name}</TableCell>
                   <TableCell>
-                    <div className="flex space-x-2">
+                    <div className="flex justify-center space-x-2">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleEdit(classItem)}
+                        className="rounded-full w-8 h-8 p-0 border-teal-200 hover:border-teal-300 hover:bg-teal-50"
                       >
-                        <Pencil className="h-4 w-4" />
+                        <Pencil className="h-4 w-4 text-teal-600" />
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleDelete(classItem)}
+                        className="rounded-full w-8 h-8 p-0 border-pink-200 hover:border-pink-300 hover:bg-pink-50"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4 text-pink-600" />
                       </Button>
                     </div>
                   </TableCell>
@@ -240,33 +275,48 @@ export default function ClassesTable() {
 
       {/* 編集ダイアログ */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent>
+        <DialogContent className="bg-white rounded-xl border-2 border-teal-100">
           <DialogHeader>
-            <DialogTitle>
-              {currentClass?.id ? 'クラスを編集' : '新規クラス追加'}
+            <DialogTitle className="text-xl font-bold text-teal-700 flex items-center">
+              {currentClass?.id ? (
+                <>
+                  <Pencil className="h-5 w-5 mr-2 text-teal-500" /> クラスを編集
+                </>
+              ) : (
+                <>
+                  <PlusIcon className="h-5 w-5 mr-2 text-teal-500" /> 新規クラス追加
+                </>
+              )}
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="grade_id">学年</Label>
-              <select
-                id="grade_id"
-                value={currentClass?.grade_id || ''}
-                onChange={(e) => setCurrentClass(prev => ({
-                  ...prev,
-                  grade_id: parseInt(e.target.value),
-                }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {grades.map(grade => (
-                  <option key={grade.id} value={grade.id}>
-                    {grade.name}
-                  </option>
-                ))}
-              </select>
+              <Label htmlFor="grade_id" className="text-gray-700 font-medium">学年</Label>
+              <div className="relative">
+                <select
+                  id="grade_id"
+                  value={currentClass?.grade_id || ''}
+                  onChange={(e) => setCurrentClass(prev => ({
+                    ...prev,
+                    grade_id: parseInt(e.target.value),
+                  }))}
+                  className="w-full appearance-none px-4 py-2 border-2 border-teal-100 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-200 pr-10"
+                >
+                  {grades.map(grade => (
+                    <option key={grade.id} value={grade.id}>
+                      {grade.name}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-3 top-2.5 text-teal-400 pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </div>
+              </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="name">クラス名</Label>
+              <Label htmlFor="name" className="text-gray-700 font-medium">クラス名</Label>
               <Input
                 id="name"
                 value={currentClass?.name || ''}
@@ -275,14 +325,23 @@ export default function ClassesTable() {
                   name: e.target.value,
                 }))}
                 placeholder="クラス名を入力してください"
+                className="border-2 border-teal-100 focus:border-teal-200 rounded-md"
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+          <DialogFooter className="pt-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setEditDialogOpen(false)}
+              className="rounded-full border-gray-300 hover:bg-gray-100 text-gray-700"
+            >
               キャンセル
             </Button>
-            <Button onClick={handleSave} disabled={saving}>
+            <Button 
+              onClick={confirmSaveAction} 
+              disabled={saving}
+              className="rounded-full bg-teal-500 hover:bg-teal-600 text-white"
+            >
               {saving ? '保存中...' : '保存'}
             </Button>
           </DialogFooter>
@@ -291,20 +350,104 @@ export default function ClassesTable() {
 
       {/* 削除確認ダイアログ */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
+        <DialogContent className="bg-white rounded-xl border-2 border-pink-100">
           <DialogHeader>
-            <DialogTitle>クラスの削除</DialogTitle>
+            <DialogTitle className="text-xl font-bold text-pink-700 flex items-center">
+              <Trash2 className="h-5 w-5 mr-2 text-pink-500" /> クラスの削除
+            </DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <p>「{classToDelete?.name}」を削除してもよろしいですか？</p>
+            <p className="text-gray-700">「{classToDelete?.name}」を削除してもよろしいですか？</p>
             <p className="text-sm text-gray-500 mt-2">この操作は取り消せません。</p>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+            <Button 
+              variant="outline" 
+              onClick={() => setDeleteDialogOpen(false)}
+              className="rounded-full border-gray-300 hover:bg-gray-100 text-gray-700"
+            >
               キャンセル
             </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
+            <Button 
+              variant="outline" 
+              onClick={confirmDelete}
+              className="rounded-full bg-pink-500 hover:bg-pink-600 text-white border-pink-400"
+            >
               削除
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 保存確認ダイアログ */}
+      <Dialog open={confirmSaveDialogOpen} onOpenChange={setConfirmSaveDialogOpen}>
+        <DialogContent className="bg-white rounded-xl border-2 border-teal-100">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-teal-700 flex items-center">
+              <Save className="h-5 w-5 mr-2 text-teal-500" /> 保存の確認
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-700">{dialogMessage}</p>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setConfirmSaveDialogOpen(false)}
+              className="rounded-full border-gray-300 hover:bg-gray-100 text-gray-700"
+            >
+              キャンセル
+            </Button>
+            <Button 
+              onClick={handleSave} 
+              className="rounded-full bg-teal-500 hover:bg-teal-600 text-white"
+            >
+              保存
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 成功ダイアログ */}
+      <Dialog open={successDialogOpen} onOpenChange={setSuccessDialogOpen}>
+        <DialogContent className="bg-white rounded-xl border-2 border-teal-100">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-teal-700 flex items-center">
+              <CheckCircle className="h-5 w-5 mr-2 text-teal-500" /> 成功
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-700">{dialogMessage}</p>
+          </div>
+          <DialogFooter>
+            <Button 
+              onClick={() => setSuccessDialogOpen(false)} 
+              className="rounded-full bg-teal-500 hover:bg-teal-600 text-white"
+            >
+              OK
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* エラーダイアログ */}
+      <Dialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
+        <DialogContent className="bg-white rounded-xl border-2 border-pink-100">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-pink-700 flex items-center">
+              <AlertCircle className="h-5 w-5 mr-2 text-pink-500" /> エラー
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-700">{dialogMessage}</p>
+            <p className="text-sm text-gray-500 mt-2">もう一度お試しいただくか、管理者にお問い合わせください。</p>
+          </div>
+          <DialogFooter>
+            <Button 
+              onClick={() => setErrorDialogOpen(false)} 
+              className="rounded-full bg-pink-500 hover:bg-pink-600 text-white"
+            >
+              OK
             </Button>
           </DialogFooter>
         </DialogContent>

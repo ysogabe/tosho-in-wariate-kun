@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,7 +20,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Library, librariesApi } from '@/services/api';
-import { PlusIcon, Pencil, Trash2 } from 'lucide-react';
+import { PlusIcon, Pencil, Trash2, CheckCircle, AlertCircle, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function LibrariesTable() {
@@ -32,28 +32,31 @@ export default function LibrariesTable() {
   const [libraryToDelete, setLibraryToDelete] = useState<Library | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [saving, setSaving] = useState(false);
+  const [confirmSaveDialogOpen, setConfirmSaveDialogOpen] = useState(false);
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [dialogMessage, setDialogMessage] = useState('');
   const { toast } = useToast();
 
-  useEffect(() => {
-    loadLibraries();
-  }, []);
-
-  const loadLibraries = async () => {
+  const loadLibraries = useCallback(async () => {
     try {
       setLoading(true);
       const data = await librariesApi.getAll();
       setLibraries(data);
     } catch (error) {
-      console.error('図書室情報の取得に失敗しました:', error);
+      console.error('図書館データの取得に失敗しました:', error);
       toast({
         title: 'エラー',
-        description: '図書室情報の取得に失敗しました。',
-        variant: 'destructive',
+        description: '図書館データの取得に失敗しました。'
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    loadLibraries();
+  }, [loadLibraries]);
 
   const handleAdd = () => {
     setCurrentLibrary({
@@ -75,45 +78,42 @@ export default function LibrariesTable() {
     setDeleteDialogOpen(true);
   };
 
-  const handleSave = async () => {
+  const confirmSaveAction = () => {
     if (!currentLibrary?.name) {
-      toast({
-        title: 'エラー',
-        description: '図書室名は必須です。',
-        variant: 'destructive',
-      });
+      setDialogMessage('図書室名は必須です。');
+      setErrorDialogOpen(true);
       return;
     }
 
+    setDialogMessage(currentLibrary.id ? '図書室情報を更新します。よろしいですか？' : '図書室情報を登録します。よろしいですか？');
+    setConfirmSaveDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    setConfirmSaveDialogOpen(false);
     try {
       setSaving(true);
+      
+      if (!currentLibrary) return;
       
       if (currentLibrary.id) {
         // 更新
         await librariesApi.update(currentLibrary.id, currentLibrary);
-        toast({
-          title: '成功',
-          description: '図書室情報を更新しました。',
-        });
+        setDialogMessage('図書室情報を更新しました。');
       } else {
         // 新規作成
         await librariesApi.create(currentLibrary as Omit<Library, 'id'>);
-        toast({
-          title: '成功',
-          description: '図書室情報を作成しました。',
-        });
+        setDialogMessage('図書室情報を登録しました。');
       }
       
       setEditDialogOpen(false);
       setCurrentLibrary(null);
       await loadLibraries();
+      setSuccessDialogOpen(true);
     } catch (error) {
       console.error('図書室情報の保存に失敗しました:', error);
-      toast({
-        title: 'エラー',
-        description: '図書室情報の保存に失敗しました。',
-        variant: 'destructive',
-      });
+      setDialogMessage('図書室情報の保存に失敗しました。');
+      setErrorDialogOpen(true);
     } finally {
       setSaving(false);
     }
@@ -124,20 +124,15 @@ export default function LibrariesTable() {
 
     try {
       await librariesApi.delete(libraryToDelete.id);
-      toast({
-        title: '成功',
-        description: '図書室情報を削除しました。',
-      });
+      setDialogMessage('図書室情報を削除しました。');
       setDeleteDialogOpen(false);
       setLibraryToDelete(null);
       await loadLibraries();
+      setSuccessDialogOpen(true);
     } catch (error) {
       console.error('図書室情報の削除に失敗しました:', error);
-      toast({
-        title: 'エラー',
-        description: '図書室情報の削除に失敗しました。',
-        variant: 'destructive',
-      });
+      setDialogMessage('図書室情報の削除に失敗しました。');
+      setErrorDialogOpen(true);
     }
   };
 
@@ -228,10 +223,18 @@ export default function LibrariesTable() {
 
       {/* 編集ダイアログ */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent>
+        <DialogContent className="bg-white rounded-xl border-2 border-teal-100">
           <DialogHeader>
-            <DialogTitle>
-              {currentLibrary?.id ? '図書室を編集' : '新規図書室追加'}
+            <DialogTitle className="text-xl font-bold text-teal-700 flex items-center">
+              {currentLibrary?.id ? (
+                <>
+                  <Pencil className="h-5 w-5 mr-2 text-teal-500" /> 図書室を編集
+                </>
+              ) : (
+                <>
+                  <PlusIcon className="h-5 w-5 mr-2 text-teal-500" /> 新規図書室追加
+                </>
+              )}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
@@ -287,10 +290,18 @@ export default function LibrariesTable() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+            <Button 
+              variant="outline" 
+              onClick={() => setEditDialogOpen(false)}
+              className="rounded-full border-gray-300 hover:bg-gray-100 text-gray-700"
+            >
               キャンセル
             </Button>
-            <Button onClick={handleSave} disabled={saving}>
+            <Button 
+              onClick={confirmSaveAction} 
+              disabled={saving}
+              className="rounded-full bg-teal-500 hover:bg-teal-600 text-white"
+            >
               {saving ? '保存中...' : '保存'}
             </Button>
           </DialogFooter>
@@ -299,20 +310,104 @@ export default function LibrariesTable() {
 
       {/* 削除確認ダイアログ */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
+        <DialogContent className="bg-white rounded-xl border-2 border-pink-100">
           <DialogHeader>
-            <DialogTitle>図書室の削除</DialogTitle>
+            <DialogTitle className="text-xl font-bold text-pink-700 flex items-center">
+              <Trash2 className="h-5 w-5 mr-2 text-pink-500" /> 図書室の削除
+            </DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <p>「{libraryToDelete?.name}」を削除してもよろしいですか？</p>
+            <p className="text-gray-700">「{libraryToDelete?.name}」を削除してもよろしいですか？</p>
             <p className="text-sm text-gray-500 mt-2">この操作は取り消せません。</p>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+            <Button 
+              variant="outline" 
+              onClick={() => setDeleteDialogOpen(false)}
+              className="rounded-full border-gray-300 hover:bg-gray-100 text-gray-700"
+            >
               キャンセル
             </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
+            <Button 
+              variant="outline" 
+              onClick={confirmDelete}
+              className="rounded-full bg-pink-500 hover:bg-pink-600 text-white border-pink-400"
+            >
               削除
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 保存確認ダイアログ */}
+      <Dialog open={confirmSaveDialogOpen} onOpenChange={setConfirmSaveDialogOpen}>
+        <DialogContent className="bg-white rounded-xl border-2 border-teal-100">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-teal-700 flex items-center">
+              <Save className="h-5 w-5 mr-2 text-teal-500" /> 保存の確認
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-700">{dialogMessage}</p>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setConfirmSaveDialogOpen(false)}
+              className="rounded-full border-gray-300 hover:bg-gray-100 text-gray-700"
+            >
+              キャンセル
+            </Button>
+            <Button 
+              onClick={handleSave} 
+              className="rounded-full bg-teal-500 hover:bg-teal-600 text-white"
+            >
+              保存
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 成功ダイアログ */}
+      <Dialog open={successDialogOpen} onOpenChange={setSuccessDialogOpen}>
+        <DialogContent className="bg-white rounded-xl border-2 border-teal-100">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-teal-700 flex items-center">
+              <CheckCircle className="h-5 w-5 mr-2 text-teal-500" /> 成功
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-700">{dialogMessage}</p>
+          </div>
+          <DialogFooter>
+            <Button 
+              onClick={() => setSuccessDialogOpen(false)} 
+              className="rounded-full bg-teal-500 hover:bg-teal-600 text-white"
+            >
+              OK
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* エラーダイアログ */}
+      <Dialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
+        <DialogContent className="bg-white rounded-xl border-2 border-pink-100">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-pink-700 flex items-center">
+              <AlertCircle className="h-5 w-5 mr-2 text-pink-500" /> エラー
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-700">{dialogMessage}</p>
+            <p className="text-sm text-gray-500 mt-2">もう一度お試しいただくか、管理者にお問い合わせください。</p>
+          </div>
+          <DialogFooter>
+            <Button 
+              onClick={() => setErrorDialogOpen(false)} 
+              className="rounded-full bg-pink-500 hover:bg-pink-600 text-white"
+            >
+              OK
             </Button>
           </DialogFooter>
         </DialogContent>

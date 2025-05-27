@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -35,11 +35,7 @@ export default function PositionsTable() {
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    loadPositions();
-  }, []);
-
-  const loadPositions = async () => {
+  const loadPositions = useCallback(async () => {
     try {
       setLoading(true);
       const data = await positionsApi.getAll();
@@ -54,7 +50,11 @@ export default function PositionsTable() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+  
+  useEffect(() => {
+    loadPositions();
+  }, [loadPositions]);
 
   const handleAdd = () => {
     setCurrentPosition({
@@ -277,7 +277,7 @@ export default function PositionsTable() {
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
               キャンセル
             </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
+            <Button variant="outline" onClick={confirmDelete} className="rounded-full bg-pink-500 hover:bg-pink-600 text-white border-pink-400">
               削除
             </Button>
           </DialogFooter>

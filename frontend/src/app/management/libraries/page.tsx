@@ -153,19 +153,36 @@ export default function LibrariesManagementPage() {
   };
 
   const deleteLibrary = async (id: number) => {
-    if (confirm('この図書室を削除してもよろしいですか？関連するスケジュール割り当てがある場合は削除できないことがあります。')) {
+    if (confirm('この図書室を削除してもよろしいですか？')) {
       setIsLoading(true);
       setError(null);
       try {
         const response = await fetch(`${API_LIBRARIES_URL}/${id}`, { method: 'DELETE' });
+        
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: `API Error: ${response.status} ${response.statusText}` }));
+          const errorData = await response.json().catch(() => ({ 
+            error: `API Error: ${response.status} ${response.statusText}` 
+          }));
+          
+          if (errorData.error) {
+            alert(errorData.error);
+            if (errorData.details) {
+              alert(errorData.details);
+            }
+          } else {
+            alert(`図書室の削除に失敗しました: ${response.status} ${response.statusText}`);
+          }
+          
           throw new Error(errorData.error || `API Error: ${response.status} ${response.statusText}`);
         }
+        
         await fetchLibraries();
+        alert('図書室が正常に削除されました');
       } catch (err) {
-        setError(err instanceof Error ? err.message : '削除に失敗しました。');
         console.error(err);
+        if (!(err instanceof Error && err.message.includes('API Error'))) {
+          setError(err instanceof Error ? err.message : '削除に失敗しました。');
+        }
       } finally {
         setIsLoading(false);
       }
