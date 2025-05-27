@@ -144,34 +144,83 @@ This is a library committee duty assignment system (図書委員当番くん) wi
 - Backend: Uses pytest.ini configuration with verbose output and strict markers
 - Both codebases use TypeScript/Python type hints for better maintainability
 
-## Test Port Configuration
+## Development Workflow Guidelines
 
-**Important Rule**: When testing for a specific issue, use port numbers based on the issue number:
+### Branch Strategy for Bug Fixes
+- **Bug fix Issues**: Create fix branches from the affected feature branch, not from main
+- **Merge target**: Bug fixes should be merged back to the feature branch, not directly to main
+- **Example workflow**:
+  ```bash
+  # From feature branch (e.g., feature/010-schedule-generation-fix)
+  git checkout -b fix/011-schedule-assignment-rules
+  # Work on fixes
+  git commit -m "Fix schedule assignment rules"
+  # Merge back to feature branch
+  git checkout feature/010-schedule-generation-fix
+  git merge fix/011-schedule-assignment-rules
+  ```
+
+### Python Environment Management
+- **Always use virtual environments** for Python development
+- **Backend setup**:
+  ```bash
+  cd mock_backend
+  python -m venv venv
+  source venv/bin/activate  # macOS/Linux
+  # venv\Scripts\activate   # Windows
+  pip install -r requirements.txt
+  ```
+- **Activate venv** before running any Python commands (pytest, flask, etc.)
+- **Never commit** venv directories or **pycache** folders
+
+### Issue Management Workflow
+
+#### Before Starting Work
+- **Create feature branch** with Issue number before starting any work:
+  ```bash
+  git checkout -b feature/###-issue-description-session-YYYYMMDD
+  # Example: git checkout -b feature/011-schedule-assignment-rules-session-20250527
+  ```
+- **Include session date** in branch name for traceability
+- **Start from appropriate base branch** (main for new features, feature branch for bug fixes)
+
+#### After Completing Work
+- **Update Issue file** with implementation results:
+  - Add "実施結果" (Implementation Results) section
+  - Document what was implemented
+  - Include test results and verification
+  - Note any remaining tasks or follow-up issues
+- **Commit Issue file updates** as part of the final commit
+- **Create PR** with reference to the Issue number
+
+### Testing Port Configuration
+
+#### Development Testing Ports
+- **Frontend**: Port 3100
+  ```bash
+  cd frontend
+  npx next dev --port 3100
+  ```
+- **Backend**: Port 5100
+  ```bash
+  cd mock_backend
+  source venv/bin/activate
+  FLASK_APP=app.py python -m flask run --port=5100
+  ```
+- **API Configuration**: Ensure frontend API calls target `http://localhost:5100/api`
+- **E2E Testing**: Configure Playwright tests to use these ports for consistency
+
+#### Issue-Specific Port Configuration
+
+**Alternative Rule**: When testing for a specific issue, you may use port numbers based on the issue number:
 
 - Frontend: Port 3000 + Issue Number (e.g., Issue #011 → Port 3011)
 - Backend: Port 5000 + Issue Number (e.g., Issue #011 → Port 5011)
 
-### Example: Testing Issue #011
-
 ```bash
-# Frontend (from frontend/)
-PORT=3011 npm run dev
-# Or
-npx next dev --port 3011
-
-# Backend (from mock_backend/)
-source venv/bin/activate
-python app.py --port 5011
-# Or
-FLASK_APP=app.py python -m flask run --port=5011
-
-# Update API configuration
-# In frontend/src/services/api.ts:
-# const API_BASE_URL = 'http://localhost:5011/api';
+# Example: Testing Issue #011
+PORT=3011 npm run dev                             # Frontend on port 3011
+FLASK_APP=app.py python -m flask run --port=5011  # Backend on port 5011
 ```
 
-This port configuration ensures that:
-
-- Each issue has its own isolated testing environment
-- Multiple issues can be tested simultaneously without port conflicts
-- It's easy to identify which ports belong to which issue
+This approach ensures each issue has its own isolated testing environment and prevents port conflicts when testing multiple issues simultaneously.
