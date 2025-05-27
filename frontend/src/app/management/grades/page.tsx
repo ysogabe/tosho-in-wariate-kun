@@ -10,7 +10,7 @@ interface Grade {
   description: string;
 }
 
-const API_URL = 'http://localhost:5001/api/grades';
+const API_URL = 'http://localhost:5012/api/grades';
 
 export default function GradesManagementPage() {
   const [grades, setGrades] = useState<Grade[]>([]);

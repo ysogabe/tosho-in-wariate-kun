@@ -25,7 +25,7 @@ export const SchoolProvider = ({ children }: { children: ReactNode }) => {
   // APIから学校情報を取得する関数
   const fetchSchoolData = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/schools');
+      const response = await fetch('http://localhost:5012/api/schools');
       if (!response.ok) {
         throw new Error(`API Error: ${response.status}`);
       }

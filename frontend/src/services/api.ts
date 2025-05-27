@@ -1,6 +1,6 @@
 // API service for connecting to the mock backend
 
-const API_BASE_URL = 'http://localhost:5100/api';
+const API_BASE_URL = 'http://localhost:5012/api';
 
 // Generic fetch function with error handling
 async function fetchApi<T>(url: string, options: RequestInit = {}): Promise<T> {

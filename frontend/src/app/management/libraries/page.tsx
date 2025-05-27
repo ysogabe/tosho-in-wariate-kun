@@ -30,7 +30,7 @@ interface EditingLibraryState {
   availability: LibraryAvailabilitySlot[];
 }
 
-const API_LIBRARIES_URL = 'http://localhost:5001/api/libraries';
+const API_LIBRARIES_URL = 'http://localhost:5012/api/libraries';
 const daysOfWeekMap = ["日", "月", "火", "水", "木", "金", "土"];
 
 
