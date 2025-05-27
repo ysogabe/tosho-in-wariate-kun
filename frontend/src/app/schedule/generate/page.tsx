@@ -22,7 +22,7 @@ interface ExcludedDate {
   reason: string;
 }
 
-const API_BASE_URL = 'http://localhost:5012/api';
+const API_BASE_URL = 'http://localhost:5100/api';
 
 export default function ScheduleGeneratePage() {
   const router = useRouter();
@@ -207,8 +207,8 @@ export default function ScheduleGeneratePage() {
       const data = await response.json();
       alert('スケジュールが正常に生成されました');
       
-      // 生成されたスケジュールの詳細ページに遷移
-      router.push(`/schedule/detail/${data.scheduleId}`);
+      // 生成されたスケジュールの検証ページに遷移
+      router.push(`/schedule/verify?scheduleId=${data.scheduleId}`);
     } catch (err) {
       console.error('スケジュール生成エラー:', err);
       setErrorMessage(err instanceof Error ? err.message : 'スケジュール生成に失敗しました');

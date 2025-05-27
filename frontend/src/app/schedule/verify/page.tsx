@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
+import ScheduleWeeklyView from '@/app/_components/ScheduleWeeklyView';
 
 interface ValidationResult {
   id: number;
@@ -11,6 +12,19 @@ interface ValidationResult {
   type: 'success' | 'warning' | 'error';
   description: string;
   details: string[];
+}
+
+interface Schedule {
+  id: number;
+  name: string;
+  description?: string;
+  academic_year: number;
+  is_first_half: boolean;
+  start_date: string;
+  end_date: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface ScheduleSummary {
@@ -21,73 +35,118 @@ interface ScheduleSummary {
   endDate: string;
 }
 
+const API_BASE_URL = 'http://localhost:5100/api';
+
 export default function ScheduleVerifyPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(true);
-  const [scheduleName] = useState('2025年度前期スケジュール');
+  const [isLoadingSchedules, setIsLoadingSchedules] = useState(true);
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(null);
+  const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
   const [validationResults, setValidationResults] = useState<ValidationResult[]>([]);
   const [scheduleSummary, setScheduleSummary] = useState<ScheduleSummary | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // モックデータをロード
+  // スケジュール一覧を取得
   useEffect(() => {
-    // 実際のアプリではAPIからデータを取得する
-    setTimeout(() => {
-      const mockValidationResults: ValidationResult[] = [
+    const fetchSchedules = async () => {
+      setIsLoadingSchedules(true);
+      setError(null);
+      try {
+        const response = await fetch(`${API_BASE_URL}/schedules`);
+        if (!response.ok) throw new Error(`API Error: ${response.status} ${response.statusText}`);
+        const data: Schedule[] = await response.json();
+        setSchedules(data);
+
+        // URLパラメータからスケジュールIDを取得
+        const scheduleIdParam = searchParams.get('scheduleId');
+        if (scheduleIdParam) {
+          const scheduleId = parseInt(scheduleIdParam);
+          const schedule = data.find(s => s.id === scheduleId);
+          if (schedule) {
+            setSelectedScheduleId(scheduleId);
+            setSelectedSchedule(schedule);
+          }
+        } else if (data.length > 0) {
+          // デフォルトで最新のスケジュールを選択
+          const latestSchedule = data[0];
+          setSelectedScheduleId(latestSchedule.id);
+          setSelectedSchedule(latestSchedule);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'スケジュールの取得に失敗しました。');
+        console.error(err);
+      } finally {
+        setIsLoadingSchedules(false);
+      }
+    };
+    fetchSchedules();
+  }, [searchParams]);
+
+  // 選択されたスケジュールが変更された時の処理
+  useEffect(() => {
+    if (!selectedSchedule) {
+      setValidationResults([]);
+      setScheduleSummary(null);
+      setIsLoading(false);
+      return;
+    }
+
+    // 簡単な検証結果を生成（実際の実装では詳細な検証を行う）
+    const generateValidationResults = () => {
+      const results: ValidationResult[] = [
         {
           id: 1,
-          rule: '必要人数確保',
+          rule: 'スケジュール基本情報',
           type: 'success',
-          description: 'すべての図書室に必要な人数が配置されています',
-          details: ['図書室A: 必要人数2名に対して、すべての時間帯で2名以上配置されています']
-        },
-        {
-          id: 2,
-          rule: '同一人物の連続当番禁止',
-          type: 'success',
-          description: '同じ人が連続して当番に入ることはありません',
-          details: ['すべての図書委員について、連続した当番はありません']
-        },
-        {
-          id: 3,
-          rule: '学年バランス',
-          type: 'warning',
-          description: '一部の当番で学年バランスが取れていません',
+          description: `${selectedSchedule.name}のスケジュールが正常に作成されています`,
           details: [
-            '4月10日(木) 12:30-13:00: 同じ学年の生徒のみが配置されています',
-            '4月11日(金) 12:30-13:00: 同じ学年の生徒のみが配置されています'
+            `年度: ${selectedSchedule.academic_year}年度`,
+            `期間: ${selectedSchedule.is_first_half ? '前期' : '後期'}`,
+            `開始日: ${selectedSchedule.start_date}`,
+            `終了日: ${selectedSchedule.end_date}`
           ]
         },
         {
-          id: 4,
-          rule: '当番回数の均等化',
-          type: 'error',
-          description: '当番回数に大きな偏りがあります',
+          id: 2,
+          rule: 'スケジュール状態',
+          type: selectedSchedule.status === 'active' ? 'success' : 'warning',
+          description: `スケジュール状態: ${selectedSchedule.status}`,
           details: [
-            '山田太郎: 5回',
-            '佐藤花子: 4回',
-            '鈴木一郎: 4回',
-            '高橋明: 4回',
-            '渡辺健太: 2回',
-            '中村さくら: 2回',
-            '小林和也: 1回',
-            '加藤美咲: 1回'
+            `作成日時: ${selectedSchedule.created_at}`,
+            `更新日時: ${selectedSchedule.updated_at}`
           ]
         }
       ];
 
-      const mockScheduleSummary: ScheduleSummary = {
-        totalAssignments: 24,
-        totalMembers: 8,
-        averageAssignmentsPerMember: 3,
-        startDate: '2025/4/1',
-        endDate: '2025/7/31'
+      setValidationResults(results);
+      
+      // 簡単な統計情報（実際の実装では割り当てデータから計算）
+      const summary: ScheduleSummary = {
+        totalAssignments: 0, // 実際の割り当て数
+        totalMembers: 0, // 実際のメンバー数
+        averageAssignmentsPerMember: 0,
+        startDate: selectedSchedule.start_date,
+        endDate: selectedSchedule.end_date
       };
-
-      setValidationResults(mockValidationResults);
-      setScheduleSummary(mockScheduleSummary);
+      setScheduleSummary(summary);
       setIsLoading(false);
-    }, 1000);
-  }, []);
+    };
+
+    setIsLoading(true);
+    setTimeout(generateValidationResults, 500); // 少し遅延を入れて読み込み感を演出
+  }, [selectedSchedule]);
+
+  // スケジュール選択の変更
+  const handleScheduleChange = (scheduleId: string) => {
+    const schedule = schedules.find(s => s.id === parseInt(scheduleId));
+    if (schedule) {
+      setSelectedScheduleId(schedule.id);
+      setSelectedSchedule(schedule);
+    }
+  };
 
   // スケジュールを採用
   const adoptSchedule = () => {
@@ -194,9 +253,78 @@ export default function ScheduleVerifyPage() {
             <>
               <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
                 <div className="px-4 py-5 sm:p-6">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">
-                    {scheduleName}の検証結果
-                  </h3>
+                  {/* スケジュール選択 */}
+                  <div className="mb-6">
+                    <label htmlFor="schedule-select" className="block text-sm font-medium text-gray-700 mb-1">
+                      検証するスケジュール
+                    </label>
+                    {isLoadingSchedules ? (
+                      <p className="text-gray-500">スケジュールを読み込み中...</p>
+                    ) : error ? (
+                      <p className="text-red-500">エラー: {error}</p>
+                    ) : schedules.length === 0 ? (
+                      <p className="text-gray-500">利用可能なスケジュールがありません。</p>
+                    ) : (
+                      <select
+                        id="schedule-select"
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        value={selectedScheduleId ?? ''}
+                        onChange={(e) => handleScheduleChange(e.target.value)}
+                        disabled={schedules.length === 0}
+                      >
+                        {schedules.map((schedule) => (
+                          <option key={schedule.id} value={schedule.id}>
+                            {schedule.name} ({schedule.academic_year}年度 {schedule.is_first_half ? '前期' : '後期'})
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+
+                  {selectedSchedule && (
+                    <>
+                      <h3 className="text-lg font-medium text-gray-900 mb-4">
+                        {selectedSchedule.name}の検証結果
+                      </h3>
+                      
+                      {/* スケジュール基本情報 */}
+                      <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                        <h4 className="text-md font-medium text-gray-900 mb-2">スケジュール情報</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <span className="font-medium text-gray-600">年度:</span>
+                            <span className="ml-1">{selectedSchedule.academic_year}年度</span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-gray-600">期間:</span>
+                            <span className="ml-1">{selectedSchedule.is_first_half ? '前期' : '後期'}</span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-gray-600">開始日:</span>
+                            <span className="ml-1">{selectedSchedule.start_date}</span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-gray-600">終了日:</span>
+                            <span className="ml-1">{selectedSchedule.end_date}</span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-gray-600">状態:</span>
+                            <span className={`ml-1 px-2 py-1 rounded-full text-xs ${
+                              selectedSchedule.status === 'active' 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-yellow-100 text-yellow-800'
+                            }`}>
+                              {selectedSchedule.status}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-gray-600">ID:</span>
+                            <span className="ml-1">{selectedSchedule.id}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
                   
                   {scheduleSummary && (
                     <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
@@ -219,6 +347,18 @@ export default function ScheduleVerifyPage() {
                           <p className="text-md font-medium">{scheduleSummary.averageAssignmentsPerMember}回/人</p>
                         </div>
                       </div>
+                    </div>
+                  )}
+
+                  {/* 週間スケジュール表示 */}
+                  {selectedScheduleId && (
+                    <div className="mb-6">
+                      <h4 className="text-lg font-medium text-gray-900 mb-4">週間スケジュール表示</h4>
+                      <ScheduleWeeklyView 
+                        scheduleId={selectedScheduleId}
+                        className="border-2 border-gray-200"
+                        showEmpty={true}
+                      />
                     </div>
                   )}
                   
