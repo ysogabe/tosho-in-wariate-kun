@@ -148,7 +148,15 @@ class ScheduleGenerator:
         cursor = conn.cursor()
         
         try:
-            # 既存のドラフトスケジュールを削除
+            # 既存のドラフトスケジュールとその関連する割り当てを削除
+            cursor.execute("""
+                DELETE FROM schedule_assignments 
+                WHERE schedule_id IN (
+                    SELECT id FROM schedules 
+                    WHERE school_id = ? AND academic_year = ? AND is_first_half = ? AND status = 'draft'
+                )
+            """, (self.school_id, self.academic_year, self.is_first_half))
+            
             cursor.execute("""
                 DELETE FROM schedules 
                 WHERE school_id = ? AND academic_year = ? AND is_first_half = ? AND status = 'draft'
@@ -310,20 +318,6 @@ class ScheduleGenerator:
             cursor = conn.cursor()
             
             try:
-                # 一意制約違反を避けるために、テスト用に既存のスケジュールを削除する
-                cursor.execute("""
-                    DELETE FROM schedule_assignments 
-                    WHERE schedule_id IN (SELECT id FROM schedules WHERE school_id = ? AND academic_year = ? AND is_first_half = ?)
-                """, (self.school_id, self.academic_year, self.is_first_half))
-                
-                cursor.execute("""
-                    DELETE FROM schedules 
-                    WHERE school_id = ? AND academic_year = ? AND is_first_half = ?
-                """, (self.school_id, self.academic_year, self.is_first_half))
-                
-                conn.commit()
-                logger.debug("既存のスケジュールを削除しました")
-                
                 # スケジュールの基本情報を作成
                 schedule_id = self.create_schedule(name, description)
                 
@@ -332,6 +326,13 @@ class ScheduleGenerator:
                 
                 # 割り当てをデータベースに保存
                 self.save_assignments(assignments, schedule_id)
+                
+                # 既存のアクティブなスケジュールを非アクティブに変更
+                cursor.execute("""
+                    UPDATE schedules 
+                    SET status = 'inactive' 
+                    WHERE school_id = ? AND academic_year = ? AND is_first_half = ? AND status = 'active' AND id != ?
+                """, (self.school_id, self.academic_year, self.is_first_half, schedule_id))
                 
                 # 新しいスケジュールをアクティブに更新
                 cursor.execute("UPDATE schedules SET status = 'active' WHERE id = ?", (schedule_id,))
