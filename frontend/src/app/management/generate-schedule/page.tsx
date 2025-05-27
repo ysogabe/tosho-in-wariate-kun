@@ -47,7 +47,7 @@ export default function GenerateSchedulePage() {
 
     try {
       // APIを呼び出してスケジュールを生成
-      const response = await fetch('http://localhost:5100/api/generate-schedule', {
+      const response = await fetch('http://localhost:5012/api/generate-schedule', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

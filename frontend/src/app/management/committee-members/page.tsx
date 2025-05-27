@@ -37,8 +37,8 @@ interface EditingMemberState {
 }
 
 
-const API_MEMBERS_URL = 'http://localhost:5001/api/committee-members';
-const API_CLASSES_URL = 'http://localhost:5001/api/classes';
+const API_MEMBERS_URL = 'http://localhost:5012/api/committee-members';
+const API_CLASSES_URL = 'http://localhost:5012/api/classes';
 
 export default function CommitteeMembersPage() {
   const [members, setMembers] = useState<CommitteeMember[]>([]);

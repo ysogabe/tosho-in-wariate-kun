@@ -20,7 +20,7 @@ interface EditingRuleState {
   priority: string; // Keep as string for form input, convert on save
 }
 
-const API_RULES_URL = 'http://localhost:5001/api/schedule-rules';
+const API_RULES_URL = 'http://localhost:5012/api/schedule-rules';
 
 // Available rule types - could be fetched from backend if dynamic
 const RULE_TYPES = ["min_members_per_slot", "max_consecutive_hours", "max_hours_per_week_per_member", "min_members_from_same_class_per_slot", "custom"];

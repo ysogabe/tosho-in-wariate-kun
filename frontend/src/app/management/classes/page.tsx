@@ -23,8 +23,8 @@ interface EditingClassState {
   grade_id: number | string; // Can be string from select, convert to number before sending
 }
 
-const API_CLASSES_URL = 'http://localhost:5001/api/classes';
-const API_GRADES_URL = 'http://localhost:5001/api/grades';
+const API_CLASSES_URL = 'http://localhost:5012/api/classes';
+const API_GRADES_URL = 'http://localhost:5012/api/grades';
 
 
 export default function ClassesManagementPage() {

@@ -47,7 +47,7 @@ const DashboardPage = () => {
     setIsLoading(true);
     setScheduleError(null);
     try {
-      const response = await fetch('http://localhost:5001/api/schedules');
+      const response = await fetch('http://localhost:5012/api/schedules');
       if (!response.ok) throw new Error(`API Error: ${response.status} ${response.statusText}`);
       
       const schedulesData = await response.json();
@@ -63,7 +63,7 @@ const DashboardPage = () => {
       const latestSchedule = schedulesData[schedulesData.length - 1];
       
       // スケジュールの詳細を取得
-      const scheduleDetailResponse = await fetch(`http://localhost:5001/api/schedules/${latestSchedule.id}`);
+      const scheduleDetailResponse = await fetch(`http://localhost:5012/api/schedules/${latestSchedule.id}`);
       if (!scheduleDetailResponse.ok) throw new Error(`API Error: ${scheduleDetailResponse.status} ${scheduleDetailResponse.statusText}`);
       
       const scheduleDetail = await scheduleDetailResponse.json();
@@ -77,7 +77,7 @@ const DashboardPage = () => {
       
       // 曜日ごとにグループ化
       const days = ['月', '火', '水', '木', '金'];
-      const libraries = await fetch('http://localhost:5001/api/libraries').then(res => res.json());
+      const libraries = await fetch('http://localhost:5012/api/libraries').then(res => res.json());
       
       // 曜日ごとのデータを作成
       const weeklyData = days.map(day => {
