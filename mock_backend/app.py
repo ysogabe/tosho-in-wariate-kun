@@ -911,13 +911,26 @@ def get_schedules():
 @app.route('/api/schedules', methods=['POST'])
 def add_schedule():
     data = request.json
-    if not data or not data.get('name'):
+    # Handle both 'name' and 'scheduleName' field names
+    name = data.get('name') or data.get('scheduleName') if data else None
+    if not name:
         return jsonify({"error": "Missing name for schedule"}), 400
 
-    name = data['name']
     description = data.get('description', '')
-    academic_year = data.get('academic_year', 2025)
-    is_first_half = data.get('is_first_half', True)
+    # Handle both academicYear and academic_year field names
+    academic_year = data.get('academicYear') or data.get('academic_year', 2025)
+    # Convert to int if it's a string
+    if isinstance(academic_year, str):
+        try:
+            academic_year = int(academic_year)
+        except ValueError:
+            academic_year = 2025
+    # Handle both 'is_first_half' and 'period' field names
+    # period: 1 = first half, 2 = second half
+    if 'period' in data:
+        is_first_half = data['period'] == 1
+    else:
+        is_first_half = data.get('is_first_half', True)
     status = data.get('status', 'draft')
     school_id = data.get('school_id')
     
@@ -961,11 +974,11 @@ def add_schedule():
                 start_date = f"{academic_year}-10-01"
                 end_date = f"{academic_year + 1}-03-31"
         
-        # 新しいスケジュールを作成（start_dateとend_dateを含む）
+        # 新しいスケジュールを作成
         cursor.execute('''
-            INSERT INTO schedules (school_id, schedule_name, description, academic_year, is_first_half, status, start_date, end_date)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (school_id, name, description, academic_year, is_first_half, status, start_date, end_date))
+            INSERT INTO schedules (school_id, schedule_name, description, academic_year, is_first_half, status)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (school_id, name, description, academic_year, is_first_half, status))
         conn.commit()
         new_schedule_id = cursor.lastrowid
         
@@ -1045,10 +1058,12 @@ def get_schedule(schedule_id):
     assignments_query = """
     SELECT sa.id, sa.schedule_id, sa.day_of_week, sa.library_room_id, 
            lr.room_name as library_name, sa.committee_member_id,
-           cm.name as committee_member_name, sa.created_at
+           cm.name as committee_member_name, cm.class_id,
+           c.class_name, c.grade, sa.created_at
     FROM schedule_assignments sa
     JOIN library_rooms lr ON sa.library_room_id = lr.id
     JOIN committee_members cm ON sa.committee_member_id = cm.id
+    LEFT JOIN classes c ON cm.class_id = c.id
     WHERE sa.schedule_id = ?
     ORDER BY sa.day_of_week, lr.room_id
     """
@@ -1065,7 +1080,9 @@ def get_schedule(schedule_id):
         assignment['assigned_committee_members'] = [
             {
                 'id': assignment['committee_member_id'],
-                'name': assignment['committee_member_name']
+                'name': assignment['committee_member_name'],
+                'class_name': assignment.get('class_name', ''),
+                'grade_name': f"{assignment.get('grade', '')}年" if assignment.get('grade') else ''
             }
         ]
 
@@ -1354,8 +1371,15 @@ def generate_schedule_api():
     # Extract data from request
     name = data.get('name')
     description = data.get('description', '')
-    academic_year = data.get('academic_year', 2025)
-    is_first_half = data.get('is_first_half', True)
+    # Handle both academicYear and academic_year field names
+    academic_year = data.get('academicYear') or data.get('academic_year', 2025)
+    # Convert to int if it's a string
+    if isinstance(academic_year, str):
+        try:
+            academic_year = int(academic_year)
+        except ValueError:
+            academic_year = 2025
+    is_first_half = data.get('isFirstHalf', data.get('is_first_half', True))
     school_id = data.get('school_id')
     
     # Basic validation

@@ -113,6 +113,13 @@
 - `GET /api/schedules/:id`: スケジュール詳細取得
 - `DELETE /api/schedules/:id`: スケジュール削除
 
+**APIフィールドマッピング**：
+- データベースとAPIレスポンス間で以下のフィールド名変換を実施：
+  - `academic_year` (DB) ↔ `academicYear` (API)
+  - `is_first_half` (DB) ↔ `period` (API) ※ period: 1=前期, 2=後期
+  - `schedule_name` (DB) ↔ `name` または `scheduleName` (API)
+- これによりフロントエンドのキャメルケースとバックエンドのスネークケースの差異を吸収
+
 #### 4.2.5 スケジュール割り当て管理
 
 - `GET /api/schedule-assignments`: 割り当て一覧取得

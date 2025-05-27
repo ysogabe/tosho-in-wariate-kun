@@ -57,3 +57,7 @@ venv/
 *.db-shm
 *.db-wal
 mock_backend/reports/
+.last-run.json
+flask.log
+frontend.log
+server.log
