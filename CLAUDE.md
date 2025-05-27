@@ -208,6 +208,7 @@ This is a library committee duty assignment system (図書委員当番くん) wi
   FLASK_APP=app.py python -m flask run --port=5100
   ```
 - **API Configuration**: Ensure frontend API calls target `http://localhost:5100/api`
+
 - **E2E Testing**: Configure Playwright tests to use these ports for consistency
 
 #### Issue-Specific Port Configuration
