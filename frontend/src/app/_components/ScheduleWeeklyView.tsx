@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react';
 interface AssignmentMember {
   id: number;
   name: string;
+  class_name?: string;
+  grade_name?: string;
 }
 
 interface BackendScheduleAssignment {
@@ -20,13 +22,21 @@ interface BackendScheduleAssignment {
   assigned_committee_members: AssignmentMember[];
 }
 
+interface LibrarySchedule {
+  libraryId: number;
+  libraryName: string;
+  weekSchedule: {
+    [dayOfWeek: number]: AssignmentMember[];
+  };
+}
+
 interface ScheduleWeeklyViewProps {
   scheduleId: number | null;
   className?: string;
   showEmpty?: boolean;
 }
 
-const API_BASE_URL = 'http://localhost:5100/api';
+const API_BASE_URL = 'http://localhost:5012/api';
 
 export default function ScheduleWeeklyView({ scheduleId, className = '', showEmpty = true }: ScheduleWeeklyViewProps) {
   const [assignments, setAssignments] = useState<BackendScheduleAssignment[]>([]);
@@ -64,9 +74,36 @@ export default function ScheduleWeeklyView({ scheduleId, className = '', showEmp
     fetchAssignments();
   }, [scheduleId]);
 
-  // 曜日別に割り当てを整理
-  const getAssignmentsForDay = (dayOfWeek: number) => {
-    return assignments.filter(assignment => assignment.day_of_week === dayOfWeek);
+  // 図書室別に週間スケジュールを整理
+  const getLibrarySchedules = (): LibrarySchedule[] => {
+    const libraryMap = new Map<number, LibrarySchedule>();
+    
+    assignments.forEach(assignment => {
+      if (!libraryMap.has(assignment.library_id)) {
+        libraryMap.set(assignment.library_id, {
+          libraryId: assignment.library_id,
+          libraryName: assignment.library_name,
+          weekSchedule: {}
+        });
+      }
+      
+      const library = libraryMap.get(assignment.library_id)!;
+      if (!library.weekSchedule[assignment.day_of_week]) {
+        library.weekSchedule[assignment.day_of_week] = [];
+      }
+      
+      // 割り当てられたメンバーを追加
+      if (assignment.assigned_committee_members && assignment.assigned_committee_members.length > 0) {
+        library.weekSchedule[assignment.day_of_week].push(...assignment.assigned_committee_members);
+      } else if (assignment.committee_member_id && assignment.committee_member_name) {
+        library.weekSchedule[assignment.day_of_week].push({
+          id: assignment.committee_member_id,
+          name: assignment.committee_member_name
+        });
+      }
+    });
+    
+    return Array.from(libraryMap.values()).sort((a, b) => a.libraryName.localeCompare(b.libraryName));
   };
 
   if (isLoading) {
@@ -93,12 +130,17 @@ export default function ScheduleWeeklyView({ scheduleId, className = '', showEmp
     );
   }
 
+  const librarySchedules = getLibrarySchedules();
+  
   return (
     <div className={`border rounded-lg overflow-hidden ${className}`}>
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10">
+                図書室
+              </th>
               {weekdays.map((dayOfWeek) => (
                 <th
                   key={dayOfWeek}
@@ -110,44 +152,57 @@ export default function ScheduleWeeklyView({ scheduleId, className = '', showEmp
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            <tr>
-              {weekdays.map((dayOfWeek) => {
-                const dayAssignments = getAssignmentsForDay(dayOfWeek);
-                return (
-                  <td
-                    key={dayOfWeek}
-                    className="px-2 py-4 whitespace-nowrap text-sm text-gray-500 border-r last:border-r-0 align-top"
-                  >
-                    {dayAssignments.length === 0 ? (
-                      <div className="h-24 flex items-center justify-center text-gray-400">
-                        当番なし
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        {dayAssignments.map((assignment) => (
-                          <div
-                            key={assignment.id}
-                            className="p-2 bg-blue-50 border border-blue-200 rounded-md"
-                          >
-                            <div className="font-medium text-blue-800">
-                              {assignment.time_slot || '終日'}
-                            </div>
-                            <div className="text-gray-700 text-xs">
-                              {assignment.library_name}
-                            </div>
-                            <div className="mt-1 text-xs text-gray-600">
-                              {assignment.assigned_committee_members?.map(member => member.name).join(', ') || 
-                               assignment.committee_member_name || 
-                               'メンバー未定'}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+            {librarySchedules.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+                  スケジュールデータがありません
+                </td>
+              </tr>
+            ) : (
+              librarySchedules.map((library) => (
+                <tr key={library.libraryId}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10">
+                    {library.libraryName}
                   </td>
-                );
-              })}
-            </tr>
+                  {weekdays.map((dayOfWeek) => {
+                    const members = library.weekSchedule[dayOfWeek] || [];
+                    return (
+                      <td
+                        key={dayOfWeek}
+                        className="px-4 py-4 text-sm text-gray-500 border-l"
+                      >
+                        {members.length === 0 ? (
+                          <div className="text-center text-gray-400">
+                            -
+                          </div>
+                        ) : (
+                          <div className="space-y-1">
+                            {members.map((member, index) => {
+                              const displayClass = member.grade_name && member.class_name 
+                                ? `${member.grade_name}${member.class_name}` 
+                                : '';
+                              return (
+                                <div
+                                  key={`${member.id}-${index}`}
+                                  className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-1 mb-1"
+                                >
+                                  {displayClass && (
+                                    <span className="text-[10px] mr-1">
+                                      {displayClass}
+                                    </span>
+                                  )}
+                                  <span>{member.name}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
