@@ -21,7 +21,8 @@ interface BackendScheduleAssignment {
   schedule_id: number;
   library_id: number;
   library_name: string;
-  date: string; // YYYY-MM-DD from backend
+  day_of_week: number; // 1=Monday, 2=Tuesday, etc.
+  date: string; // Day name from backend (e.g., "Monday")
   time_slot: string;
   committee_member_id?: number | null; // If direct assignment
   committee_member_name?: string | null; // If direct assignment
@@ -39,7 +40,7 @@ interface ScheduleAssignment {
 }
 
 
-const API_BASE_URL = 'http://localhost:5001/api';
+const API_BASE_URL = 'http://localhost:5100/api';
 
 export default function WeeklySchedulePage() {
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(new Date());
@@ -157,16 +158,17 @@ export default function WeeklySchedulePage() {
   // Filter assignments for the current week view
   useEffect(() => {
     const weekDatesObjects = calculateWeekDates(currentWeekStart);
-    const weekDateStrings = weekDatesObjects.map(date => formatDateToYYYYMMDD(date));
 
     const newFilteredAssignments = allScheduleAssignments
-      .filter(assignment => weekDateStrings.includes(assignment.date))
       .map(backendAssignment => {
-        const assignmentDate = new Date(backendAssignment.date + 'T00:00:00'); // Ensure local time interpretation
+        // Convert day_of_week (1=Monday) to the corresponding date in current week
+        const weekDayIndex = backendAssignment.day_of_week === 7 ? 0 : backendAssignment.day_of_week; // Sunday=0, Monday=1, etc.
+        const correspondingDate = weekDatesObjects[weekDayIndex === 0 ? 6 : weekDayIndex - 1]; // Adjust for our Monday-start week
+        
         return {
           id: backendAssignment.id,
-          date: backendAssignment.date, // YYYY-MM-DD
-          day: daysOfWeek[assignmentDate.getDay()], // Derive day of week
+          date: formatDateToYYYYMMDD(correspondingDate), // YYYY-MM-DD for the current week
+          day: daysOfWeek[correspondingDate.getDay()], // Derive day of week
           timeSlot: backendAssignment.time_slot,
           library: backendAssignment.library_name,
           members: backendAssignment.assigned_committee_members || [], // Use assigned_committee_members
