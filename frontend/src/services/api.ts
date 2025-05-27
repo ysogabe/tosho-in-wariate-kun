@@ -1,6 +1,7 @@
 // API service for connecting to the mock backend
 
-const API_BASE_URL = 'http://localhost:5200/api';
+// Use environment variable if available, otherwise use default
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5200/api';
 
 // Generic fetch function with error handling
 async function fetchApi<T>(url: string, options: RequestInit = {}): Promise<T> {

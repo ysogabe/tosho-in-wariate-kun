@@ -9,6 +9,31 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Production: Frontend runs on port 3200, Backend runs on port 5200
 - Testing: Use port 3000 + issue number for frontend, 5000 + issue number for backend (e.g., issue #011: frontend 3011, backend 5011)
 
+### Quick Start Scripts
+
+```bash
+# Start development environment (both frontend and backend)
+./scripts/dev.sh
+
+# Start test environment for a specific issue
+./scripts/test-env.sh 15 start    # Start for issue #15
+./scripts/test-env.sh 15 stop     # Stop for issue #15
+./scripts/test-env.sh 15 status   # Check status
+./scripts/test-env.sh 15 restart  # Restart
+
+# Stop all test environments
+./scripts/stop-all-tests.sh
+```
+
+### Environment Variables
+
+**Frontend**:
+- `NEXT_PUBLIC_API_BASE_URL`: API base URL (default: `http://localhost:5200/api`)
+- `PORT`: Frontend port (default: 3200)
+
+**Backend**:
+- `FLASK_RUN_PORT` or `FLASK_PORT`: Backend port (default: 5200)
+
 ### Frontend (Next.js)
 
 ```bash
@@ -16,6 +41,9 @@ cd frontend
 npm run dev           # Start development server on port 3200
 npm run build         # Build for production
 npm run lint          # Run ESLint
+
+# With custom API URL (environment variable)
+NEXT_PUBLIC_API_BASE_URL=http://localhost:5015/api npm run dev
 ```
 
 ### Mock Backend (Python Flask)
@@ -29,6 +57,9 @@ source venv/bin/activate                          # Activate venv (every new ses
 pip install -r requirements.txt                   # Install dependencies
 python init_database.py                           # Initialize SQLite database
 python app.py                                     # Start Flask server on port 5200
+
+# With custom port (environment variable)
+FLASK_RUN_PORT=5015 python app.py                # Start on custom port
 ```
 
 ### Testing
