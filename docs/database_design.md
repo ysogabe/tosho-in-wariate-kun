@@ -115,6 +115,7 @@
 | school_id | 学校ID | INTEGER | NO | | schools.id | | 学校ID（外部キー） |
 | room_id | 図書室番号 | INTEGER | NO | | | | 図書室ID（学校内での識別子） |
 | room_name | 図書室名 | TEXT | NO | | | | 図書室名（例："第一図書室", "第二図書室"） |
+| location | 場所 | TEXT | YES | | | | 図書室の場所（例："1階東棟", "3階西棟"） |
 | capacity | 収容人数 | INTEGER | NO | | | 1 | 1日の最大収容人数 |
 | description | 説明 | TEXT | YES | | | | 図書室の説明 |
 | active | 利用可能フラグ | BOOLEAN | NO | | | TRUE | アクティブ状態フラグ |
@@ -245,6 +246,7 @@ erDiagram
         int school_id FK "学校ID"
         int room_id "図書室番号"
         string room_name "図書室名"
+        string location "場所"
         int capacity "収容人数"
         string description "説明"
         boolean active "利用可能フラグ"
@@ -342,9 +344,9 @@ INSERT INTO classes (school_id, grade, class_number, class_name, homeroom_teache
 (1, 2, 2, '2B', '鈴木先生');
 
 -- 図書室テーブル初期データ
-INSERT INTO library_rooms (school_id, room_id, room_name, capacity, description) VALUES
-(1, 1, '第一図書室', 2, 'メイン図書室'),
-(1, 2, '第二図書室', 1, 'サブ図書室');
+INSERT INTO library_rooms (school_id, room_id, room_name, location, capacity, description) VALUES
+(1, 1, '第一図書室', '1階東棟', 2, 'メイン図書室'),
+(1, 2, '第二図書室', '2階西棟', 1, 'サブ図書室');
 
 -- 図書委員テーブル初期データ
 INSERT INTO committee_members (school_id, student_id, name, class_id, position_id, academic_year) VALUES

@@ -61,3 +61,4 @@ mock_backend/reports/
 flask.log
 frontend.log
 server.log
+backend.log

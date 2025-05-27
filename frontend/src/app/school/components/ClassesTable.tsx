@@ -168,10 +168,7 @@ export default function ClassesTable() {
   }
 
   return (
-    <div className="p-6 bg-white bg-opacity-90 rounded-xl border-2 border-dashed border-pink-200">
-      <h2 className="text-xl font-bold text-pink-700 mb-6 flex items-center">
-        <span className="text-pink-500 mr-2 text-2xl">👨‍🎓</span> クラス管理
-      </h2>
+    <div className="space-y-6">
       
       <div className="flex justify-between items-center mb-6 gap-4">
         <div className="flex items-center gap-4 flex-1">
@@ -219,7 +216,7 @@ export default function ClassesTable() {
         </Button>
       </div>
 
-      <div className="border-2 border-gray-100 rounded-xl overflow-hidden">
+      <div className="border-2 border-gray-100 rounded-xl overflow-hidden bg-white">
         <Table>
           <TableHeader className="bg-gray-50">
             <TableRow>

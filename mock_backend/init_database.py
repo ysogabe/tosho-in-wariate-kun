@@ -92,6 +92,7 @@ def init_database(db_path='database.db'):
         room_name TEXT NOT NULL,
         capacity INTEGER NOT NULL DEFAULT 1,
         description TEXT,
+        location TEXT,
         active BOOLEAN NOT NULL DEFAULT TRUE,
         created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -183,10 +184,10 @@ def init_database(db_path='database.db'):
     
     # library_rooms
     library_rooms_data = [
-        (school_id, 1, '第一図書室', 2, 'メイン図書室'),
-        (school_id, 2, '第二図書室', 1, 'サブ図書室')
+        (school_id, 1, '第一図書室', 2, 'メイン図書室', '本館1階'),
+        (school_id, 2, '第二図書室', 1, 'サブ図書室', '本館2階')
     ]
-    cursor.executemany("INSERT INTO library_rooms (school_id, room_id, room_name, capacity, description) VALUES (?, ?, ?, ?, ?)", library_rooms_data)
+    cursor.executemany("INSERT INTO library_rooms (school_id, room_id, room_name, capacity, description, location) VALUES (?, ?, ?, ?, ?, ?)", library_rooms_data)
     
     # committee_members
     committee_members_data = [

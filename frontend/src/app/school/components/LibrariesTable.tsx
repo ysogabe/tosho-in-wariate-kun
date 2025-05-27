@@ -163,7 +163,7 @@ export default function LibrariesTable() {
         </Button>
       </div>
 
-      <div className="border rounded-lg">
+      <div className="border rounded-lg bg-white">
         <Table>
           <TableHeader>
             <TableRow>

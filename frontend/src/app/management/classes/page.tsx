@@ -162,66 +162,64 @@ export default function ClassesManagementPage() {
         <h1 className="text-3xl font-bold text-text">✨ クラス管理 ✨</h1>
       </div>
 
-      <div className="bg-white bg-opacity-80 rounded-2xl p-6 shadow-md border-2 border-dashed border-secondary mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-text">クラス一覧</h2>
-          <button
-            onClick={startAddingNew}
-            disabled={isLoading || availableGrades.length === 0}
-            className="px-6 py-2 bg-primary text-white rounded-full hover:bg-primary-dark transition-colors flex items-center disabled:opacity-50"
-            title={availableGrades.length === 0 ? "利用可能な学年がありません" : "新規追加"}
-          >
-            <FaPlus className="mr-2" />
-            新規追加
-          </button>
-        </div>
-
-        {isLoading && classes.length === 0 && <p className="text-center text-gray-500">データを読み込み中...</p>}
-        {error && <p className="text-center text-red-500 my-4">エラー: {error}</p>}
-        {!isLoading && !error && classes.length === 0 && <p className="text-center text-gray-500">登録されているクラスデータがありません。</p>}
-
-        {classes.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white">
-              <thead>
-                <tr className="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
-                  <th className="py-3 px-6 text-left">ID</th>
-                  <th className="py-3 px-6 text-left">クラス名</th>
-                  {/* <th className="py-3 px-6 text-left">定員</th> Backend doesn't support capacity for classes table */}
-                  <th className="py-3 px-6 text-center">操作</th>
-                </tr>
-              </thead>
-              <tbody className="text-gray-600 text-sm">
-                {classes.map((cls) => (
-                  <tr key={cls.id} className="border-b border-gray-200 hover:bg-gray-50">
-                    <td className="py-3 px-6 text-left">{cls.id}</td>
-                    <td className="py-3 px-6 text-left">{cls.name}</td>
-                    {/* <td className="py-3 px-6 text-left">{cls.capacity}人</td> */}
-                    <td className="py-3 px-6 text-center">
-                      <div className="flex item-center justify-center">
-                        <button
-                          onClick={() => startEditing(cls)}
-                          disabled={isLoading || availableGrades.length === 0}
-                          className="transform hover:text-blue-500 hover:scale-110 transition-all mx-2 disabled:opacity-50"
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          onClick={() => deleteClass(cls.id)}
-                          disabled={isLoading}
-                          className="transform hover:text-red-500 hover:scale-110 transition-all mx-2 disabled:opacity-50"
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+      <div className="flex justify-between items-center mb-4">
+        <div></div>
+        <button
+          onClick={startAddingNew}
+          disabled={isLoading || availableGrades.length === 0}
+          className="px-6 py-2 bg-primary text-white rounded-full hover:bg-primary-dark transition-colors flex items-center disabled:opacity-50"
+          title={availableGrades.length === 0 ? "利用可能な学年がありません" : "新規追加"}
+        >
+          <FaPlus className="mr-2" />
+          新規追加
+        </button>
       </div>
+
+      {isLoading && classes.length === 0 && <p className="text-center text-gray-500">データを読み込み中...</p>}
+      {error && <p className="text-center text-red-500 my-4">エラー: {error}</p>}
+      {!isLoading && !error && classes.length === 0 && <p className="text-center text-gray-500">登録されているクラスデータがありません。</p>}
+
+      {classes.length > 0 && (
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white">
+            <thead>
+              <tr className="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
+                <th className="py-3 px-6 text-left">ID</th>
+                <th className="py-3 px-6 text-left">クラス名</th>
+                {/* <th className="py-3 px-6 text-left">定員</th> Backend doesn't support capacity for classes table */}
+                <th className="py-3 px-6 text-center">操作</th>
+              </tr>
+            </thead>
+            <tbody className="text-gray-600 text-sm">
+              {classes.map((cls) => (
+                <tr key={cls.id} className="border-b border-gray-200 hover:bg-gray-50">
+                  <td className="py-3 px-6 text-left">{cls.id}</td>
+                  <td className="py-3 px-6 text-left">{cls.name}</td>
+                  {/* <td className="py-3 px-6 text-left">{cls.capacity}人</td> */}
+                  <td className="py-3 px-6 text-center">
+                    <div className="flex item-center justify-center">
+                      <button
+                        onClick={() => startEditing(cls)}
+                        disabled={isLoading || availableGrades.length === 0}
+                        className="transform hover:text-blue-500 hover:scale-110 transition-all mx-2 disabled:opacity-50"
+                      >
+                        <FaEdit />
+                      </button>
+                      <button
+                        onClick={() => deleteClass(cls.id)}
+                        disabled={isLoading}
+                        className="transform hover:text-red-500 hover:scale-110 transition-all mx-2 disabled:opacity-50"
+                      >
+                        <FaTrash />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {showForm && editingClass && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">

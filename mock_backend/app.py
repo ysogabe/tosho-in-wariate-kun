@@ -301,9 +301,10 @@ def get_classes():
     classes_cursor = conn.execute(query)
     classes = [dict(row) for row in classes_cursor.fetchall()]
     
-    # Add grade_id for frontend compatibility
+    # Add grade_id and grade_name for frontend compatibility
     for class_item in classes:
         class_item['grade_id'] = class_item['grade']
+        class_item['grade_name'] = f"{class_item['grade']}年生"
     
     conn.close()
     return jsonify(classes)
@@ -685,8 +686,8 @@ def delete_committee_member(member_id):
 def get_library_rooms():
     conn = get_db_connection()
     query = """
-    SELECT lr.id, lr.room_name as name, lr.room_id, lr.capacity, lr.description, lr.location,
-           lr.active as is_active, lr.school_id, s.school_name
+    SELECT lr.id, lr.room_name as name, lr.room_id, lr.capacity, lr.description,
+           lr.location, lr.active as is_active, lr.school_id, s.school_name
     FROM library_rooms lr
     JOIN schools s ON lr.school_id = s.id
     WHERE lr.active = TRUE
@@ -727,7 +728,7 @@ def add_library_room():
     name = data['name']
     capacity = data.get('capacity', 1)
     description = data.get('description', '')
-    location = data.get('location', '')
+    location = data.get('location', '')  # Add location field
     school_id = data.get('school_id')
     room_id = data.get('room_id')
 
@@ -760,8 +761,8 @@ def add_library_room():
 
         # Fetch the created room with school info
         query = """
-        SELECT lr.id, lr.room_name as name, lr.room_id, lr.capacity, lr.description, lr.location,
-               lr.active as is_active, lr.school_id, s.school_name
+        SELECT lr.id, lr.room_name as name, lr.room_id, lr.capacity, lr.description,
+               lr.location, lr.active as is_active, lr.school_id, s.school_name
         FROM library_rooms lr
         JOIN schools s ON lr.school_id = s.id
         WHERE lr.id = ?
@@ -781,8 +782,8 @@ def add_library_room():
 def get_library_room(room_id):
     conn = get_db_connection()
     query = """
-    SELECT lr.id, lr.room_name as name, lr.room_id, lr.capacity, lr.description, lr.location,
-           lr.active as is_active, lr.school_id, s.school_name
+    SELECT lr.id, lr.room_name as name, lr.room_id, lr.capacity, lr.description,
+           lr.location, lr.active as is_active, lr.school_id, s.school_name
     FROM library_rooms lr
     JOIN schools s ON lr.school_id = s.id
     WHERE lr.id = ?
@@ -819,7 +820,7 @@ def update_library_room(room_id):
         'room_id': 'room_id',
         'capacity': 'capacity',
         'description': 'description',
-        'location': 'location',
+        'location': 'location',  # Add location field mapping
         'is_active': 'active',
         'school_id': 'school_id'
     }

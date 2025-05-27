@@ -80,24 +80,35 @@ const DashboardPage = () => {
       const libraries = await fetch('http://localhost:5012/api/libraries').then(res => res.json());
       
       // 曜日ごとのデータを作成
-      const weeklyData = days.map(day => {
-        // 実際のデータを使用する場合は、ここで曜日に対応する割り当てをフィルタリング
-        const duties = libraries.map((library: Library) => ({
-          location: library.name,
-          members: [
-            // ダミーデータを返す
-            { 
-              name: `委員${Math.floor(Math.random() * 10) + 1}`, 
-              icon: ['🌸', '🌺', '🌼', '🌊', '🚀'][Math.floor(Math.random() * 5)], 
-              className: `${Math.random() > 0.5 ? '5' : '6'}年${Math.floor(Math.random() * 3) + 1}組` 
-            },
-            { 
-              name: `委員${Math.floor(Math.random() * 10) + 11}`, 
-              icon: ['🌸', '🌺', '🌼', '🌊', '🚀'][Math.floor(Math.random() * 5)], 
-              className: `${Math.random() > 0.5 ? '5' : '6'}年${Math.floor(Math.random() * 3) + 1}組` 
-            }
-          ]
-        }));
+      const weeklyData = days.map((day, dayIndex) => {
+        // 曜日インデックス（月曜日=1, 火曜日=2, ...）
+        const dayOfWeek = dayIndex + 1;
+        
+        // この曜日の割り当てをフィルタリング
+        const dayAssignments = scheduleDetail.assignments.filter(
+          (assignment: any) => assignment.day_of_week === dayOfWeek
+        );
+        
+        // 図書室ごとの担当者をグループ化
+        const duties = libraries.map((library: Library) => {
+          const libraryAssignments = dayAssignments.filter(
+            (assignment: any) => assignment.library_room_id === library.id
+          );
+          
+          // アイコンの配列（学年やクラスに応じて選択）
+          const icons = ['🌸', '🌺', '🌼', '🌻', '🌷'];
+          
+          const members = libraryAssignments.map((assignment: any) => ({
+            name: assignment.committee_member_name,
+            icon: icons[(assignment.class_id - 1) % icons.length], // クラスIDに基づいてアイコンを選択
+            className: assignment.class_name
+          }));
+          
+          return {
+            location: library.name,
+            members
+          };
+        });
         
         return { day, duties };
       });

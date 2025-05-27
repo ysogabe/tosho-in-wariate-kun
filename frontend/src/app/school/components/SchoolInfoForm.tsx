@@ -100,7 +100,7 @@ export default function SchoolInfoForm() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-white p-6 rounded-lg border">
       <div className="grid grid-cols-1 gap-6">
         <div className="space-y-2">
           <Label htmlFor="school_name">学校名</Label>

@@ -76,7 +76,7 @@ export default function SchoolInfoPage() {
 
       <div className="w-full">
         {activeTab === 'school-info' && (
-          <Card className="p-6 border-2 border-dashed border-secondary bg-white bg-opacity-80">
+          <Card className="p-6 border-2 border-dashed border-secondary bg-gray-50">
             <h2 className="text-2xl font-semibold mb-4 flex items-center">
               <FaCog className="mr-2 text-primary" />
               学校基本情報
@@ -86,7 +86,7 @@ export default function SchoolInfoPage() {
         )}
         
         {activeTab === 'positions' && (
-          <Card className="p-6 border-2 border-dashed border-secondary bg-white bg-opacity-80">
+          <Card className="p-6 border-2 border-dashed border-secondary bg-gray-50">
             <h2 className="text-2xl font-semibold mb-4 flex items-center">
               <FaUserTie className="mr-2 text-primary" />
               役職管理
@@ -96,7 +96,7 @@ export default function SchoolInfoPage() {
         )}
         
         {activeTab === 'libraries' && (
-          <Card className="p-6 border-2 border-dashed border-secondary bg-white bg-opacity-80">
+          <Card className="p-6 border-2 border-dashed border-secondary bg-gray-50">
             <h2 className="text-2xl font-semibold mb-4 flex items-center">
               <FaBook className="mr-2 text-primary" />
               図書室管理
@@ -106,7 +106,7 @@ export default function SchoolInfoPage() {
         )}
         
         {activeTab === 'classes' && (
-          <Card className="p-6 border-2 border-dashed border-secondary bg-white bg-opacity-80">
+          <Card className="p-6 border-2 border-dashed border-secondary bg-gray-50">
             <h2 className="text-2xl font-semibold mb-4 flex items-center">
               <FaUsers className="mr-2 text-primary" />
               クラス管理

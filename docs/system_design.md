@@ -44,12 +44,11 @@
   /src
     /app                  # Next.js App Router
       /dashboard          # ダッシュボード画面
-      /management         # 管理画面
-        /grades           # 学年管理（削除済み）
-        /classes          # クラス管理
+      /management         # 管理画面（タブ切り替え式）
         /committee-members # 図書委員管理
-        /libraries        # 図書室管理
-        /schedules        # スケジュール管理
+        /generate-schedule # スケジュール生成
+        /validate-schedule # スケジュール検証
+      /school             # 学校基本情報管理（図書室・クラス管理統合）
     /components           # 共通コンポーネント
     /contexts             # コンテキストプロバイダー
     /lib                  # ユーティリティライブラリ

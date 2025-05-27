@@ -53,6 +53,7 @@ export default function CommitteeMembersPage() {
   
   // 学年リストを作成（重複なし）
   const availableGrades = useMemo(() => {
+    console.log('Creating availableGrades from availableClasses:', availableClasses);
     if (!availableClasses.length) return [];
     
     const grades = availableClasses.reduce<{id: number, name: string}[]>((acc, cls) => {
@@ -65,6 +66,7 @@ export default function CommitteeMembersPage() {
       return acc;
     }, []);
     
+    console.log('Generated availableGrades:', grades);
     return grades.sort((a, b) => a.id - b.id);
   }, [availableClasses]);
 
@@ -72,13 +74,16 @@ export default function CommitteeMembersPage() {
     setIsLoading(true);
     setError(null);
     try {
+      console.log('Fetching members from:', API_MEMBERS_URL);
       const response = await fetch(API_MEMBERS_URL);
+      console.log('Members response status:', response.status);
       if (!response.ok) throw new Error(`API Error (Members): ${response.status} ${response.statusText}`);
       const data: CommitteeMember[] = await response.json();
+      console.log('Members data:', data);
       setMembers(data);
     } catch (err) {
+      console.error('Fetch members error:', err);
       setError(err instanceof Error ? err.message : '委員データの取得に失敗しました。');
-      console.error(err);
     } finally {
       setIsLoading(false);
     }
@@ -87,14 +92,17 @@ export default function CommitteeMembersPage() {
   const fetchClasses = async () => {
     // No separate loading state for classes, assume it's quick or part of overall loading
     try {
+      console.log('Fetching classes from:', API_CLASSES_URL);
       const response = await fetch(API_CLASSES_URL);
+      console.log('Classes response status:', response.status);
       if (!response.ok) throw new Error(`API Error (Classes): ${response.status} ${response.statusText}`);
       const data: ClassData[] = await response.json();
+      console.log('Classes data:', data);
       setAvailableClasses(data);
     } catch (err) {
+      console.error('Fetch classes error:', err);
       // Set a general error or a specific one for class fetching if needed
       setError(err instanceof Error ? err.message : 'クラスデータの取得に失敗しました。');
-      console.error(err);
     }
   };
 
@@ -257,7 +265,12 @@ export default function CommitteeMembersPage() {
         
         {error && (
           <div className="text-center py-4 text-red-500">
-            エラー: {error}
+            <div className="font-bold mb-2">エラーが発生しました:</div>
+            <div className="text-sm">{error}</div>
+            <div className="mt-2 text-xs text-gray-500">
+              availableClasses.length: {availableClasses.length}, 
+              availableGrades.length: {availableGrades.length}
+            </div>
           </div>
         )}
         

@@ -9,7 +9,7 @@ import { Card } from '@/components/ui/card';
 import { useSchool } from '@/contexts/SchoolContext';
 
 export default function ManagementPage() {
-  const [activeTab, setActiveTab] = useState('basic');
+  const [activeTab, setActiveTab] = useState('schedule');
   const [userName] = useState('管理者');
   const { schoolName } = useSchool();
 
@@ -20,12 +20,6 @@ export default function ManagementPage() {
         icon: <FaCog />,
         description: '学校情報、役職、図書室、クラスを一元管理します',
         link: '/school'
-      },
-      {
-        title: 'クラス管理',
-        icon: <FaUsers />,
-        description: 'クラス情報の登録・編集・削除を行います',
-        link: '/management/classes'
       },
       {
         title: '図書委員管理',
@@ -63,18 +57,6 @@ export default function ManagementPage() {
         <Card className="p-6 mb-8 bg-opacity-70">
           <div className="flex space-x-4 mb-6">
             <button
-              onClick={() => setActiveTab('basic')}
-              className={`rounded-full px-8 py-2 text-base font-medium transition-colors ${activeTab === 'basic' ? 'shadow-md' : 'opacity-80 hover:opacity-100'}`}
-              style={{
-                backgroundColor: activeTab === 'basic' ? 'hsl(180, 65%, 75%)' : 'hsl(180, 65%, 85%)', 
-                color: 'hsl(180, 65%, 25%)',
-                border: '1px solid hsl(180, 65%, 65%)'
-              }}
-            >
-              <FaCog className="inline-block mr-2" />
-              基本情報管理
-            </button>
-            <button
               onClick={() => setActiveTab('schedule')}
               className={`rounded-full px-8 py-2 text-base font-medium transition-colors ${activeTab === 'schedule' ? 'shadow-md' : 'opacity-80 hover:opacity-100'}`}
               style={{
@@ -85,6 +67,18 @@ export default function ManagementPage() {
             >
               <FaCalendarAlt className="inline-block mr-2" />
               スケジュール管理
+            </button>
+            <button
+              onClick={() => setActiveTab('basic')}
+              className={`rounded-full px-8 py-2 text-base font-medium transition-colors ${activeTab === 'basic' ? 'shadow-md' : 'opacity-80 hover:opacity-100'}`}
+              style={{
+                backgroundColor: activeTab === 'basic' ? 'hsl(180, 65%, 75%)' : 'hsl(180, 65%, 85%)', 
+                color: 'hsl(180, 65%, 25%)',
+                border: '1px solid hsl(180, 65%, 65%)'
+              }}
+            >
+              <FaCog className="inline-block mr-2" />
+              基本情報管理
             </button>
           </div>
 
