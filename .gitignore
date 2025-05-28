@@ -66,3 +66,4 @@ backend.log
 # Script logs and PID files
 logs/
 .test-env-*.pid
+mock_backend/backend.log
