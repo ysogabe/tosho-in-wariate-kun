@@ -23,7 +23,7 @@ interface ScheduleSummary {
 export default function ScheduleVerifyPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const [scheduleName, setScheduleName] = useState('2025年度前期スケジュール');
+  const [scheduleName] = useState('2025年度前期スケジュール');
   const [validationResults, setValidationResults] = useState<ValidationResult[]>([]);
   const [scheduleSummary, setScheduleSummary] = useState<ScheduleSummary | null>(null);
 

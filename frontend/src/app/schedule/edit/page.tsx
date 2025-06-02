@@ -4,11 +4,23 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
+// Type definitions
+interface Duty {
+  id: number;
+  room: string;
+  time: string;
+  members: string[];
+}
+
+interface DutyWithDate extends Duty {
+  date: Date;
+}
+
 // 曜日の配列
 const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
 
 // モックデータ - 当番スケジュール
-const mockSchedules = {
+const mockSchedules: Record<string, Duty[]> = {
   '2025-05-01': [
     { id: 1, room: '図書室A', time: '12:30-13:00', members: ['山田太郎', '佐藤花子'] },
   ],
@@ -65,8 +77,8 @@ export default function ScheduleEdit() {
   const [currentDate, setCurrentDate] = useState(new Date(2025, 4, 1)); // 2025年5月
   const [isPublished, setIsPublished] = useState(mockScheduleList[0].isPublished);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentDuty, setCurrentDuty] = useState(null);
-  const [newMembers, setNewMembers] = useState([]);
+  const [currentDuty, setCurrentDuty] = useState<DutyWithDate | null>(null);
+  const [newMembers, setNewMembers] = useState<string[]>([]);
   const [changeReason, setChangeReason] = useState('');
 
   // 現在の年月を取得
@@ -107,19 +119,19 @@ export default function ScheduleEdit() {
   };
 
   // 日付フォーマット関数
-  const formatDate = (date) => {
+  const formatDate = (date: Date | null) => {
     return date ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}` : '';
   };
 
   // 日付のスケジュールを取得
-  const getScheduleForDate = (date) => {
+  const getScheduleForDate = (date: Date | null) => {
     if (!date) return null;
     const dateString = formatDate(date);
     return mockSchedules[dateString] || null;
   };
 
   // 当番編集モーダルを開く
-  const openEditModal = (duty, date) => {
+  const openEditModal = (duty: Duty, date: Date) => {
     setCurrentDuty({
       ...duty,
       date: date
@@ -139,6 +151,7 @@ export default function ScheduleEdit() {
 
   // 当番の変更を保存
   const saveDutyChanges = () => {
+    if (!currentDuty) return;
     // 実際のアプリケーションでは、ここでAPIを呼び出してデータを更新します
     // このモックでは、変更を表示するだけです
     alert(`当番変更を保存しました。\n日付: ${formatDate(currentDuty.date)}\n図書室: ${currentDuty.room}\n担当者: ${newMembers.join(', ')}\n変更理由: ${changeReason || 'なし'}`);
@@ -197,7 +210,10 @@ export default function ScheduleEdit() {
                     onChange={(e) => {
                       const schedId = Number(e.target.value);
                       setSelectedSchedule(schedId);
-                      setIsPublished(mockScheduleList.find(s => s.id === schedId).isPublished);
+                      const schedule = mockScheduleList.find(s => s.id === schedId);
+                      if (schedule) {
+                        setIsPublished(schedule.isPublished);
+                      }
                     }}
                     className="w-64 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   >

@@ -16,7 +16,7 @@ export default function WeeklySchedulePage() {
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(new Date());
   const [scheduleAssignments, setScheduleAssignments] = useState<ScheduleAssignment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [schedules, setSchedules] = useState<{id: number, name: string}[]>([
+  const [schedules] = useState<{id: number, name: string}[]>([
     { id: 1, name: '2025年度前期スケジュール' },
     { id: 2, name: '2025年度後期スケジュール' },
   ]);

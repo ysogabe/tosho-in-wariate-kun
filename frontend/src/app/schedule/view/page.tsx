@@ -4,11 +4,18 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
+// Type definitions
+interface ScheduleItem {
+  room: string;
+  time: string;
+  members: string[];
+}
+
 // 曜日の配列
 const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
 
 // モックデータ - 当番スケジュール
-const mockSchedules = {
+const mockSchedules: Record<string, ScheduleItem[]> = {
   '2025-05-01': [
     { room: '図書室A', time: '12:30-13:00', members: ['山田太郎', '佐藤花子'] },
   ],
@@ -90,12 +97,12 @@ export default function ScheduleView() {
   };
 
   // 日付フォーマット関数
-  const formatDate = (date) => {
+  const formatDate = (date: Date | null) => {
     return date ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}` : '';
   };
 
   // 日付のスケジュールを取得
-  const getScheduleForDate = (date) => {
+  const getScheduleForDate = (date: Date | null) => {
     if (!date) return null;
     const dateString = formatDate(date);
     return mockSchedules[dateString] || null;

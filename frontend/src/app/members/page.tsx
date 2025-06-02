@@ -57,7 +57,7 @@ export default function MembersManagement() {
   };
 
   // モーダルを開く（編集）
-  const openEditModal = (member) => {
+  const openEditModal = (member: typeof mockMembers[0]) => {
     setCurrentMember({
       ...member,
       notes: ''
@@ -86,7 +86,7 @@ export default function MembersManagement() {
   };
 
   // 図書委員の削除処理
-  const deleteMember = (id) => {
+  const deleteMember = (id: number) => {
     if (confirm('本当に削除しますか？')) {
       setMembers(members.filter(member => member.id !== id));
     }
