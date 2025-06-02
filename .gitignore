@@ -33,3 +33,13 @@ yarn-error.log*
 # TypeScript
 *.tsbuildinfo
 .DS_Store
+__pycache__/
+mock_backend/.coverage
+mock_backend/coverage.xml
+mock_backend/database.db
+mock_backend/reports/test_report.html
+mock_backend/reports/test_report.json
+.gitignore
+mock_backend/reports/
+test-results/
+playwright-report/index.html
