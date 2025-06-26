@@ -1,0 +1,43 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "pipeline": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "dist/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "outputs": ["test-results/**", "coverage/**"]
+    },
+    "test:unit": {
+      "dependsOn": ["build"],
+      "outputs": ["test-results/unit/**"]
+    },
+    "test:integration": {
+      "dependsOn": ["build"],
+      "outputs": ["test-results/integration/**"]
+    },
+    "test:e2e": {
+      "dependsOn": ["build"],
+      "outputs": ["test-results/e2e/**"]
+    },
+    "test:coverage": {
+      "dependsOn": ["test"],
+      "outputs": ["test-results/**/coverage/**"]
+    },
+    "test:report": {
+      "dependsOn": ["test"],
+      "outputs": ["test-results/reports/**"]
+    },
+    "lint": {
+      "dependsOn": ["^build"]
+    },
+    "type-check": {
+      "dependsOn": ["^build"]
+    }
+  }
+}

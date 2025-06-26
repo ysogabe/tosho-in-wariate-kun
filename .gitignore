@@ -3,45 +3,106 @@ node_modules/
 .pnp
 .pnp.js
 
-# Testing
-/coverage
-
-# Next.js
-.next/
+# Production builds
+dist/
+build/
 out/
+.next/
 
-# Production
-build
-dist
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Misc
-.DS_Store
-*.pem
-
-# Debug
+# Logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Local env files
-.env*.local
-.env
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# Test results
+test-results/
+playwright-report/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Cache directories
+.cache/
+.parcel-cache/
+.eslintcache
+.turbo/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary folders
+tmp/
+temp/
+
+# Miscellaneous
+*.tgz
+*.tar.gz
+*.pem
 
 # Vercel
 .vercel
 
+# Prisma
+prisma/migrations/*
+!prisma/migrations/.gitkeep
+
+# Storybook
+storybook-static/
+
+# Turborepo
+.turbo/
+
+# Changesets
+.changeset/
+
+# Local development
+*.local
+
+# Python (legacy mock backend)
+__pycache__/
+*.pyc
+*.pyo
+*.coverage
+coverage.xml
+
+# Legacy project files
+mock_backend/
+docs/kamui-creative-*/
+
 # TypeScript
 *.tsbuildinfo
-.DS_Store
-__pycache__/
-mock_backend/.coverage
-mock_backend/coverage.xml
-mock_backend/database.db
-mock_backend/reports/test_report.html
-mock_backend/reports/test_report.json
-.gitignore
-mock_backend/reports/
-test-results/
-playwright-report/index.html
-docs/kamui-creative-2025-05-22T12-39-19/
-.DS_Store
