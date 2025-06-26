@@ -6,30 +6,45 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 図書委員当番くん (Tosho-in Wariate-kun) is a web application that automates the scheduling of library committee members in elementary schools. It ensures fair rotation among committee members while respecting complex scheduling rules.
 
-## Monorepo Structure
+## MVP Architecture (Updated 2025-06-26)
 
-This project is organized as a monorepo to maximize code sharing, maintain consistency, and streamline development workflows across frontend and backend applications.
+**IMPORTANT**: This project follows a **Next.js API Routes** architecture for MVP development, not a separate backend service.
 
+### Architecture Decision
+- **ADR 0005**: MVP向けアーキテクチャの決定 - Next.js統合アプローチを採用
+- **Single Application**: フロントエンドとバックエンドを統合したNext.jsアプリケーション
+- **Simplified Structure**: MVPに適したシンプルなアーキテクチャ
+
+### Project Structure
+```
+tosho-in-wariate-kun/
+├── src/
+│   ├── app/                    # Next.js App Router
+│   │   ├── (admin)/           # 管理者向けページ
+│   │   ├── (public)/          # 表示専用ページ
+│   │   └── api/               # API Routes (バックエンドロジック)
+│   ├── components/            # UIコンポーネント
+│   ├── lib/                   # ユーティリティ・サービス
+│   │   ├── services/          # ビジネスロジック
+│   │   ├── schedulers/        # スケジューリングエンジン
+│   │   └── database/          # データベース接続
+│   └── types/                 # 型定義
+├── docs/                      # プロジェクトドキュメント
+├── public/                    # 静的ファイル
+└── frontend/                  # UI mockups and prototypes (READ-ONLY)
+```
+
+### Legacy Monorepo Structure (参考)
+以下の構造は将来的なスケーリング時の参考として保持：
 ```
 tosho-in-wariate-kun/
 ├── apps/
-│   ├── frontend/          # Next.js application (production development)
-│   └── backend/           # NestJS application
+│   ├── frontend/          # Next.js application (future expansion)
+│   └── backend/           # NestJS application (future expansion)
 ├── packages/
 │   ├── shared/           # Shared types and interfaces
-│   ├── ui/               # Shared UI components
+│   ├── ui/               # Shared UI components  
 │   └── utils/            # Shared utilities
-├── tools/
-│   ├── eslint-config/    # Shared ESLint configuration
-│   ├── typescript-config/ # Shared TypeScript configuration
-│   └── build-scripts/    # Custom build scripts
-├── docs/                 # Project documentation
-│   ├── api/              # API documentation
-│   ├── development/      # Development guides
-│   ├── deployment/       # Deployment guides
-│   └── issues/           # Issue templates and work instructions
-├── test-results/         # Test output directory
-└── frontend/             # UI mockups and prototypes (READ-ONLY)
 ```
 
 ## ⚠️ Important: Legacy Frontend Directory
@@ -53,95 +68,104 @@ tosho-in-wariate-kun/
 - **User Flow Examples**: Study user interaction patterns from prototypes
 - **Design System**: Extract design tokens and patterns for production implementation
 
-## Technology Stack
+## Technology Stack (MVP)
 
-### Backend: Node.js/TypeScript + NestJS
-- **Framework**: NestJS with modular architecture
-- **Database**: PostgreSQL with Prisma ORM
-- **Authentication**: JWT with role-based access control
-- **Real-time**: WebSocket support with Socket.IO
-- **Testing**: Jest + @nestjs/testing
-
-### Frontend: Next.js + TypeScript
-- **Framework**: Next.js 15 with App Router
+### Frontend + Backend: Next.js統合アプリケーション
+- **Framework**: Next.js 15 with App Router + API Routes
+- **Language**: TypeScript
 - **Styling**: TailwindCSS + shadcn-ui
-- **State Management**: React Context API
+- **Database**: Supabase PostgreSQL + Prisma ORM
+- **Authentication**: Supabase Auth
+- **State Management**: React Context API + SWR
 - **Testing**: Jest + Testing Library + Playwright
+- **Deployment**: Vercel
 
-### Shared Packages
-- **@tosho/shared**: Common types, constants, validation schemas
-- **@tosho/ui**: Reusable UI components with shadcn-ui
-- **@tosho/utils**: Common utility functions and helpers
+### Key Libraries
+- **UI Components**: shadcn-ui (Radix UI + Tailwind CSS)
+- **Database ORM**: Prisma
+- **Form Handling**: React Hook Form + Zod validation
+- **Data Fetching**: SWR (React Hooks for Data Fetching)
+- **Date Handling**: date-fns
+- **Scheduling Algorithm**: Custom implementation
 
-## Package Manager: pnpm + Turborepo
+### Future Expansion (Post-MVP)
+- **Backend**: NestJS with modular architecture
+- **Shared Packages**: @tosho/shared, @tosho/ui, @tosho/utils
+- **Real-time**: WebSocket support with Socket.IO
 
-- **Efficient Dependencies**: pnpm's symlink approach reduces disk usage
-- **Build Caching**: Turborepo provides intelligent build caching
-- **Task Orchestration**: Parallel execution across packages
+## Package Manager: npm (MVP Simplified)
 
-## Common Development Commands
+MVPでは標準のnpmを使用してシンプルな開発環境を構築
 
 ### Initial Setup
 ```bash
-# Install pnpm globally
-npm install -g pnpm
-
 # Install all dependencies
-pnpm install
+npm install
 
-# Generate Prisma client
-pnpm --filter backend prisma:generate
+# Set up Supabase
+npx supabase init
+
+# Generate Prisma client  
+npx prisma generate
+
+# Set up shadcn-ui
+npx shadcn-ui@latest init
 ```
 
 ### Development Workflow
 ```bash
-# Start all development servers
-pnpm dev
+# Start development server
+npm run dev
 
-# Start specific application
-pnpm --filter frontend dev
-pnpm --filter backend dev
+# Build application
+npm run build
 
-# Build all packages
-pnpm build
+# Run tests
+npm run test
 
-# Run tests across all packages
-pnpm test
+# Lint code
+npm run lint
 
-# Run specific test types
-pnpm test:unit
-pnpm test:integration
-pnpm test:e2e
+# Type check
+npm run type-check
 ```
 
-## Application-Specific Guides
+### Future Migration to Monorepo
+Post-MVP時のスケーリング時にpnpm + Turborepoへ移行予定：
+```bash
+# Future monorepo commands
+pnpm dev                    # Start all services
+pnpm --filter frontend dev  # Start frontend only
+pnpm --filter backend dev   # Start backend only
+```
 
-### Frontend Development
-- **Location**: `apps/frontend/CLAUDE.md`
-- **Topics**: Next.js, React, TailwindCSS, shadcn-ui, testing
-- **Key Features**: Component development, styling, performance optimization
+## Development Structure (MVP)
 
-### Backend Development
-- **Location**: `apps/backend/CLAUDE.md`
-- **Topics**: NestJS, Prisma, PostgreSQL, authentication, WebSocket
-- **Key Features**: API development, database management, real-time features
+### Single Application Development
+- **Location**: Root directory (Next.js統合アプリケーション)
+- **Frontend**: `src/app/` - Next.js App Router pages
+- **Backend**: `src/app/api/` - API Routes
+- **Components**: `src/components/` - React components with shadcn-ui
+- **Services**: `src/lib/services/` - Business logic
+- **Database**: `src/lib/database/` - Prisma client and utilities
 
-## Shared Package Development
+### Key Development Areas
+1. **UI Development**: Next.js App Router + shadcn-ui components
+2. **API Development**: Next.js API Routes + Supabase integration
+3. **Database**: Prisma ORM + Supabase PostgreSQL
+4. **Authentication**: Supabase Auth integration
+5. **Scheduling**: Custom algorithm implementation
 
-### @tosho/shared
-- **Location**: `packages/shared/README.md`
-- **Purpose**: Common types, interfaces, constants, validation schemas
-- **Usage**: Imported by both frontend and backend for type safety
+## Future Expansion (Post-MVP)
 
-### @tosho/ui
-- **Location**: `packages/ui/README.md`
-- **Purpose**: Reusable UI components built with shadcn-ui
-- **Usage**: Frontend applications import components for consistent design
+### Application-Specific Guides (参考)
+- **Frontend**: `apps/frontend/CLAUDE.md` - Next.js, React, TailwindCSS
+- **Backend**: `apps/backend/CLAUDE.md` - NestJS, Prisma, PostgreSQL
 
-### @tosho/utils
-- **Location**: `packages/utils/README.md`
-- **Purpose**: Common utility functions and helpers
-- **Usage**: Shared business logic and utility functions
+### Shared Package Development (参考)
+- **@tosho/shared**: Common types, interfaces, constants
+- **@tosho/ui**: Reusable UI components built with shadcn-ui
+- **@tosho/utils**: Common utility functions and helpers
 
 ## Development Guidelines
 
@@ -215,17 +239,31 @@ pnpm test:e2e
 4. **Follow TDD methodology** with t_wada approach
 5. **Use monorepo commands** for development workflow
 
-## Package Import Examples
+## Import Examples (MVP)
 
 ```typescript
-// Importing shared types
-import { User, Schedule } from '@tosho/shared'
+// Importing types
+import { User, Schedule } from '@/types'
 
-// Importing UI components
-import { Button, Card } from '@tosho/ui'
+// Importing UI components (shadcn-ui)
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+
+// Importing services
+import { SchedulerService } from '@/lib/services/scheduler'
+import { DatabaseService } from '@/lib/database/client'
 
 // Importing utilities
+import { formatJapaneseDate, isValidEmail } from '@/lib/utils'
+```
+
+## Future Import Examples (Post-MVP)
+
+```typescript
+// Future monorepo imports
+import { User, Schedule } from '@tosho/shared'
+import { Button, Card } from '@tosho/ui'
 import { formatJapaneseDate, isValidEmail } from '@tosho/utils'
 ```
 
-For detailed implementation guidance, refer to the specific documentation in each package and application directory.
+For detailed implementation guidance, refer to the design documents in the `/docs` directory.
