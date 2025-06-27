@@ -142,6 +142,27 @@ npm run lint
 npm run type-check
 ```
 
+### GitHub Operations
+
+All GitHub-related operations should use the `gh` CLI command for consistency:
+
+```bash
+# Create issues
+gh issue create --title "Issue Title" --body "Issue description"
+
+# Link branch to issue 
+gh issue develop <issue-number> --checkout
+
+# Create pull requests
+gh pr create --title "PR Title" --body "PR description"
+
+# View PR status
+gh pr status
+
+# Merge PR (when approved)
+gh pr merge <pr-number>
+```
+
 ### Future Migration to Monorepo
 
 Post-MVP時のスケーリング時にpnpm + Turborepoへ移行予定：
