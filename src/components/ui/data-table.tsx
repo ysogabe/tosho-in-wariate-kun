@@ -12,6 +12,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
+  type Column,
 } from '@tanstack/react-table'
 import { ArrowUpDown, ChevronDown, MoreHorizontal, Search } from 'lucide-react'
 
@@ -260,15 +261,15 @@ export function DataTable<TData, TValue>({
 }
 
 // ソート可能ヘッダーのヘルパーコンポーネント
-interface SortableHeaderProps {
-  column: {
-    toggleSorting: (desc?: boolean) => void
-    getIsSorted: () => false | 'asc' | 'desc'
-  }
+interface SortableHeaderProps<TData, TValue> {
+  column: Column<TData, TValue>
   children: React.ReactNode
 }
 
-export function SortableHeader({ column, children }: SortableHeaderProps) {
+export function SortableHeader<TData, TValue>({ 
+  column, 
+  children 
+}: SortableHeaderProps<TData, TValue>) {
   return (
     <Button
       variant="ghost"

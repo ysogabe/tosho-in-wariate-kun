@@ -1,22 +1,55 @@
 import { render, screen } from '@testing-library/react'
-import { flexRender } from '@tanstack/react-table'
+import { flexRender, type ColumnDef, type CellContext } from '@tanstack/react-table'
 import {
   classesColumns,
   sampleClassesData,
   type ClassData,
 } from '../classes-columns'
 
+// 型安全な列検索ヘルパー
+const findColumnByAccessorKey = (
+  key: keyof ClassData
+): ColumnDef<ClassData> | undefined => {
+  return classesColumns.find((col) => {
+    return 'accessorKey' in col && col.accessorKey === key
+  })
+}
+
+const findColumnById = (id: string): ColumnDef<ClassData> | undefined => {
+  return classesColumns.find((col) => col.id === id)
+}
+
 // テーブルのセルレンダリングをテストするヘルパー
-const renderCell = (column: any, data: ClassData) => {
-  const cell = {
-    getValue: (key: string) => data[key as keyof ClassData],
-    row: {
-      original: data,
-      getValue: (key: string) => data[key as keyof ClassData],
+const renderCell = (column: ColumnDef<ClassData>, data: ClassData) => {
+  // 簡化されたモックセルコンテキスト（any型でキャスト）
+  const mockCell = {
+    getValue: () => {
+      if ('accessorKey' in column && typeof column.accessorKey === 'string') {
+        return data[column.accessorKey as keyof ClassData]
+      }
+      return undefined
     },
-    getContext: () => ({ cell }),
-  }
-  return render(<div>{flexRender(column.cell, cell)}</div>)
+    row: {
+      id: data.id,
+      index: 0,
+      original: data,
+      getValue: (columnId: string) => data[columnId as keyof ClassData],
+    },
+    column: {
+      id: 'accessorKey' in column && typeof column.accessorKey === 'string' 
+        ? column.accessorKey 
+        : column.id || 'unknown',
+      columnDef: column,
+    },
+    table: {},
+    cell: {},
+    renderValue: () => undefined,
+  } as any
+
+  // セルコンテキストを更新
+  mockCell.cell = mockCell
+
+  return render(<div>{flexRender(column.cell, mockCell)}</div>)
 }
 
 describe('Classes Columns', () => {
@@ -24,10 +57,9 @@ describe('Classes Columns', () => {
 
   describe('Name Column', () => {
     it('renders class name with school icon', () => {
-      const nameColumn = classesColumns.find(
-        (col) => col.accessorKey === 'name'
-      )!
-      renderCell(nameColumn, testClass)
+      const nameColumn = findColumnByAccessorKey('name')
+      expect(nameColumn).toBeDefined()
+      renderCell(nameColumn!, testClass)
 
       expect(screen.getByText(testClass.name)).toBeInTheDocument()
     })
@@ -35,10 +67,9 @@ describe('Classes Columns', () => {
 
   describe('Year Column', () => {
     it('renders year with badge', () => {
-      const yearColumn = classesColumns.find(
-        (col) => col.accessorKey === 'year'
-      )!
-      renderCell(yearColumn, testClass)
+      const yearColumn = findColumnByAccessorKey('year')
+      expect(yearColumn).toBeDefined()
+      renderCell(yearColumn!, testClass)
 
       expect(screen.getByText(`${testClass.year}年`)).toBeInTheDocument()
     })
@@ -46,10 +77,9 @@ describe('Classes Columns', () => {
 
   describe('Room Column', () => {
     it('renders room information', () => {
-      const roomColumn = classesColumns.find(
-        (col) => col.accessorKey === 'room'
-      )!
-      renderCell(roomColumn, testClass)
+      const roomColumn = findColumnByAccessorKey('room')
+      expect(roomColumn).toBeDefined()
+      renderCell(roomColumn!, testClass)
 
       expect(screen.getByText(testClass.room.name)).toBeInTheDocument()
       expect(
@@ -60,10 +90,9 @@ describe('Classes Columns', () => {
 
   describe('Students Count Column', () => {
     it('renders students count with users icon', () => {
-      const studentsColumn = classesColumns.find(
-        (col) => col.accessorKey === 'studentsCount'
-      )!
-      renderCell(studentsColumn, testClass)
+      const studentsColumn = findColumnByAccessorKey('studentsCount')
+      expect(studentsColumn).toBeDefined()
+      renderCell(studentsColumn!, testClass)
 
       expect(
         screen.getByText(`${testClass.studentsCount}名`)
@@ -73,10 +102,9 @@ describe('Classes Columns', () => {
 
   describe('Committee Members Column', () => {
     it('renders committee members count with appropriate badge', () => {
-      const committeeColumn = classesColumns.find(
-        (col) => col.accessorKey === 'committeeMembers'
-      )!
-      renderCell(committeeColumn, testClass)
+      const committeeColumn = findColumnByAccessorKey('committeeMembers')
+      expect(committeeColumn).toBeDefined()
+      renderCell(committeeColumn!, testClass)
 
       expect(
         screen.getByText(`${testClass.committeeMembers}名`)
@@ -85,10 +113,9 @@ describe('Classes Columns', () => {
 
     it('renders secondary badge when no committee members', () => {
       const classWithNoMembers = { ...testClass, committeeMembers: 0 }
-      const committeeColumn = classesColumns.find(
-        (col) => col.accessorKey === 'committeeMembers'
-      )!
-      renderCell(committeeColumn, classWithNoMembers)
+      const committeeColumn = findColumnByAccessorKey('committeeMembers')
+      expect(committeeColumn).toBeDefined()
+      renderCell(committeeColumn!, classWithNoMembers)
 
       expect(screen.getByText('0名')).toBeInTheDocument()
     })
@@ -96,20 +123,18 @@ describe('Classes Columns', () => {
 
   describe('Status Column', () => {
     it('renders active status', () => {
-      const statusColumn = classesColumns.find(
-        (col) => col.accessorKey === 'isActive'
-      )!
-      renderCell(statusColumn, testClass)
+      const statusColumn = findColumnByAccessorKey('isActive')
+      expect(statusColumn).toBeDefined()
+      renderCell(statusColumn!, testClass)
 
       expect(screen.getByText('アクティブ')).toBeInTheDocument()
     })
 
     it('renders inactive status', () => {
       const inactiveClass = { ...testClass, isActive: false }
-      const statusColumn = classesColumns.find(
-        (col) => col.accessorKey === 'isActive'
-      )!
-      renderCell(statusColumn, inactiveClass)
+      const statusColumn = findColumnByAccessorKey('isActive')
+      expect(statusColumn).toBeDefined()
+      renderCell(statusColumn!, inactiveClass)
 
       expect(screen.getByText('非アクティブ')).toBeInTheDocument()
     })
@@ -117,10 +142,9 @@ describe('Classes Columns', () => {
 
   describe('Created At Column', () => {
     it('renders formatted creation date', () => {
-      const createdAtColumn = classesColumns.find(
-        (col) => col.accessorKey === 'createdAt'
-      )!
-      renderCell(createdAtColumn, testClass)
+      const createdAtColumn = findColumnByAccessorKey('createdAt')
+      expect(createdAtColumn).toBeDefined()
+      renderCell(createdAtColumn!, testClass)
 
       const expectedDate = new Date(testClass.createdAt).toLocaleDateString(
         'ja-JP'
@@ -131,13 +155,9 @@ describe('Classes Columns', () => {
 
   describe('Actions Column', () => {
     it('renders actions dropdown', () => {
-      const actionsColumn = classesColumns.find((col) => col.id === 'actions')!
-      const cell = {
-        row: { original: testClass },
-        getContext: () => ({ cell }),
-      }
-
-      render(<div>{flexRender(actionsColumn.cell, cell)}</div>)
+      const actionsColumn = findColumnById('actions')
+      expect(actionsColumn).toBeDefined()
+      renderCell(actionsColumn!, testClass)
 
       expect(screen.getByRole('button')).toBeInTheDocument()
     })
