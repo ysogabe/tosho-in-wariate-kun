@@ -365,31 +365,49 @@ export default function LayoutTestPage() {
 
 ### Work Completed
 
-- [ ] Headerコンポーネント作成
-- [ ] PageLayoutコンポーネント作成
-- [ ] MainLayoutコンポーネント作成
-- [ ] RootLayout更新
-- [ ] レスポンシブ対応実装
-- [ ] モバイルメニュー実装
-- [ ] アクセシビリティ対応
-- [ ] テストページ作成
+- [x] Headerコンポーネント作成
+- [x] PageLayoutコンポーネント作成  
+- [x] MainLayoutコンポーネント作成
+- [x] RootLayout更新
+- [x] レスポンシブ対応実装
+- [x] モバイルメニュー実装
+- [x] アクセシビリティ対応
+- [x] テストページ作成
+- [x] 単体テスト作成（PageLayout, MainLayout）
+- [x] shadcn/ui追加コンポーネント導入（dropdown-menu, sheet）
 
 ### Challenges Faced
 
-<!-- 実装中に直面した課題を記録 -->
+**shadcn/uiコンポーネントの統合:**
+- dropdown-menuとsheetの個別インストールが必要
+- Prettierの書式設定との競合を自動修正で解決
+
+**テストカバレッジ:**  
+- 新規レイアウトコンポーネント追加によりカバレッジが一時的に低下
+- PageLayoutとMainLayoutの基本テストを追加して改善
+
+**レスポンシブデザイン:**
+- モバイルファーストアプローチでの実装
+- shadcn/ui Sheetコンポーネントを活用したモバイルメニュー
 
 ### Testing Results
 
-- [ ] デスクトップ表示確認
-- [ ] タブレット表示確認
-- [ ] モバイル表示確認
-- [ ] ナビゲーション動作確認
-- [ ] キーボードナビゲーション確認
-- [ ] スクリーンリーダー対応確認
+- [x] デスクトップ表示確認
+- [x] タブレット表示確認  
+- [x] モバイル表示確認
+- [x] ナビゲーション動作確認
+- [x] キーボードナビゲーション確認
+- [x] スクリーンリーダー対応確認
+- [x] 単体テスト実行（PageLayout: 8テスト、MainLayout: 5テスト）
+- [x] TypeScript型チェック通過
+- [x] ESLint検証通過
 
 ### Code Review Feedback
 
-<!-- コードレビューでの指摘事項と対応を記録 -->
+**実装完了 - レビュー待ち:**
+- PR作成済み: feature/issue-007-layout-components
+- 全Acceptance Criteria達成
+- テストページ(/layout-test)で動作確認可能
 
 ## Next Steps
 
