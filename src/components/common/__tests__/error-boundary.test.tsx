@@ -11,7 +11,7 @@ jest.mock('react-error-boundary', () => ({
   ErrorBoundary: ({ children, FallbackComponent, onError }: any) => {
     const [hasError, setHasError] = React.useState(false)
     const [error] = React.useState(new Error('Test error message'))
-    
+
     React.useEffect(() => {
       // Simulate error condition for testing
       if (children?.props?.shouldThrow) {
@@ -19,16 +19,16 @@ jest.mock('react-error-boundary', () => ({
         onError?.(error, { componentStack: 'test stack' })
       }
     }, [children?.props?.shouldThrow, error, onError])
-    
+
     if (hasError && FallbackComponent) {
       return React.createElement(FallbackComponent, {
         error,
-        resetErrorBoundary: () => setHasError(false)
+        resetErrorBoundary: () => setHasError(false),
       })
     }
-    
+
     return children
-  }
+  },
 }))
 
 // Mock component that throws an error
@@ -60,7 +60,7 @@ describe('ErrorBoundary', () => {
         <ThrowError shouldThrow={false} />
       </ErrorBoundary>
     )
-    
+
     expect(screen.getByText('No error')).toBeInTheDocument()
   })
 
@@ -70,10 +70,14 @@ describe('ErrorBoundary', () => {
         <ThrowError shouldThrow={true} />
       </ErrorBoundary>
     )
-    
+
     expect(screen.getByText('エラーが発生しました')).toBeInTheDocument()
     expect(screen.getByText('申し訳ございません')).toBeInTheDocument()
-    expect(screen.getByText('予期しないエラーが発生しました。ページを再読み込みして再試行してください。')).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        '予期しないエラーが発生しました。ページを再読み込みして再試行してください。'
+      )
+    ).toBeInTheDocument()
   })
 
   it('shows retry and reload buttons', () => {
@@ -82,9 +86,11 @@ describe('ErrorBoundary', () => {
         <ThrowError shouldThrow={true} />
       </ErrorBoundary>
     )
-    
+
     expect(screen.getByRole('button', { name: /再試行/ })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /ページを再読み込み/ })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /ページを再読み込み/ })
+    ).toBeInTheDocument()
   })
 
   it('calls window.location.reload when reload button is clicked', () => {
@@ -93,28 +99,30 @@ describe('ErrorBoundary', () => {
       value: { reload: mockReload },
       writable: true,
     })
-    
+
     render(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
       </ErrorBoundary>
     )
-    
-    const reloadButton = screen.getByRole('button', { name: /ページを再読み込み/ })
+
+    const reloadButton = screen.getByRole('button', {
+      name: /ページを再読み込み/,
+    })
     fireEvent.click(reloadButton)
-    
+
     expect(mockReload).toHaveBeenCalledTimes(1)
   })
 
   it('calls onError callback when error occurs', () => {
     const mockOnError = jest.fn()
-    
+
     render(
       <ErrorBoundary onError={mockOnError}>
         <ThrowError shouldThrow={true} />
       </ErrorBoundary>
     )
-    
+
     expect(mockOnError).toHaveBeenCalledWith(
       expect.any(Error),
       expect.objectContaining({
@@ -124,33 +132,33 @@ describe('ErrorBoundary', () => {
   })
 
   it('shows error details in development environment', () => {
-    const originalEnv = process.env.NODE_ENV;
-    (process.env as any).NODE_ENV = 'development'
-    
+    const originalEnv = process.env.NODE_ENV
+    ;(process.env as any).NODE_ENV = 'development'
+
     render(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
       </ErrorBoundary>
     )
-    
+
     expect(screen.getByText('詳細を表示（開発環境）')).toBeInTheDocument()
-    
+
     // Restore original environment
     ;(process.env as any).NODE_ENV = originalEnv
   })
 
   it('hides error details in production environment', () => {
-    const originalEnv = process.env.NODE_ENV;
-    (process.env as any).NODE_ENV = 'production'
-    
+    const originalEnv = process.env.NODE_ENV
+    ;(process.env as any).NODE_ENV = 'production'
+
     render(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
       </ErrorBoundary>
     )
-    
+
     expect(screen.queryByText('詳細を表示（開発環境）')).not.toBeInTheDocument()
-    
+
     // Restore original environment
     ;(process.env as any).NODE_ENV = originalEnv
   })
@@ -171,11 +179,13 @@ describe('PageErrorBoundary', () => {
         <ThrowError shouldThrow={true} />
       </PageErrorBoundary>
     )
-    
+
     expect(screen.getByText('エラーが発生しました')).toBeInTheDocument()
-    
+
     // Check for full-screen styling class
-    const container = screen.getByText('エラーが発生しました').closest('.min-h-screen')
+    const container = screen
+      .getByText('エラーが発生しました')
+      .closest('.min-h-screen')
     expect(container).toBeInTheDocument()
   })
 })
@@ -195,9 +205,11 @@ describe('ComponentErrorBoundary', () => {
         <ThrowError shouldThrow={true} />
       </ComponentErrorBoundary>
     )
-    
+
     expect(screen.getByText('コンポーネントエラー')).toBeInTheDocument()
-    expect(screen.getByText('このコンポーネントの読み込みに失敗しました。')).toBeInTheDocument()
+    expect(
+      screen.getByText('このコンポーネントの読み込みに失敗しました。')
+    ).toBeInTheDocument()
   })
 
   it('has retry button in component error boundary', () => {
@@ -206,7 +218,7 @@ describe('ComponentErrorBoundary', () => {
         <ThrowError shouldThrow={true} />
       </ComponentErrorBoundary>
     )
-    
+
     expect(screen.getByRole('button', { name: /再試行/ })).toBeInTheDocument()
   })
 })

@@ -20,7 +20,9 @@ describe('LoadingSpinner', () => {
 
   it('applies custom className', () => {
     render(<LoadingSpinner className="custom-class" />)
-    const container = screen.getByTestId('loader2-icon').closest('.custom-class')
+    const container = screen
+      .getByTestId('loader2-icon')
+      .closest('.custom-class')
     expect(container).toBeInTheDocument()
   })
 })

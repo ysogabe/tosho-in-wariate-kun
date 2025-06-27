@@ -5,7 +5,7 @@ import { Icon, AppIcons } from '../icon'
 describe('Icon', () => {
   it('renders with default size (md)', () => {
     render(<Icon icon={Settings} />)
-    
+
     const icon = screen.getByTestId('settings-icon')
     expect(icon).toBeInTheDocument()
     expect(icon).toHaveClass('h-5', 'w-5')
@@ -14,7 +14,7 @@ describe('Icon', () => {
 
   it('renders with custom size', () => {
     render(<Icon icon={Settings} size="lg" />)
-    
+
     const icon = screen.getByTestId('settings-icon')
     expect(icon).toHaveClass('h-6', 'w-6')
   })
@@ -31,25 +31,25 @@ describe('Icon', () => {
     sizes.forEach(({ size, classes }) => {
       const { unmount } = render(<Icon icon={Settings} size={size} />)
       const icon = screen.getByTestId('settings-icon')
-      
-      classes.forEach(className => {
+
+      classes.forEach((className) => {
         expect(icon).toHaveClass(className)
       })
-      
+
       unmount()
     })
   })
 
   it('applies custom className', () => {
     render(<Icon icon={Settings} className="text-blue-500 custom-class" />)
-    
+
     const icon = screen.getByTestId('settings-icon')
     expect(icon).toHaveClass('text-blue-500', 'custom-class')
   })
 
   it('has proper accessibility attributes', () => {
     render(<Icon icon={Settings} />)
-    
+
     const icon = screen.getByTestId('settings-icon')
     expect(icon).toHaveAttribute('aria-hidden', 'true')
   })
@@ -142,28 +142,28 @@ describe('AppIcons', () => {
   describe('Flexible props support', () => {
     it('accepts custom size prop', () => {
       render(<AppIcons.Dashboard size="lg" />)
-      
+
       const icon = screen.getByTestId('dashboard-icon')
       expect(icon).toHaveClass('h-6', 'w-6')
     })
 
     it('accepts custom className prop', () => {
       render(<AppIcons.Settings className="text-red-500" />)
-      
+
       const icon = screen.getByTestId('settings-icon')
       expect(icon).toHaveClass('text-red-500')
     })
 
     it('accepts multiple props simultaneously', () => {
       render(<AppIcons.Users size="xl" className="text-blue-600 rotate-45" />)
-      
+
       const icon = screen.getByTestId('users-icon')
       expect(icon).toHaveClass('h-8', 'w-8', 'text-blue-600', 'rotate-45')
     })
 
     it('works without any props (default behavior)', () => {
       render(<AppIcons.Add />)
-      
+
       const icon = screen.getByTestId('plus-icon')
       expect(icon).toHaveClass('h-5', 'w-5') // default md size
       expect(icon).toHaveAttribute('aria-hidden', 'true')
@@ -190,7 +190,7 @@ describe('AppIcons', () => {
         AppIcons.School,
       ]
 
-      iconComponents.forEach((IconComponent, index) => {
+      iconComponents.forEach((IconComponent) => {
         const { unmount } = render(<IconComponent />)
         const icon = screen.getByRole('img', { hidden: true })
         expect(icon).toBeInTheDocument()
