@@ -120,7 +120,7 @@ describe('SortableHeader', () => {
   const mockColumn = {
     toggleSorting: jest.fn(),
     getIsSorted: jest.fn(() => false),
-  }
+  } as any
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -182,6 +182,7 @@ describe('RowActions', () => {
     const triggerButton = screen.getByRole('button')
     await user.click(triggerButton)
 
+    expect(screen.getByText('アクション')).toBeInTheDocument()
     expect(screen.getByText('Edit')).toBeInTheDocument()
     expect(screen.getByText('Delete')).toBeInTheDocument()
   })
