@@ -47,28 +47,36 @@ import {
   GraduationCap,
 } from 'lucide-react'
 
-// Common icons for the application
+// Common icons for the application with flexible props
 export const AppIcons = {
   // Navigation
-  Dashboard: () => <Icon icon={LayoutDashboard} />,
-  Settings: () => <Icon icon={Settings} />,
-  Users: () => <Icon icon={Users} />,
+  Dashboard: (props?: Partial<IconProps>) => (
+    <Icon icon={LayoutDashboard} {...props} />
+  ),
+  Settings: (props?: Partial<IconProps>) => <Icon icon={Settings} {...props} />,
+  Users: (props?: Partial<IconProps>) => <Icon icon={Users} {...props} />,
 
   // Actions
-  Add: () => <Icon icon={Plus} />,
-  Edit: () => <Icon icon={Edit} />,
-  Delete: () => <Icon icon={Trash2} />,
-  Save: () => <Icon icon={Save} />,
+  Add: (props?: Partial<IconProps>) => <Icon icon={Plus} {...props} />,
+  Edit: (props?: Partial<IconProps>) => <Icon icon={Edit} {...props} />,
+  Delete: (props?: Partial<IconProps>) => <Icon icon={Trash2} {...props} />,
+  Save: (props?: Partial<IconProps>) => <Icon icon={Save} {...props} />,
 
   // Status
-  Success: () => <Icon icon={CheckCircle} />,
-  Error: () => <Icon icon={XCircle} />,
-  Warning: () => <Icon icon={AlertTriangle} />,
-  Info: () => <Icon icon={Info} />,
+  Success: (props?: Partial<IconProps>) => (
+    <Icon icon={CheckCircle} {...props} />
+  ),
+  Error: (props?: Partial<IconProps>) => <Icon icon={XCircle} {...props} />,
+  Warning: (props?: Partial<IconProps>) => (
+    <Icon icon={AlertTriangle} {...props} />
+  ),
+  Info: (props?: Partial<IconProps>) => <Icon icon={Info} {...props} />,
 
   // Library specific
-  Book: () => <Icon icon={Book} />,
-  Calendar: () => <Icon icon={Calendar} />,
-  Clock: () => <Icon icon={Clock} />,
-  School: () => <Icon icon={GraduationCap} />,
+  Book: (props?: Partial<IconProps>) => <Icon icon={Book} {...props} />,
+  Calendar: (props?: Partial<IconProps>) => <Icon icon={Calendar} {...props} />,
+  Clock: (props?: Partial<IconProps>) => <Icon icon={Clock} {...props} />,
+  School: (props?: Partial<IconProps>) => (
+    <Icon icon={GraduationCap} {...props} />
+  ),
 }

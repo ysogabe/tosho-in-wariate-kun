@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils'
 import { Loader2 } from 'lucide-react'
+import { useMemo } from 'react'
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg'
@@ -50,18 +51,20 @@ export function PageLoading() {
 }
 
 export function TableLoading({ rows = 5 }: { rows?: number }) {
-  return (
-    <div className="space-y-3">
-      {Array.from({ length: rows }).map((_, i) => (
+  const skeletonRows = useMemo(
+    () =>
+      Array.from({ length: rows }, (_, i) => (
         <div key={i} className="flex space-x-4">
           <div className="h-4 w-[100px] bg-muted animate-pulse rounded" />
           <div className="h-4 w-[150px] bg-muted animate-pulse rounded" />
           <div className="h-4 w-[100px] bg-muted animate-pulse rounded" />
           <div className="h-4 w-[80px] bg-muted animate-pulse rounded" />
         </div>
-      ))}
-    </div>
+      )),
+    [rows]
   )
+
+  return <div className="space-y-3">{skeletonRows}</div>
 }
 
 export function CardLoading() {
