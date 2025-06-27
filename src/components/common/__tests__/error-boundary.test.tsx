@@ -40,7 +40,7 @@ const ThrowError = ({ shouldThrow = true }: { shouldThrow?: boolean }) => {
 }
 
 // Access mock from jest.setup.js
-const mockReload = global.mockReload
+const mockReload = (global as any).mockReload
 
 describe('ErrorBoundary', () => {
   beforeEach(() => {
@@ -124,8 +124,8 @@ describe('ErrorBoundary', () => {
   })
 
   it('shows error details in development environment', () => {
-    const originalEnv = process.env.NODE_ENV
-    process.env.NODE_ENV = 'development'
+    const originalEnv = process.env.NODE_ENV;
+    (process.env as any).NODE_ENV = 'development'
     
     render(
       <ErrorBoundary>
@@ -136,12 +136,12 @@ describe('ErrorBoundary', () => {
     expect(screen.getByText('詳細を表示（開発環境）')).toBeInTheDocument()
     
     // Restore original environment
-    process.env.NODE_ENV = originalEnv
+    ;(process.env as any).NODE_ENV = originalEnv
   })
 
   it('hides error details in production environment', () => {
-    const originalEnv = process.env.NODE_ENV
-    process.env.NODE_ENV = 'production'
+    const originalEnv = process.env.NODE_ENV;
+    (process.env as any).NODE_ENV = 'production'
     
     render(
       <ErrorBoundary>
@@ -152,7 +152,7 @@ describe('ErrorBoundary', () => {
     expect(screen.queryByText('詳細を表示（開発環境）')).not.toBeInTheDocument()
     
     // Restore original environment
-    process.env.NODE_ENV = originalEnv
+    ;(process.env as any).NODE_ENV = originalEnv
   })
 })
 

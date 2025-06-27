@@ -36,15 +36,15 @@ describe('PageLoading', () => {
 describe('TableLoading', () => {
   it('renders table skeleton', () => {
     render(<TableLoading />)
-    // Check basic structure exists
-    const container = screen.getByText('Loading').parentElement
-    expect(container).toBeInTheDocument()
+    // Check basic structure exists - skeleton elements have specific classes
+    const skeleton = document.querySelector('.animate-pulse')
+    expect(skeleton).toBeInTheDocument()
   })
 
   it('renders custom number of rows', () => {
     render(<TableLoading rows={3} />)
-    const container = screen.getByText('Loading').parentElement
-    expect(container).toBeInTheDocument()
+    const skeletons = document.querySelectorAll('.animate-pulse')
+    expect(skeletons.length).toBeGreaterThan(0)
   })
 })
 
@@ -52,7 +52,7 @@ describe('CardLoading', () => {
   it('renders card skeleton', () => {
     render(<CardLoading />)
     // Check that skeleton structure exists
-    const container = screen.getByText('Loading').parentElement
-    expect(container).toBeInTheDocument()
+    const skeleton = document.querySelector('.animate-pulse')
+    expect(skeleton).toBeInTheDocument()
   })
 })

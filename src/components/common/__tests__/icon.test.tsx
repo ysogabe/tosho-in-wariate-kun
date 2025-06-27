@@ -192,8 +192,8 @@ describe('AppIcons', () => {
 
       iconComponents.forEach((IconComponent, index) => {
         const { unmount } = render(<IconComponent />)
-        const icons = screen.getAllByAttribute('aria-hidden', 'true')
-        expect(icons).toHaveLength(1)
+        const icon = screen.getByRole('img', { hidden: true })
+        expect(icon).toBeInTheDocument()
         unmount()
       })
     })
