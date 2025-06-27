@@ -9,12 +9,14 @@ The Tosho-in Wariate-kun system supports multiple deployment strategies, from lo
 ## Documentation Structure
 
 ### Deployment Strategies
+
 - **[Production Deployment](./production/README.md)** - Complete production deployment guide
 - **[Staging Deployment](./staging/README.md)** - Staging environment setup
 - **[Development Deployment](./development/README.md)** - Local and development environment setup
 - **[Docker Deployment](./docker/README.md)** - Containerized deployment options
 
 ### Platform-Specific Guides
+
 - **[Vercel Deployment](./platforms/vercel.md)** - Frontend deployment on Vercel
 - **[Railway Deployment](./platforms/railway.md)** - Full-stack deployment on Railway
 - **[DigitalOcean Deployment](./platforms/digitalocean.md)** - VPS deployment guide
@@ -22,12 +24,14 @@ The Tosho-in Wariate-kun system supports multiple deployment strategies, from lo
 - **[Google Cloud Deployment](./platforms/gcp.md)** - Google Cloud Platform deployment
 
 ### Infrastructure & DevOps
+
 - **[CI/CD Pipeline](./cicd/README.md)** - Continuous integration and deployment
 - **[Environment Configuration](./environment/README.md)** - Environment variables and configuration
 - **[Database Setup](./database/README.md)** - Database deployment and migration
 - **[Monitoring & Logging](./monitoring/README.md)** - Production monitoring setup
 
 ### Security & Maintenance
+
 - **[Security Configuration](./security/README.md)** - Production security setup
 - **[SSL/TLS Setup](./security/ssl-setup.md)** - HTTPS configuration
 - **[Backup & Recovery](./backup/README.md)** - Data backup and disaster recovery
@@ -36,6 +40,7 @@ The Tosho-in Wariate-kun system supports multiple deployment strategies, from lo
 ## Quick Deployment Options
 
 ### 1. Local Development
+
 ```bash
 # Clone and setup
 git clone https://github.com/your-org/tosho-in-wariate-kun.git
@@ -47,6 +52,7 @@ pnpm dev
 ```
 
 ### 2. Docker Compose (Recommended for Testing)
+
 ```bash
 # Build and start all services
 docker-compose up -d
@@ -58,6 +64,7 @@ docker-compose up -d
 ```
 
 ### 3. Vercel (Frontend Only)
+
 ```bash
 # Install Vercel CLI
 npm install -g vercel
@@ -68,6 +75,7 @@ vercel --prod
 ```
 
 ### 4. Railway (Full Stack)
+
 ```bash
 # Install Railway CLI
 npm install -g @railway/cli
@@ -80,6 +88,7 @@ railway up
 ## Architecture Overview
 
 ### Application Components
+
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │                 │    │                 │    │                 │
@@ -99,7 +108,9 @@ railway up
 ```
 
 ### Shared Packages
+
 The monorepo includes shared packages that are built and included in both frontend and backend deployments:
+
 - `@tosho/shared` - Common types and interfaces
 - `@tosho/ui` - Shared UI components (frontend only)
 - `@tosho/utils` - Common utilities
@@ -107,6 +118,7 @@ The monorepo includes shared packages that are built and included in both fronte
 ## Environment Requirements
 
 ### System Requirements
+
 - **Node.js**: 20.x LTS
 - **pnpm**: 8.x or higher
 - **PostgreSQL**: 14.x or higher
@@ -115,6 +127,7 @@ The monorepo includes shared packages that are built and included in both fronte
 ### Environment Variables
 
 #### Frontend (.env.local)
+
 ```bash
 # API Configuration
 NEXT_PUBLIC_API_URL=https://api.your-domain.com
@@ -128,6 +141,7 @@ NEXT_PUBLIC_GOOGLE_ANALYTICS_ID=GA-XXXXXXXXX
 ```
 
 #### Backend (.env)
+
 ```bash
 # Database
 DATABASE_URL=postgresql://user:password@localhost:5432/tosho_db
@@ -151,6 +165,7 @@ RATE_LIMIT_MAX=100
 ## Deployment Checklist
 
 ### Pre-Deployment
+
 - [ ] Environment variables configured
 - [ ] Database migrations tested
 - [ ] SSL certificates obtained
@@ -159,6 +174,7 @@ RATE_LIMIT_MAX=100
 - [ ] Backup strategy implemented
 
 ### Testing
+
 - [ ] Unit tests passing
 - [ ] Integration tests passing
 - [ ] E2E tests passing
@@ -167,6 +183,7 @@ RATE_LIMIT_MAX=100
 - [ ] Load testing completed
 
 ### Production Deployment
+
 - [ ] Database backed up
 - [ ] Deployment pipeline tested
 - [ ] Rollback plan prepared
@@ -175,6 +192,7 @@ RATE_LIMIT_MAX=100
 - [ ] Team notified of deployment
 
 ### Post-Deployment
+
 - [ ] Health checks verified
 - [ ] Functionality tested
 - [ ] Performance metrics reviewed
@@ -185,18 +203,21 @@ RATE_LIMIT_MAX=100
 ## Monitoring & Observability
 
 ### Application Monitoring
+
 - **Health Checks**: Built-in health check endpoints
 - **Performance Metrics**: Response times and throughput
 - **Error Tracking**: Comprehensive error logging
 - **User Analytics**: Usage patterns and behavior
 
 ### Infrastructure Monitoring
+
 - **Server Metrics**: CPU, memory, disk usage
 - **Database Performance**: Query performance and connections
 - **Network Monitoring**: Latency and availability
 - **Security Monitoring**: Authentication and access logs
 
 ### Alerting
+
 - **Critical Errors**: Immediate notification for system failures
 - **Performance Degradation**: Alerts for slow response times
 - **Capacity Issues**: Warnings for resource usage
@@ -205,18 +226,21 @@ RATE_LIMIT_MAX=100
 ## Scaling Considerations
 
 ### Horizontal Scaling
+
 - **Frontend**: Multiple Vercel deployments with load balancing
 - **Backend**: Multiple NestJS instances with load balancer
 - **Database**: Read replicas for improved performance
 - **Caching**: Redis cluster for session and data caching
 
 ### Vertical Scaling
+
 - **Server Resources**: CPU and memory upgrades
 - **Database**: Higher-tier database instances
 - **Storage**: SSD upgrades for better I/O performance
 - **Network**: Enhanced bandwidth allocation
 
 ### Performance Optimization
+
 - **Frontend**: Code splitting, image optimization, CDN usage
 - **Backend**: Database query optimization, caching strategies
 - **Database**: Index optimization, query performance tuning
@@ -225,18 +249,21 @@ RATE_LIMIT_MAX=100
 ## Security Best Practices
 
 ### Application Security
+
 - **Input Validation**: All user inputs validated and sanitized
 - **Authentication**: Secure JWT implementation
 - **Authorization**: Role-based access control
 - **Data Protection**: Encryption at rest and in transit
 
 ### Infrastructure Security
+
 - **Network Security**: Firewall rules and VPC configuration
 - **Access Control**: SSH key management and restricted access
 - **Certificate Management**: Automated SSL certificate renewal
 - **Vulnerability Management**: Regular security updates
 
 ### Compliance
+
 - **Data Privacy**: GDPR and local privacy law compliance
 - **Educational Data**: Special considerations for student data
 - **Audit Logging**: Comprehensive audit trail
@@ -245,18 +272,21 @@ RATE_LIMIT_MAX=100
 ## Disaster Recovery
 
 ### Backup Strategy
+
 - **Database Backups**: Daily automated backups with point-in-time recovery
 - **Application Backups**: Source code in version control
 - **Configuration Backups**: Infrastructure as code
 - **Data Export**: Regular data exports for compliance
 
 ### Recovery Procedures
+
 - **Service Restoration**: Step-by-step service recovery procedures
 - **Data Recovery**: Database restoration from backups
 - **Infrastructure Recovery**: Infrastructure recreation procedures
 - **Communication Plan**: Stakeholder communication during outages
 
 ### Business Continuity
+
 - **Maintenance Windows**: Planned maintenance scheduling
 - **Rollback Procedures**: Quick rollback for failed deployments
 - **Alternative Access**: Offline access capabilities when possible
@@ -265,18 +295,21 @@ RATE_LIMIT_MAX=100
 ## Troubleshooting
 
 ### Common Issues
+
 - **[Deployment Failures](./troubleshooting/deployment-failures.md)** - Common deployment problems
 - **[Performance Issues](./troubleshooting/performance-issues.md)** - Performance troubleshooting
 - **[Database Issues](./troubleshooting/database-issues.md)** - Database-related problems
 - **[Network Issues](./troubleshooting/network-issues.md)** - Connectivity and network problems
 
 ### Diagnostic Tools
+
 - **Health Check Endpoints**: Real-time system status
 - **Log Analysis**: Centralized logging and analysis
 - **Performance Profiling**: Application performance analysis
 - **Database Monitoring**: Query performance and optimization
 
 ### Emergency Procedures
+
 - **Incident Response**: Step-by-step incident handling
 - **Escalation Procedures**: When and how to escalate issues
 - **Communication Templates**: Pre-written incident communications
@@ -285,18 +318,21 @@ RATE_LIMIT_MAX=100
 ## Support and Maintenance
 
 ### Regular Maintenance
+
 - **Security Updates**: Regular dependency and security updates
 - **Performance Monitoring**: Ongoing performance analysis
 - **Capacity Planning**: Resource usage trending and planning
 - **Documentation Updates**: Keeping deployment docs current
 
 ### Team Responsibilities
+
 - **Development Team**: Code deployment and application issues
 - **DevOps Team**: Infrastructure and deployment pipeline
 - **Database Team**: Database performance and optimization
 - **Security Team**: Security monitoring and compliance
 
 ### External Support
+
 - **Platform Support**: Cloud provider technical support
 - **Third-party Services**: Monitoring and security service support
 - **Community Support**: Open source community resources

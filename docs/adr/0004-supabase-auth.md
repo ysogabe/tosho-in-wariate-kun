@@ -111,12 +111,14 @@
 ### 1. NextAuth.js
 
 #### メリット
+
 - Next.jsとの緊密な統合
 - 多様な認証プロバイダー
 - 柔軟なカスタマイズ
 - データベース非依存
 
 #### デメリット
+
 - Supabaseデータベースとの統合に追加作業が必要
 - RLSとの連携が複雑
 - 認証とデータベースの同期維持が必要
@@ -124,11 +126,13 @@
 ### 2. Firebase Authentication
 
 #### メリット
+
 - 成熟した認証システム
 - 広範なソーシャルログインオプション
 - 電話認証のサポート
 
 #### デメリット
+
 - Supabaseデータベースとの連携が複雑
 - Firebaseエコシステムへの依存
 - 複数サービスにまたがる管理の複雑さ
@@ -136,11 +140,13 @@
 ### 3. カスタム認証システム
 
 #### メリット
+
 - 完全なカスタマイズ性
 - 特定の要件に合わせた最適化
 - 外部依存なし
 
 #### デメリット
+
 - 実装コストが非常に高い
 - セキュリティリスク
 - 保守コストの増大
@@ -198,7 +204,7 @@ const setUserRole = async (userId: string, role: string) => {
     .from('users')
     .update({ role })
     .eq('id', userId)
-  
+
   return { data, error }
 }
 
@@ -216,7 +222,7 @@ const RoleBasedComponent = ({ requiredRole, children }) => {
           .select('role')
           .eq('id', data.user.id)
           .single()
-        
+
         setUser({ ...data.user, role: userData?.role })
       }
       setLoading(false)
@@ -244,7 +250,7 @@ import type { NextRequest } from 'next/server'
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
   const supabase = createMiddlewareClient({ req, res })
-  
+
   const {
     data: { session },
   } = await supabase.auth.getSession()
@@ -261,7 +267,7 @@ export async function middleware(req: NextRequest) {
       .select('role')
       .eq('id', session?.user?.id)
       .single()
-    
+
     if (data?.role !== 'admin' && data?.role !== 'teacher') {
       return NextResponse.redirect(new URL('/dashboard', req.url))
     }
@@ -271,11 +277,7 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    '/dashboard/:path*',
-    '/admin/:path*',
-    '/schedule/:path*',
-  ],
+  matcher: ['/dashboard/:path*', '/admin/:path*', '/schedule/:path*'],
 }
 ```
 

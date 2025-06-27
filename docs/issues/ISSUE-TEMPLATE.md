@@ -1,7 +1,7 @@
 # Issue #XXX: [Descriptive Title]
 
 **Priority**: Low | Medium | High
-**Difficulty**: Beginner | Intermediate 
+**Difficulty**: Beginner | Intermediate
 **Estimated Time**: X hours/days
 **Type**: Bug Fix | Feature | Documentation | Refactor | Setup
 **Labels**: frontend, backend, testing, documentation, configuration
@@ -30,6 +30,7 @@
 ### Getting Started
 
 1. **Repository Setup**
+
    ```bash
    # Clone and setup commands
    git clone [repo-url]
@@ -38,6 +39,7 @@
    ```
 
 2. **Branch Creation**
+
    ```bash
    git checkout -b issue/XXX-descriptive-branch-name
    ```
@@ -73,23 +75,27 @@
 ## Step-by-Step Implementation Plan
 
 ### Phase 1: Setup and Planning
+
 - [ ] Read through all requirements and resources
 - [ ] Set up development environment
 - [ ] Create feature branch
 - [ ] Review similar implementations in codebase
 
 ### Phase 2: Implementation
+
 - [ ] [Specific implementation step 1]
 - [ ] [Specific implementation step 2]
 - [ ] [Specific implementation step 3]
 
 ### Phase 3: Testing
+
 - [ ] Write unit tests
 - [ ] Write integration tests (if applicable)
 - [ ] Manual testing
 - [ ] Verify all acceptance criteria
 
 ### Phase 4: Documentation and Review
+
 - [ ] Update relevant documentation
 - [ ] Self-review code changes
 - [ ] Create pull request
@@ -98,15 +104,18 @@
 ## Testing Requirements
 
 ### Unit Tests
+
 - **Location**: [Specify test file locations]
 - **Coverage**: Minimum 90% line coverage
 - **Test Cases**: [Specify key test scenarios]
 
 ### Integration Tests
+
 - **Scope**: [Define integration test requirements]
 - **Test Data**: [Specify test data needs]
 
 ### Manual Testing
+
 - **Test Scenarios**: [List manual test cases]
 - **Browser Testing**: [If frontend task]
 - **API Testing**: [If backend task]

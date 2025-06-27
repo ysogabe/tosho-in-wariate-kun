@@ -107,11 +107,13 @@
 ### 1. セルフホスティングのPostgreSQL + Prisma
 
 #### メリット
+
 - 完全なコントロール
 - ベンダーロックインなし
 - 従来型の開発パターン
 
 #### デメリット
+
 - インフラ管理コスト
 - 開発工数増加
 - リアルタイム機能の自前実装が必要
@@ -119,11 +121,13 @@
 ### 2. Firebase
 
 #### メリット
+
 - Googleの強力なインフラ
 - 豊富な統合サービス
 - スケーラビリティ
 
 #### デメリット
+
 - NoSQLモデル（スケジュールデータの関係モデリングに不向き）
 - クエリの柔軟性に制限
 - コスト構造がSupabaseより複雑な場合がある
@@ -131,11 +135,13 @@
 ### 3. Planet Scale (MySQL) + Prisma
 
 #### メリット
+
 - 高いスケーラビリティ
 - ブランチング機能
 - MySQLの親和性
 
 #### デメリット
+
 - リアルタイム機能の欠如
 - PostgreSQLの高度な機能がない
 - RLSのような細かい権限制御の実装が複雑
@@ -145,11 +151,13 @@
 ### 1. セルフホスティングのPostgreSQL + Prisma
 
 #### メリット
+
 - 完全なコントロール
 - ベンダーロックインなし
 - 従来型の開発パターン
 
 #### デメリット
+
 - インフラ管理コスト
 - 開発工数増加
 - リアルタイム機能の自前実装が必要
@@ -157,11 +165,13 @@
 ### 2. Firebase
 
 #### メリット
+
 - Googleの強力なインフラ
 - 豊富な統合サービス
 - スケーラビリティ
 
 #### デメリット
+
 - NoSQLモデル（スケジュールデータの関係モデリングに不向き）
 - クエリの柔軟性に制限
 - コスト構造がSupabaseより複雑な場合がある
@@ -169,11 +179,13 @@
 ### 3. Planet Scale (MySQL) + Prisma
 
 #### メリット
+
 - 高いスケーラビリティ
 - ブランチング機能
 - MySQLの親和性
 
 #### デメリット
+
 - リアルタイム機能の欠如
 - PostgreSQLの高度な機能がない
 - RLSのような細かい権限制御の実装が複雑
@@ -239,7 +251,7 @@ ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 -- 自分自身のデータのみ読み取り可能
 CREATE POLICY "ユーザーは自分のデータのみ表示可能" ON users
   FOR SELECT USING (auth.uid() = id);
-  
+
 -- 管理者は全ユーザーデータを読み取り可能
 CREATE POLICY "管理者は全ユーザーデータを表示可能" ON users
   FOR SELECT USING (auth.jwt() ->> 'role' = 'admin');
@@ -272,9 +284,9 @@ const scheduleSubscription = supabase
   .from('schedule_assignments')
   .on('*', (payload) => {
     // スケジュール変更をUIに反映
-    updateScheduleDisplay(payload.new);
+    updateScheduleDisplay(payload.new)
   })
-  .subscribe();
+  .subscribe()
 ```
 
 ## 注意点
