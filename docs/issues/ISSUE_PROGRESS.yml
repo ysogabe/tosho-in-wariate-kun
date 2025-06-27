@@ -1,0 +1,611 @@
+# Issue Progress Tracker
+# このファイルでIssueの進捗状況を管理します
+
+project:
+  name: '図書委員当番くん'
+  description: '小学校図書委員の当番表自動生成システム'
+  total_issues: 30
+  estimated_weeks: 6
+
+# ステータス定義
+status_definitions:
+  not_started: '🔴 未着手'
+  in_progress: '🟡 進行中'
+  completed: '🟢 完了'
+  under_review: '🔵 レビュー中'
+  blocked: '⚫ ブロック'
+
+# 優先度定義
+priority_definitions:
+  high: '🔥 High'
+  medium: '📋 Medium'
+  low: '📝 Low'
+
+# 難易度定義
+difficulty_definitions:
+  beginner: '🟢 Beginner'
+  intermediate: '🟡 Intermediate'
+  advanced: '🔴 Advanced'
+  expert: '🔥 Expert'
+
+# Issues詳細
+issues:
+  # === フェーズ1: 初期セットアップ ===
+  - id: 'ISSUE-001'
+    title: 'Next.js 15プロジェクトの初期セットアップ'
+    file: './ISSUE-001-project-setup-nextjs.md'
+    priority: 'high'
+    difficulty: 'beginner'
+    estimated_hours: '2-3'
+    status: 'completed'
+    assignee: 'Claude'
+    dependencies: []
+    blocks: ['ISSUE-002', 'ISSUE-003', 'ISSUE-004', 'ISSUE-005']
+    phase: 1
+    start_date: '2025-06-27'
+    end_date: '2025-06-27'
+    notes: 'Next.js 15 + TypeScript + Tailwind CSS セットアップ'
+
+  - id: 'ISSUE-002'
+    title: 'ESLint・Prettier設定とコード品質ツール構築'
+    file: './ISSUE-002-eslint-prettier-configuration.md'
+    priority: 'high'
+    difficulty: 'beginner'
+    estimated_hours: '1-2'
+    status: 'completed'
+    assignee: 'Claude'
+    dependencies: ['ISSUE-001']
+    blocks: ['all_development']
+    phase: 1
+    start_date: '2025-06-27'
+    end_date: '2025-06-27'
+    notes: 'ESLint + Prettier + TypeScript strict モード設定'
+
+  - id: 'ISSUE-003'
+    title: 'ローカル開発環境セットアップ（SQLite + NextAuth.js）'
+    file: './ISSUE-003-supabase-setup-configuration.md'
+    priority: 'high'
+    difficulty: 'intermediate'
+    estimated_hours: '3-4'
+    status: 'completed'
+    assignee: 'Claude'
+    dependencies: ['ISSUE-001']
+    blocks: ['ISSUE-004', 'ISSUE-009', 'ISSUE-011']
+    phase: 1
+    start_date: '2025-06-27'
+    end_date: '2025-06-27'
+    notes: 'SQLite + NextAuth.js ローカル開発環境'
+
+  - id: 'ISSUE-004'
+    title: 'Prismaスキーマ実装とデータベースマイグレーション'
+    file: './ISSUE-004-prisma-schema-implementation.md'
+    priority: 'high'
+    difficulty: 'intermediate'
+    estimated_hours: '4-5'
+    status: 'completed'
+    assignee: 'Claude'
+    dependencies: ['ISSUE-001', 'ISSUE-003']
+    blocks: ['ISSUE-012', 'ISSUE-013', 'ISSUE-014', 'ISSUE-015']
+    phase: 1
+    start_date: '2025-06-27'
+    end_date: '2025-06-27'
+    notes: 'SQLite向けPrismaスキーマ + NextAuth.js統合'
+
+  - id: 'ISSUE-005'
+    title: 'shadcn/ui セットアップとUIコンポーネント基盤構築'
+    file: './ISSUE-005-shadcn-ui-setup.md'
+    priority: 'high'
+    difficulty: 'beginner'
+    estimated_hours: '1-2'
+    status: 'completed'
+    assignee: 'Claude'
+    dependencies: ['ISSUE-001', 'ISSUE-002']
+    blocks: ['ISSUE-006', 'ISSUE-007', 'ISSUE-008']
+    phase: 1
+    start_date: '2025-06-27'
+    end_date: '2025-06-27'
+    notes: 'shadcn/ui + Tailwind CSS + 基本コンポーネント'
+
+  # === フェーズ2: 基本コンポーネント ===
+  - id: 'ISSUE-006'
+    title: '基本UIコンポーネント作成'
+    file: './ISSUE-006-basic-ui-components.md'
+    priority: 'high'
+    difficulty: 'beginner'
+    estimated_hours: '3-4'
+    status: 'not_started'
+    assignee: ''
+    dependencies: ['ISSUE-005']
+    blocks: ['ISSUE-007', 'ISSUE-010', 'all_pages']
+    phase: 2
+    start_date: ''
+    end_date: ''
+    notes: '基本的なUIパーツ'
+
+  - id: 'ISSUE-007'
+    title: 'レイアウトコンポーネント作成'
+    file: './ISSUE-007-layout-components.md'
+    priority: 'high'
+    difficulty: 'intermediate'
+    estimated_hours: '4-5'
+    status: 'not_started'
+    assignee: ''
+    dependencies: ['ISSUE-005', 'ISSUE-006']
+    blocks: ['all_pages']
+    phase: 2
+    start_date: ''
+    end_date: ''
+    notes: 'ページ共通レイアウト'
+
+  - id: 'ISSUE-008'
+    title: 'テーブルコンポーネント作成'
+    file: './ISSUE-008-table-component.md'
+    priority: 'high'
+    difficulty: 'intermediate'
+    estimated_hours: '5-6'
+    status: 'not_started'
+    assignee: ''
+    dependencies: ['ISSUE-005', 'ISSUE-006']
+    blocks: ['ISSUE-018', 'ISSUE-020', 'ISSUE-022', 'ISSUE-024']
+    phase: 2
+    start_date: ''
+    end_date: ''
+    notes: 'データテーブル表示'
+
+  # === フェーズ3: 認証システム ===
+  - id: 'ISSUE-009'
+    title: '認証コンテキスト実装'
+    file: './ISSUE-009-auth-context.md'
+    priority: 'high'
+    difficulty: 'intermediate'
+    estimated_hours: '4-5'
+    status: 'not_started'
+    assignee: ''
+    dependencies: ['ISSUE-003']
+    blocks: ['ISSUE-010', 'ISSUE-011', 'all_authenticated_features']
+    phase: 3
+    start_date: ''
+    end_date: ''
+    notes: '認証状態管理'
+
+  - id: 'ISSUE-010'
+    title: 'ログインフォーム作成'
+    file: './ISSUE-010-login-form.md'
+    priority: 'high'
+    difficulty: 'beginner'
+    estimated_hours: '3-4'
+    status: 'not_started'
+    assignee: ''
+    dependencies: ['ISSUE-006', 'ISSUE-009', 'ISSUE-016']
+    blocks: ['system_access']
+    phase: 3
+    start_date: ''
+    end_date: ''
+    notes: 'ユーザーログイン'
+
+  - id: 'ISSUE-011'
+    title: '認証ミドルウェア実装'
+    file: './ISSUE-011-auth-middleware.md'
+    priority: 'high'
+    difficulty: 'advanced'
+    estimated_hours: '4-6'
+    status: 'not_started'
+    assignee: ''
+    dependencies: ['ISSUE-003', 'ISSUE-009']
+    blocks: ['all_api_protection']
+    phase: 3
+    start_date: ''
+    end_date: ''
+    notes: 'API認証保護'
+
+  # === フェーズ4: データベース・API基盤 ===
+  - id: 'ISSUE-012'
+    title: 'データベースマイグレーション実装'
+    file: './ISSUE-012-database-migration.md'
+    priority: 'medium'
+    difficulty: 'intermediate'
+    estimated_hours: '3-4'
+    status: 'not_started'
+    assignee: ''
+    dependencies: ['ISSUE-004']
+    blocks: ['production_setup']
+    phase: 4
+    start_date: ''
+    end_date: ''
+    notes: 'DB初期化とマイグレーション'
+
+  - id: 'ISSUE-013'
+    title: 'クラス管理APIルート作成'
+    file: './ISSUE-013-class-api-routes.md'
+    priority: 'medium'
+    difficulty: 'intermediate'
+    estimated_hours: '4-5'
+    status: 'not_started'
+    assignee: ''
+    dependencies: ['ISSUE-004', 'ISSUE-011']
+    blocks: ['ISSUE-022']
+    phase: 4
+    start_date: ''
+    end_date: ''
+    notes: 'クラス情報管理API'
+
+  - id: 'ISSUE-014'
+    title: '図書委員管理APIルート作成'
+    file: './ISSUE-014-student-api-routes.md'
+    priority: 'medium'
+    difficulty: 'intermediate'
+    estimated_hours: '5-6'
+    status: 'not_started'
+    assignee: ''
+    dependencies: ['ISSUE-004', 'ISSUE-011', 'ISSUE-013']
+    blocks: ['ISSUE-020', 'ISSUE-021']
+    phase: 4
+    start_date: ''
+    end_date: ''
+    notes: '図書委員情報管理API'
+
+  - id: 'ISSUE-015'
+    title: 'スケジュール管理APIルート作成'
+    file: './ISSUE-015-schedule-api-routes.md'
+    priority: 'high'
+    difficulty: 'advanced'
+    estimated_hours: '6-8'
+    status: 'not_started'
+    assignee: ''
+    dependencies: ['ISSUE-004', 'ISSUE-011', 'ISSUE-014']
+    blocks: ['ISSUE-018', 'ISSUE-021']
+    phase: 4
+    start_date: ''
+    end_date: ''
+    notes: 'スケジュール管理API'
+
+  # === フェーズ5: フォーム・バリデーション ===
+  - id: 'ISSUE-016'
+    title: 'フォームバリデーションスキーマ実装'
+    file: './ISSUE-016-form-validation-schemas.md'
+    priority: 'medium'
+    difficulty: 'intermediate'
+    estimated_hours: '4-5'
+    status: 'not_started'
+    assignee: ''
+    dependencies: ['ISSUE-004']
+    blocks: ['ISSUE-010', 'ISSUE-020', 'ISSUE-022', 'ISSUE-024']
+    phase: 5
+    start_date: ''
+    end_date: ''
+    notes: '入力データ検証'
+
+  # === フェーズ6: 主要機能実装 ===
+  - id: 'ISSUE-017'
+    title: 'スケジュール表示コンポーネント作成'
+    file: './ISSUE-017-schedule-display-component.md'
+    priority: 'high'
+    difficulty: 'advanced'
+    estimated_hours: '6-8'
+    status: 'not_started'
+    assignee: ''
+    dependencies: ['ISSUE-006', 'ISSUE-008']
+    blocks: ['ISSUE-018']
+    phase: 6
+    start_date: ''
+    end_date: ''
+    notes: 'スケジュール可視化'
+
+  - id: 'ISSUE-018'
+    title: 'スケジュール管理ページ実装'
+    file: './ISSUE-018-schedule-management-page.md'
+    priority: 'high'
+    difficulty: 'advanced'
+    estimated_hours: '8-10'
+    status: 'not_started'
+    assignee: ''
+    dependencies:
+      ['ISSUE-007', 'ISSUE-008', 'ISSUE-015', 'ISSUE-017', 'ISSUE-021']
+    blocks: ['mvp_completion']
+    phase: 6
+    start_date: ''
+    end_date: ''
+    notes: 'メイン機能ページ'
+
+  - id: 'ISSUE-019'
+    title: 'ダッシュボードページ実装'
+    file: './ISSUE-019-dashboard-page.md'
+    priority: 'high'
+    difficulty: 'intermediate'
+    estimated_hours: '5-6'
+    status: 'not_started'
+    assignee: ''
+    dependencies: ['ISSUE-007', 'ISSUE-013', 'ISSUE-014', 'ISSUE-015']
+    blocks: ['user_experience']
+    phase: 6
+    start_date: ''
+    end_date: ''
+    notes: 'システム概要表示'
+
+  - id: 'ISSUE-020'
+    title: '図書委員管理ページ実装'
+    file: './ISSUE-020-student-management-page.md'
+    priority: 'high'
+    difficulty: 'intermediate'
+    estimated_hours: '6-8'
+    status: 'not_started'
+    assignee: ''
+    dependencies: ['ISSUE-007', 'ISSUE-008', 'ISSUE-014', 'ISSUE-016']
+    blocks: ['basic_operations']
+    phase: 6
+    start_date: ''
+    end_date: ''
+    notes: '図書委員CRUD機能'
+
+  - id: 'ISSUE-021'
+    title: 'スケジュール生成サービス実装'
+    file: './ISSUE-021-schedule-generation-service.md'
+    priority: 'high'
+    difficulty: 'expert'
+    estimated_hours: '10-12'
+    status: 'not_started'
+    assignee: ''
+    dependencies: ['ISSUE-014', 'ISSUE-015']
+    blocks: ['ISSUE-018']
+    phase: 6
+    start_date: ''
+    end_date: ''
+    notes: 'コアアルゴリズム実装'
+
+  # === フェーズ7: 追加機能 ===
+  - id: 'ISSUE-022'
+    title: 'クラス管理ページ実装'
+    file: './ISSUE-022-class-management-page.md'
+    priority: 'medium'
+    difficulty: 'intermediate'
+    estimated_hours: '4-6'
+    status: 'not_started'
+    assignee: ''
+    dependencies: ['ISSUE-007', 'ISSUE-008', 'ISSUE-013', 'ISSUE-016']
+    blocks: []
+    phase: 7
+    start_date: ''
+    end_date: ''
+    notes: 'クラス情報管理'
+
+  - id: 'ISSUE-023'
+    title: '印刷最適化機能実装'
+    file: './ISSUE-023-print-optimization.md'
+    priority: 'medium'
+    difficulty: 'intermediate'
+    estimated_hours: '4-5'
+    status: 'not_started'
+    assignee: ''
+    dependencies: ['ISSUE-017', 'ISSUE-018']
+    blocks: []
+    phase: 7
+    start_date: ''
+    end_date: ''
+    notes: 'A4印刷対応'
+
+  - id: 'ISSUE-024'
+    title: '図書室管理ページ実装'
+    file: './ISSUE-024-room-management-page.md'
+    priority: 'medium'
+    difficulty: 'intermediate'
+    estimated_hours: '4-6'
+    status: 'not_started'
+    assignee: ''
+    dependencies: ['ISSUE-007', 'ISSUE-008', 'ISSUE-016']
+    blocks: []
+    phase: 7
+    start_date: ''
+    end_date: ''
+    notes: '図書室情報管理'
+
+  - id: 'ISSUE-025'
+    title: 'システム設定ページ実装'
+    file: './ISSUE-025-system-settings-page.md'
+    priority: 'low'
+    difficulty: 'beginner'
+    estimated_hours: '3-4'
+    status: 'not_started'
+    assignee: ''
+    dependencies: ['ISSUE-007', 'ISSUE-011']
+    blocks: []
+    phase: 7
+    start_date: ''
+    end_date: ''
+    notes: 'システム管理機能'
+
+  - id: 'ISSUE-026'
+    title: 'エラーページ実装'
+    file: './ISSUE-026-error-pages.md'
+    priority: 'medium'
+    difficulty: 'beginner'
+    estimated_hours: '2-3'
+    status: 'not_started'
+    assignee: ''
+    dependencies: ['ISSUE-006', 'ISSUE-007']
+    blocks: []
+    phase: 7
+    start_date: ''
+    end_date: ''
+    notes: 'エラーハンドリング'
+
+  # === フェーズ8: テスト・デプロイ・ドキュメント ===
+  - id: 'ISSUE-027'
+    title: 'テストセットアップ'
+    file: './ISSUE-027-test-setup.md'
+    priority: 'medium'
+    difficulty: 'intermediate'
+    estimated_hours: '4-6'
+    status: 'not_started'
+    assignee: ''
+    dependencies: ['all_features']
+    blocks: ['ISSUE-028']
+    phase: 8
+    start_date: ''
+    end_date: ''
+    notes: 'テスト環境構築'
+
+  - id: 'ISSUE-028'
+    title: 'E2Eテスト実装'
+    file: './ISSUE-028-e2e-tests.md'
+    priority: 'medium'
+    difficulty: 'advanced'
+    estimated_hours: '6-8'
+    status: 'not_started'
+    assignee: ''
+    dependencies: ['ISSUE-027', 'all_features']
+    blocks: ['quality_assurance']
+    phase: 8
+    start_date: ''
+    end_date: ''
+    notes: '自動テスト実装'
+
+  - id: 'ISSUE-029'
+    title: 'デプロイ設定'
+    file: './ISSUE-029-deployment-configuration.md'
+    priority: 'medium'
+    difficulty: 'advanced'
+    estimated_hours: '6-8'
+    status: 'not_started'
+    assignee: ''
+    dependencies: ['ISSUE-027', 'ISSUE-028']
+    blocks: ['production_release']
+    phase: 8
+    start_date: ''
+    end_date: ''
+    notes: '本番環境構築'
+
+  - id: 'ISSUE-030'
+    title: 'ドキュメント整備'
+    file: './ISSUE-030-documentation-preparation.md'
+    priority: 'medium'
+    difficulty: 'intermediate'
+    estimated_hours: '4-6'
+    status: 'not_started'
+    assignee: ''
+    dependencies: ['all_issues']
+    blocks: ['operation_start']
+    phase: 8
+    start_date: ''
+    end_date: ''
+    notes: '運用マニュアル作成'
+
+# フェーズ情報
+phases:
+  1:
+    name: '初期セットアップ'
+    description: 'プロジェクト基盤構築'
+    estimated_weeks: 1
+    issues: ['ISSUE-001', 'ISSUE-002', 'ISSUE-003', 'ISSUE-004', 'ISSUE-005']
+
+  2:
+    name: '基本コンポーネント開発'
+    description: 'UI基盤構築'
+    estimated_weeks: 1
+    issues: ['ISSUE-006', 'ISSUE-007', 'ISSUE-008']
+
+  3:
+    name: '認証システム'
+    description: 'ユーザー認証機能'
+    estimated_weeks: 1
+    issues: ['ISSUE-009', 'ISSUE-010', 'ISSUE-011']
+
+  4:
+    name: 'データベース・API基盤'
+    description: 'バックエンド機能'
+    estimated_weeks: 1
+    issues: ['ISSUE-012', 'ISSUE-013', 'ISSUE-014', 'ISSUE-015']
+
+  5:
+    name: 'フォーム・バリデーション'
+    description: '入力検証機能'
+    estimated_weeks: 0.5
+    issues: ['ISSUE-016']
+
+  6:
+    name: '主要機能実装'
+    description: 'コア機能開発'
+    estimated_weeks: 1.5
+    issues: ['ISSUE-017', 'ISSUE-018', 'ISSUE-019', 'ISSUE-020', 'ISSUE-021']
+
+  7:
+    name: '追加機能'
+    description: '拡張機能開発'
+    estimated_weeks: 1
+    issues: ['ISSUE-022', 'ISSUE-023', 'ISSUE-024', 'ISSUE-025', 'ISSUE-026']
+
+  8:
+    name: 'テスト・デプロイ・ドキュメント'
+    description: '品質保証とリリース準備'
+    estimated_weeks: 1
+    issues: ['ISSUE-027', 'ISSUE-028', 'ISSUE-029', 'ISSUE-030']
+
+# マイルストーン
+milestones:
+  mvp_alpha:
+    name: 'MVP Alpha'
+    description: '基本機能が動作する状態'
+    target_date: 'Week 4'
+    required_issues:
+      [
+        'ISSUE-001',
+        'ISSUE-002',
+        'ISSUE-003',
+        'ISSUE-004',
+        'ISSUE-005',
+        'ISSUE-006',
+        'ISSUE-007',
+        'ISSUE-009',
+        'ISSUE-010',
+        'ISSUE-011',
+        'ISSUE-014',
+        'ISSUE-021',
+      ]
+
+  mvp_beta:
+    name: 'MVP Beta'
+    description: '全機能が実装された状態'
+    target_date: 'Week 5'
+    required_issues: ['ISSUE-018', 'ISSUE-019', 'ISSUE-020']
+
+  production_ready:
+    name: 'Production Ready'
+    description: '本番リリース可能な状態'
+    target_date: 'Week 6'
+    required_issues: ['ISSUE-027', 'ISSUE-028', 'ISSUE-029', 'ISSUE-030']
+
+# 進捗サマリー
+progress:
+  completed: 5
+  in_progress: 0
+  not_started: 25
+  blocked: 0
+  total: 30
+  completion_percentage: 16.7
+  phase_1_completed: 100 # フェーズ1完了
+  mvp_alpha_progress: 41.7 # MVP Alpha進捗 (5/12 Issues)
+
+# チーム情報
+team:
+  lead_developer: ''
+  junior_developers: []
+  reviewer: ''
+  project_manager: ''
+
+# 更新履歴
+update_history:
+  - date: '2024-01-01'
+    updated_by: 'Claude'
+    changes: '初期Issue一覧作成'
+    issues_updated: ['ALL']
+
+  - date: '2025-06-27'
+    updated_by: 'Claude'
+    changes: 'フェーズ1完了 - 初期セットアップ5Issue実装完了'
+    issues_updated:
+      ['ISSUE-001', 'ISSUE-002', 'ISSUE-003', 'ISSUE-004', 'ISSUE-005']
+    technical_notes:
+      - 'Next.js 15 + TypeScript + Tailwind CSS基盤構築'
+      - 'SQLite + NextAuth.js ローカル開発環境'
+      - 'Prismaスキーマ実装（6テーブル、NextAuth.js統合）'
+      - 'shadcn/ui UIコンポーネントライブラリ導入'
+      - 'ESLint + Prettier コード品質ツール設定'

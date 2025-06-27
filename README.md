@@ -25,6 +25,7 @@ tosho-in-wariate-kun/
 ## 🚀 Technology Stack
 
 ### Frontend
+
 - **Next.js 15** with App Router
 - **TypeScript** for type safety
 - **TailwindCSS + shadcn-ui** for styling
@@ -32,6 +33,7 @@ tosho-in-wariate-kun/
 - **Jest + Testing Library + Playwright** for testing
 
 ### Backend
+
 - **NestJS** with modular architecture
 - **PostgreSQL** with Prisma ORM
 - **JWT** authentication with role-based access control
@@ -39,6 +41,7 @@ tosho-in-wariate-kun/
 - **Jest + @nestjs/testing** for testing
 
 ### DevOps & Tools
+
 - **pnpm + Turborepo** for efficient monorepo management
 - **TDD methodology** following t_wada approach
 - **ESLint + TypeScript** shared configurations
@@ -47,6 +50,7 @@ tosho-in-wariate-kun/
 ## 🏃‍♂️ Quick Start
 
 ### Prerequisites
+
 - **Node.js 20.x** LTS
 - **pnpm 8.x** or higher
 - **PostgreSQL 14.x** or higher
@@ -72,6 +76,7 @@ pnpm dev
 ```
 
 ### Development URLs
+
 - **Frontend**: http://localhost:3000
 - **Backend**: http://localhost:3001
 - **API Documentation**: http://localhost:3001/api/docs
@@ -79,15 +84,18 @@ pnpm dev
 ## 📖 Documentation
 
 ### Getting Started
+
 - **[Development Setup](./docs/development/README.md)** - Comprehensive development guide
 - **[API Documentation](./docs/api/README.md)** - Complete API reference
 - **[Deployment Guide](./docs/deployment/README.md)** - Production deployment instructions
 
 ### Application Guides
+
 - **[Frontend Guide](./apps/frontend/CLAUDE.md)** - Next.js development guidelines
 - **[Backend Guide](./apps/backend/CLAUDE.md)** - NestJS development guidelines
 
 ### Package Documentation
+
 - **[@tosho/shared](./packages/shared/README.md)** - Shared types and validation
 - **[@tosho/ui](./packages/ui/README.md)** - UI component library
 - **[@tosho/utils](./packages/utils/README.md)** - Common utilities
@@ -95,6 +103,7 @@ pnpm dev
 ## 🧪 Testing
 
 ### Run Tests
+
 ```bash
 # Run all tests
 pnpm test
@@ -109,7 +118,9 @@ pnpm test:coverage
 ```
 
 ### TDD Methodology
+
 This project follows **Test-Driven Development (TDD)** using **t_wada's methodology**:
+
 - **Red-Green-Refactor cycle**: Write failing tests first, make them pass, then refactor
 - **Test-first philosophy**: No production code without corresponding tests
 - **Incremental development**: Build functionality step by step through tests
@@ -136,18 +147,21 @@ pnpm format                # Format code with Prettier
 ## 🎯 Key Features
 
 ### Core Functionality
+
 - **Automated Schedule Generation**: Complex rule-based scheduling algorithm
 - **Master Data Management**: Classes, library rooms, and member management
 - **Conflict Detection**: Intelligent conflict resolution and prevention
 - **Fair Rotation**: Ensures equitable distribution of responsibilities
 
 ### User Experience
+
 - **Japanese UI**: Designed specifically for Japanese elementary schools
 - **Print Optimization**: A4 paper-optimized schedule layouts
 - **Responsive Design**: Works on tablets and desktop computers
 - **Real-time Updates**: Live synchronization across user sessions
 
 ### Administrative Features
+
 - **Role-based Access**: Different permissions for teachers, librarians, and administrators
 - **Annual Reset**: Clean slate functionality for new school years
 - **View-only Mode**: Safe read-only access for schedule viewing
@@ -164,12 +178,14 @@ pnpm format                # Format code with Prettier
 ## 🚀 Deployment
 
 ### Supported Platforms
+
 - **Vercel** (Frontend)
 - **Railway** (Full-stack)
 - **DigitalOcean** (VPS)
 - **AWS** / **Google Cloud** (Enterprise)
 
 ### Quick Deploy
+
 ```bash
 # Deploy to Vercel (Frontend)
 cd apps/frontend
@@ -184,6 +200,7 @@ See [Deployment Guide](./docs/deployment/README.md) for detailed instructions.
 ## 📊 Project Status
 
 ### Completed ✅
+
 - ✅ Monorepo architecture setup
 - ✅ Frontend foundation (Next.js + shadcn-ui)
 - ✅ Backend foundation (NestJS + Prisma)
@@ -192,12 +209,14 @@ See [Deployment Guide](./docs/deployment/README.md) for detailed instructions.
 - ✅ Development tooling
 
 ### In Progress 🔄
+
 - 🔄 Core scheduling algorithm implementation
 - 🔄 Database schema and migrations
 - 🔄 API endpoint development
 - 🔄 Frontend component implementation
 
 ### Planned 📋
+
 - 📋 Authentication system integration
 - 📋 WebSocket real-time features
 - 📋 Production deployment
@@ -206,6 +225,7 @@ See [Deployment Guide](./docs/deployment/README.md) for detailed instructions.
 ## 🤝 Contributing
 
 ### Development Workflow
+
 1. **Fork and clone** the repository
 2. **Create a feature branch** from `main`
 3. **Follow TDD methodology** for all new features
@@ -213,12 +233,14 @@ See [Deployment Guide](./docs/deployment/README.md) for detailed instructions.
 5. **Submit a pull request** with detailed description
 
 ### Code Standards
+
 - **TypeScript**: Strict mode enabled across all packages
 - **Testing**: Minimum 90% code coverage required
 - **Linting**: ESLint rules enforced with pre-commit hooks
 - **Documentation**: All public APIs must be documented
 
 ### Getting Help
+
 - **Issues**: Report bugs and feature requests in GitHub Issues
 - **Discussions**: Use GitHub Discussions for questions
 - **Documentation**: Check the comprehensive docs in `/docs`
@@ -230,6 +252,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 ## 👥 Team
 
 **Tosho-in Wariate-kun Development Team**
+
 - Focus: Educational technology for Japanese elementary schools
 - Mission: Simplifying administrative tasks for educators
 

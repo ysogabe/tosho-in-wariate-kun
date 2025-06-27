@@ -11,11 +11,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **IMPORTANT**: This project follows a **Next.js API Routes** architecture for MVP development, not a separate backend service.
 
 ### Architecture Decision
+
 - **ADR 0005**: MVP向けアーキテクチャの決定 - Next.js統合アプローチを採用
 - **Single Application**: フロントエンドとバックエンドを統合したNext.jsアプリケーション
 - **Simplified Structure**: MVPに適したシンプルなアーキテクチャ
 
 ### Project Structure
+
 ```
 tosho-in-wariate-kun/
 ├── src/
@@ -35,7 +37,9 @@ tosho-in-wariate-kun/
 ```
 
 ### Legacy Monorepo Structure (参考)
+
 以下の構造は将来的なスケーリング時の参考として保持：
+
 ```
 tosho-in-wariate-kun/
 ├── apps/
@@ -43,7 +47,7 @@ tosho-in-wariate-kun/
 │   └── backend/           # NestJS application (future expansion)
 ├── packages/
 │   ├── shared/           # Shared types and interfaces
-│   ├── ui/               # Shared UI components  
+│   ├── ui/               # Shared UI components
 │   └── utils/            # Shared utilities
 ```
 
@@ -52,17 +56,20 @@ tosho-in-wariate-kun/
 **CRITICAL**: The `/frontend` directory at the project root contains UI mockups and prototypes for reference purposes only.
 
 ### Usage Guidelines:
+
 - **READ-ONLY**: Do not modify, add, or delete any files in this directory
 - **Reference Only**: Use as a UI/UX reference for component design and user flows
 - **Sample Data**: Contains example implementations and design patterns
 - **Prototype Status**: This is not the production frontend application
 
 ### Production Development:
+
 - **Active Development**: Use `/apps/frontend/` for all new frontend development
 - **Component Implementation**: Create production components in `/apps/frontend/src/components/`
 - **Page Development**: Build actual pages in `/apps/frontend/src/app/`
 
 ### Why This Structure:
+
 - **Design Reference**: Preserve original UI mockups for design consistency
 - **Component Inspiration**: Reference existing component structures and patterns
 - **User Flow Examples**: Study user interaction patterns from prototypes
@@ -71,6 +78,7 @@ tosho-in-wariate-kun/
 ## Technology Stack (MVP)
 
 ### Frontend + Backend: Next.js統合アプリケーション
+
 - **Framework**: Next.js 15 with App Router + API Routes
 - **Language**: TypeScript
 - **Styling**: TailwindCSS + shadcn-ui
@@ -81,6 +89,7 @@ tosho-in-wariate-kun/
 - **Deployment**: Vercel
 
 ### Key Libraries
+
 - **UI Components**: shadcn-ui (Radix UI + Tailwind CSS)
 - **Database ORM**: Prisma
 - **Form Handling**: React Hook Form + Zod validation
@@ -89,6 +98,7 @@ tosho-in-wariate-kun/
 - **Scheduling Algorithm**: Custom implementation
 
 ### Future Expansion (Post-MVP)
+
 - **Backend**: NestJS with modular architecture
 - **Shared Packages**: @tosho/shared, @tosho/ui, @tosho/utils
 - **Real-time**: WebSocket support with Socket.IO
@@ -98,6 +108,7 @@ tosho-in-wariate-kun/
 MVPでは標準のnpmを使用してシンプルな開発環境を構築
 
 ### Initial Setup
+
 ```bash
 # Install all dependencies
 npm install
@@ -105,7 +116,7 @@ npm install
 # Set up Supabase
 npx supabase init
 
-# Generate Prisma client  
+# Generate Prisma client
 npx prisma generate
 
 # Set up shadcn-ui
@@ -113,6 +124,7 @@ npx shadcn-ui@latest init
 ```
 
 ### Development Workflow
+
 ```bash
 # Start development server
 npm run dev
@@ -131,7 +143,9 @@ npm run type-check
 ```
 
 ### Future Migration to Monorepo
+
 Post-MVP時のスケーリング時にpnpm + Turborepoへ移行予定：
+
 ```bash
 # Future monorepo commands
 pnpm dev                    # Start all services
@@ -142,6 +156,7 @@ pnpm --filter backend dev   # Start backend only
 ## Development Structure (MVP)
 
 ### Single Application Development
+
 - **Location**: Root directory (Next.js統合アプリケーション)
 - **Frontend**: `src/app/` - Next.js App Router pages
 - **Backend**: `src/app/api/` - API Routes
@@ -150,6 +165,7 @@ pnpm --filter backend dev   # Start backend only
 - **Database**: `src/lib/database/` - Prisma client and utilities
 
 ### Key Development Areas
+
 1. **UI Development**: Next.js App Router + shadcn-ui components
 2. **API Development**: Next.js API Routes + Supabase integration
 3. **Database**: Prisma ORM + Supabase PostgreSQL
@@ -159,10 +175,12 @@ pnpm --filter backend dev   # Start backend only
 ## Future Expansion (Post-MVP)
 
 ### Application-Specific Guides (参考)
+
 - **Frontend**: `apps/frontend/CLAUDE.md` - Next.js, React, TailwindCSS
 - **Backend**: `apps/backend/CLAUDE.md` - NestJS, Prisma, PostgreSQL
 
 ### Shared Package Development (参考)
+
 - **@tosho/shared**: Common types, interfaces, constants
 - **@tosho/ui**: Reusable UI components built with shadcn-ui
 - **@tosho/utils**: Common utility functions and helpers
@@ -170,16 +188,19 @@ pnpm --filter backend dev   # Start backend only
 ## Development Guidelines
 
 ### TDD Implementation (t_wada Methodology)
+
 - **Red-Green-Refactor Cycle**: Write failing tests first, make them pass, then refactor
 - **Test First Philosophy**: No production code without corresponding tests
 - **Incremental Development**: Build functionality step by step through tests
 
 ### Code Organization
+
 - **Single Responsibility**: Each component, hook, and utility should have one clear purpose
 - **Type Safety**: Use TypeScript across all packages with strict configuration
 - **Performance**: React optimization, bundle optimization, database query optimization
 
 ### Testing Strategy
+
 - **Unit Testing**: Jest + Testing Library for components and utilities
 - **Integration Testing**: API and component interaction testing
 - **E2E Testing**: Playwright for full user workflow testing
@@ -187,29 +208,35 @@ pnpm --filter backend dev   # Start backend only
 ## Tools & Configuration
 
 ### Shared Configurations
+
 - **ESLint**: `tools/eslint-config/` - Consistent linting across packages
 - **TypeScript**: `tools/typescript-config/` - Shared TypeScript configurations
 - **Build Scripts**: `tools/build-scripts/` - Custom build automation
 
 ### Package-Specific Settings
+
 - **Frontend**: TailwindCSS, Next.js, shadcn-ui configurations
 - **Backend**: NestJS, Prisma, database configurations
 
 ## Documentation Structure
 
 ### Development Documentation
+
 - **Location**: `docs/development/`
 - **Contents**: Setup guides, workflows, testing strategies, best practices
 
 ### API Documentation
+
 - **Location**: `docs/api/`
 - **Contents**: OpenAPI specs, endpoint documentation, examples
 
 ### Deployment Documentation
+
 - **Location**: `docs/deployment/`
 - **Contents**: Platform guides, CI/CD, monitoring, security
 
 ### Issue Management
+
 - **Location**: `docs/issues/`
 - **Contents**: Work instructions and issue templates for junior engineers
 - **Purpose**: GitHub Issue creation templates with task definitions and result tracking

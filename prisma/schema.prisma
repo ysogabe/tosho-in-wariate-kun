@@ -1,0 +1,132 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// NextAuth.js required models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?   // For credentials provider
+  role          String    @default("student") // teacher, admin, student
+  accounts      Account[]
+  sessions      Session[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// 図書委員当番システム用のビジネスモデル
+
+// クラステーブル
+model Class {
+  id        String   @id @default(cuid())
+  name      String
+  year      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // リレーション
+  students Student[]
+
+  // インデックス
+  @@unique([name, year])
+}
+
+// 図書室テーブル
+model Room {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  capacity  Int      @default(2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // リレーション
+  assignments Assignment[]
+}
+
+// 図書委員テーブル
+model Student {
+  id        String   @id @default(cuid())
+  name      String
+  classId   String
+  grade     Int
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // リレーション
+  class       Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
+  assignments Assignment[]
+}
+
+// 当番割り当てテーブル
+model Assignment {
+  id        String @id @default(cuid())
+  studentId String
+  roomId    String
+  dayOfWeek Int
+  term      String // FIRST_TERM, SECOND_TERM
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // リレーション
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  room    Room    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  // 制約: 同一学期で同一学生が同一曜日に重複割り当て不可
+  @@unique([studentId, dayOfWeek, term])
+}
+
+// システム設定テーブル
+model Setting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

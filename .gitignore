@@ -106,3 +106,5 @@ docs/kamui-creative-*/
 
 # TypeScript
 *.tsbuildinfo
+
+/generated/prisma
