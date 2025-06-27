@@ -5,7 +5,7 @@ import { Pagination } from '../pagination'
 
 // Import the original component for testing - mocks are in jest.setup.js
 // Since the component fails to render due to radix-ui issues, skip for now
-describe.skip('Pagination', () => {
+describe.skip('Pagination - All tests skipped due to Radix UI imports', () => {
   const defaultProps = {
     currentPage: 1,
     totalPages: 10,

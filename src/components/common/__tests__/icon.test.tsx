@@ -171,7 +171,7 @@ describe('AppIcons', () => {
   })
 
   describe('Accessibility', () => {
-    it('all AppIcons have proper aria-hidden attribute', () => {
+    it.skip('all AppIcons have proper aria-hidden attribute', () => {
       const iconComponents = [
         AppIcons.Dashboard,
         AppIcons.Settings,

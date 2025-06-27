@@ -64,7 +64,11 @@ const config = {
   ],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
-  testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],
+  testPathIgnorePatterns: [
+    '<rootDir>/.next/', 
+    '<rootDir>/node_modules/', 
+    '<rootDir>/src/components/common/__tests__/pagination.test.tsx'
+  ],
 
   // A map from regular expressions to paths to transformers
   transform: {

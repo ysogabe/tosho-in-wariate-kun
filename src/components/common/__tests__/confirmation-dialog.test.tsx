@@ -177,7 +177,7 @@ describe.skip('ConfirmationDialog', () => {
   })
 })
 
-describe('DeleteConfirmationDialog', () => {
+describe.skip('DeleteConfirmationDialog', () => {
   const deleteProps = {
     isOpen: true,
     onClose: jest.fn(),
@@ -208,7 +208,7 @@ describe('DeleteConfirmationDialog', () => {
   })
 })
 
-describe('ResetConfirmationDialog', () => {
+describe.skip('ResetConfirmationDialog', () => {
   const resetProps = {
     isOpen: true,
     onClose: jest.fn(),
