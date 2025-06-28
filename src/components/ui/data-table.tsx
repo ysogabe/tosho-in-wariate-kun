@@ -42,7 +42,6 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   searchKey?: string
   searchPlaceholder?: string
-  rowActions?: (row: TData) => React.ReactNode
   enableSelection?: boolean
   onSelectionChange?: (selectedRows: TData[]) => void
 }
@@ -52,7 +51,6 @@ export function DataTable<TData, TValue>({
   data,
   searchKey,
   searchPlaceholder = '検索...',
-  rowActions: _rowActions,
   enableSelection = false,
   onSelectionChange,
 }: DataTableProps<TData, TValue>) {
@@ -167,7 +165,7 @@ export function DataTable<TData, TValue>({
                       column.toggleVisibility(!!value)
                     }
                   >
-                    {column.id}
+                    {(column.columnDef.meta as any)?.label || column.id}
                   </DropdownMenuCheckboxItem>
                 )
               })}

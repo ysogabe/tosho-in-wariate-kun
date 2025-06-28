@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 
 // 図書委員情報の型定義
-export interface StudentData {
+export interface LibraryCommitteeMemberData {
   id: string
   name: string
   grade: number
@@ -29,12 +29,15 @@ export interface StudentData {
   updatedAt: string
 }
 
-export const studentsColumns: ColumnDef<StudentData>[] = [
+export const studentsColumns: ColumnDef<LibraryCommitteeMemberData>[] = [
   {
     accessorKey: 'name',
     header: ({ column }) => (
       <SortableHeader column={column}>氏名</SortableHeader>
     ),
+    meta: {
+      label: '氏名',
+    },
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
         <User className="h-4 w-4 text-muted-foreground" />
@@ -47,6 +50,9 @@ export const studentsColumns: ColumnDef<StudentData>[] = [
     header: ({ column }) => (
       <SortableHeader column={column}>学年</SortableHeader>
     ),
+    meta: {
+      label: '学年',
+    },
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
         <GraduationCap className="h-4 w-4 text-muted-foreground" />
@@ -57,8 +63,13 @@ export const studentsColumns: ColumnDef<StudentData>[] = [
   {
     accessorKey: 'class',
     header: 'クラス',
+    meta: {
+      label: 'クラス',
+    },
     cell: ({ row }) => {
-      const classData = row.getValue('class') as StudentData['class']
+      const classData = row.getValue(
+        'class'
+      ) as LibraryCommitteeMemberData['class']
       return (
         <div className="text-sm">
           <div className="font-medium">{classData.name}</div>
@@ -70,6 +81,9 @@ export const studentsColumns: ColumnDef<StudentData>[] = [
   {
     accessorKey: 'isActive',
     header: 'ステータス',
+    meta: {
+      label: 'ステータス',
+    },
     cell: ({ row }) => {
       const isActive = row.getValue('isActive')
       return (
@@ -91,6 +105,9 @@ export const studentsColumns: ColumnDef<StudentData>[] = [
     header: ({ column }) => (
       <SortableHeader column={column}>当番回数</SortableHeader>
     ),
+    meta: {
+      label: '当番回数',
+    },
     cell: ({ row }) => {
       const count = row.getValue('assignmentCount') as number
       return (
@@ -103,6 +120,9 @@ export const studentsColumns: ColumnDef<StudentData>[] = [
     header: ({ column }) => (
       <SortableHeader column={column}>最終当番日</SortableHeader>
     ),
+    meta: {
+      label: '最終当番日',
+    },
     cell: ({ row }) => {
       const lastAssignment = row.getValue('lastAssignment') as string | null
       if (!lastAssignment) {
@@ -122,6 +142,9 @@ export const studentsColumns: ColumnDef<StudentData>[] = [
     header: ({ column }) => (
       <SortableHeader column={column}>参加日</SortableHeader>
     ),
+    meta: {
+      label: '参加日',
+    },
     cell: ({ row }) => {
       const date = new Date(row.getValue('joinDate'))
       return (
@@ -188,7 +211,7 @@ export const studentsColumns: ColumnDef<StudentData>[] = [
 ]
 
 // サンプルデータ
-export const sampleStudentsData: StudentData[] = [
+export const sampleStudentsData: LibraryCommitteeMemberData[] = [
   {
     id: 'student-1',
     name: '田中 太郎',
