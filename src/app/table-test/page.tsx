@@ -66,14 +66,15 @@ export default function TableTestPage() {
                 {sampleClassesData.length}
               </div>
               <p className="text-xs text-muted-foreground">
-                アクティブ:{' '}
-                {sampleClassesData.filter((c) => c.isActive).length}
+                アクティブ: {sampleClassesData.filter((c) => c.isActive).length}
               </p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">図書委員総数</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                図書委員総数
+              </CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -92,9 +93,7 @@ export default function TableTestPage() {
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {selectedClasses.length}
-              </div>
+              <div className="text-2xl font-bold">{selectedClasses.length}</div>
               <p className="text-xs text-muted-foreground">
                 クラステーブルで選択中
               </p>
@@ -102,7 +101,9 @@ export default function TableTestPage() {
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">選択図書委員</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                選択図書委員
+              </CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>

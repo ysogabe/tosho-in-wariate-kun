@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { flexRender, type ColumnDef, type CellContext } from '@tanstack/react-table'
+import { flexRender, type ColumnDef } from '@tanstack/react-table'
 import {
   classesColumns,
   sampleClassesData,
@@ -36,9 +36,10 @@ const renderCell = (column: ColumnDef<ClassData>, data: ClassData) => {
       getValue: (columnId: string) => data[columnId as keyof ClassData],
     },
     column: {
-      id: 'accessorKey' in column && typeof column.accessorKey === 'string' 
-        ? column.accessorKey 
-        : column.id || 'unknown',
+      id:
+        'accessorKey' in column && typeof column.accessorKey === 'string'
+          ? column.accessorKey
+          : column.id || 'unknown',
       columnDef: column,
     },
     table: {},

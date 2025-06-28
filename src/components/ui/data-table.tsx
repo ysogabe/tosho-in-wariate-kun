@@ -266,9 +266,9 @@ interface SortableHeaderProps<TData, TValue> {
   children: React.ReactNode
 }
 
-export function SortableHeader<TData, TValue>({ 
-  column, 
-  children 
+export function SortableHeader<TData, TValue>({
+  column,
+  children,
 }: SortableHeaderProps<TData, TValue>) {
   return (
     <Button
