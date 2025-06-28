@@ -1,7 +1,13 @@
 'use client'
 
 import * as React from 'react'
-import { createContext, useContext, useEffect, useState } from 'react'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from 'react'
 
 // Mock User type - will be replaced with actual Supabase User when integrated
 interface MockUser {
@@ -67,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // return () => subscription.unsubscribe()
   }, [])
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = useCallback(async (email: string, password: string) => {
     try {
       setIsLoading(true)
 
@@ -77,7 +83,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       //   password
       // })
 
-      // Mock implementation for testing
+      // ⚠️ WARNING: Mock implementation for testing ONLY
+      // TODO: REMOVE hardcoded credentials before production deployment
       if (email === 'test@example.com' && password === 'password') {
         const mockUser = {
           id: 'mock-user-id',
@@ -109,9 +116,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [])
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     try {
       setIsLoading(true)
 
@@ -125,9 +132,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [])
 
-  const refetch = () => {
+  const refetch = useCallback(() => {
     setIsLoading(true)
     // TODO: Replace with actual Supabase session refresh
     // supabase.auth.getSession().then(({ data: { session } }) => {
@@ -139,7 +146,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setTimeout(() => {
       setIsLoading(false)
     }, 500)
-  }
+  }, [])
 
   return (
     <AuthContext.Provider

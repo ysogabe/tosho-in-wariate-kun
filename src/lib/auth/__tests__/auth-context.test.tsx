@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from '../auth-context'
 
 // テスト用コンポーネント
 function TestComponent() {
-  const { user, isLoading, signIn, signOut } = useAuth()
+  const { user, isLoading, signIn, signOut, refetch } = useAuth()
 
   if (isLoading) {
     return <div>Loading...</div>
@@ -23,6 +23,9 @@ function TestComponent() {
       </button>
       <button onClick={signOut} data-testid="sign-out">
         Sign Out
+      </button>
+      <button onClick={refetch} data-testid="refetch">
+        Refetch
       </button>
     </div>
   )
@@ -114,6 +117,34 @@ describe('AuthContext', () => {
       })
 
       // ログアウト後の状態確認
+      await waitFor(() => {
+        expect(screen.getByTestId('user-status')).toHaveTextContent(
+          'Not logged in'
+        )
+      })
+    })
+
+    it('handles refetch correctly', async () => {
+      const user = userEvent.setup()
+      render(
+        <AuthProvider>
+          <TestComponent />
+        </AuthProvider>
+      )
+
+      // ローディング完了を待機
+      await waitFor(() => {
+        expect(screen.getByTestId('user-status')).toHaveTextContent(
+          'Not logged in'
+        )
+      })
+
+      // refetch実行
+      await act(async () => {
+        await user.click(screen.getByTestId('refetch'))
+      })
+
+      // refetch後も認証状態は変わらない（モック実装では）
       await waitFor(() => {
         expect(screen.getByTestId('user-status')).toHaveTextContent(
           'Not logged in'

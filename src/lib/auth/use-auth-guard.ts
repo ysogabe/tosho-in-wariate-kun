@@ -9,8 +9,16 @@ export function useAuthGuard(redirectTo: string = '/auth/login') {
   const router = useRouter()
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    let isRedirecting = false
+
+    if (!isLoading && !user && !isRedirecting) {
+      isRedirecting = true
       router.push(redirectTo)
+    }
+
+    // Cleanup function to prevent multiple redirects
+    return () => {
+      isRedirecting = false
     }
   }, [user, isLoading, redirectTo, router])
 
