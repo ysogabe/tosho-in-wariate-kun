@@ -28,6 +28,9 @@ export const classesColumns: ColumnDef<ClassData>[] = [
     header: ({ column }) => (
       <SortableHeader column={column}>クラス名</SortableHeader>
     ),
+    meta: {
+      label: 'クラス名',
+    },
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
         <School className="h-4 w-4 text-muted-foreground" />
@@ -40,6 +43,9 @@ export const classesColumns: ColumnDef<ClassData>[] = [
     header: ({ column }) => (
       <SortableHeader column={column}>学年</SortableHeader>
     ),
+    meta: {
+      label: '学年',
+    },
     cell: ({ row }) => (
       <Badge variant="outline">{row.getValue('year')}年</Badge>
     ),
@@ -47,6 +53,9 @@ export const classesColumns: ColumnDef<ClassData>[] = [
   {
     accessorKey: 'room',
     header: '図書室',
+    meta: {
+      label: '図書室',
+    },
     cell: ({ row }) => {
       const room = row.getValue('room') as ClassData['room']
       return (
@@ -65,6 +74,9 @@ export const classesColumns: ColumnDef<ClassData>[] = [
     header: ({ column }) => (
       <SortableHeader column={column}>生徒数</SortableHeader>
     ),
+    meta: {
+      label: '生徒数',
+    },
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
         <Users className="h-4 w-4 text-muted-foreground" />
@@ -77,6 +89,9 @@ export const classesColumns: ColumnDef<ClassData>[] = [
     header: ({ column }) => (
       <SortableHeader column={column}>図書委員数</SortableHeader>
     ),
+    meta: {
+      label: '図書委員数',
+    },
     cell: ({ row }) => {
       const count = row.getValue('committeeMembers') as number
       return (
@@ -87,6 +102,9 @@ export const classesColumns: ColumnDef<ClassData>[] = [
   {
     accessorKey: 'isActive',
     header: 'ステータス',
+    meta: {
+      label: 'ステータス',
+    },
     cell: ({ row }) => {
       const isActive = row.getValue('isActive')
       return (
@@ -101,6 +119,9 @@ export const classesColumns: ColumnDef<ClassData>[] = [
     header: ({ column }) => (
       <SortableHeader column={column}>作成日</SortableHeader>
     ),
+    meta: {
+      label: '作成日',
+    },
     cell: ({ row }) => {
       const date = new Date(row.getValue('createdAt'))
       return (
