@@ -62,6 +62,13 @@ describe('AuthContext', () => {
         </AuthProvider>
       )
 
+      // ローディング完了を待機
+      await waitFor(() => {
+        expect(screen.getByTestId('user-status')).toHaveTextContent(
+          'Not logged in'
+        )
+      })
+
       // ログイン実行
       await act(async () => {
         await user.click(screen.getByTestId('sign-in'))
@@ -82,6 +89,13 @@ describe('AuthContext', () => {
           <TestComponent />
         </AuthProvider>
       )
+
+      // ローディング完了を待機
+      await waitFor(() => {
+        expect(screen.getByTestId('user-status')).toHaveTextContent(
+          'Not logged in'
+        )
+      })
 
       // まずログイン
       await act(async () => {

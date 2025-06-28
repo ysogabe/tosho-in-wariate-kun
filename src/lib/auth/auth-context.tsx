@@ -44,6 +44,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // TODO: Replace with actual Supabase client integration
         // const { data: { session } } = await supabase.auth.getSession()
         // setUser(session?.user ?? null)
+
+        // Mock: Add small delay to simulate authentication check
+        await new Promise((resolve) => setTimeout(resolve, 100))
         setUser(null) // Mock: no user initially
       } catch (error) {
         console.error('Error getting initial session:', error)

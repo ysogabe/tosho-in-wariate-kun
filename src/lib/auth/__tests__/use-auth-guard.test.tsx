@@ -67,15 +67,26 @@ describe('useAuthGuard', () => {
     })
   })
 
-  it('does not redirect when loading', () => {
+  it('handles loading state correctly', async () => {
     render(
       <AuthProvider>
         <TestUseAuthGuard />
       </AuthProvider>
     )
 
-    // ローディング中は初期状態でリダイレクトしない
+    // 初期レンダリング直後はローディング状態
+    expect(screen.getByTestId('loading')).toHaveTextContent('loading')
+
+    // ローディング中はリダイレクトしない
     expect(mockPush).not.toHaveBeenCalled()
+
+    // ローディング完了を待機
+    await waitFor(() => {
+      expect(screen.getByTestId('loading')).toHaveTextContent('not-loading')
+    })
+
+    // ローディング完了後にリダイレクトが発生
+    expect(mockPush).toHaveBeenCalledWith('/auth/login')
   })
 })
 
