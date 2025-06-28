@@ -17,7 +17,7 @@ beforeEach(() => {
 })
 
 describe('ProtectedRoute', () => {
-  it('shows loading spinner while checking authentication', () => {
+  it('shows loading spinner while checking authentication', async () => {
     render(
       <AuthProvider>
         <ProtectedRoute>
@@ -26,7 +26,13 @@ describe('ProtectedRoute', () => {
       </AuthProvider>
     )
 
+    // 初期状態でローディングスピナーが表示されることを確認
     expect(screen.getByText('認証確認中...')).toBeInTheDocument()
+
+    // ローディング完了後にリダイレクトが発生することを確認
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/auth/login')
+    })
   })
 
   it('redirects to login when not authenticated', async () => {
