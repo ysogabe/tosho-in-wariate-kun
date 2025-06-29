@@ -200,7 +200,7 @@ export function EnhancedLoginForm() {
             <Checkbox
               id="remember-me"
               checked={rememberMe}
-              onCheckedChange={setRememberMe}
+              onCheckedChange={(checked) => setRememberMe(!!checked)}
               disabled={isLoading}
             />
             <label

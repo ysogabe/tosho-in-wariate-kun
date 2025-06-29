@@ -41,7 +41,7 @@ describe('useLoginForm', () => {
   })
 
   it('sets loading state during login', async () => {
-    let resolveSignIn: () => void
+    let resolveSignIn: (value: {}) => void
     const signInPromise = new Promise<{}>((resolve) => {
       resolveSignIn = resolve
     })
@@ -55,7 +55,7 @@ describe('useLoginForm', () => {
 
     expect(result.current.isLoading).toBe(true)
 
-    resolveSignIn!()
+    resolveSignIn!({})
 
     await act(async () => {
       await signInPromise
