@@ -78,7 +78,7 @@ export function EnhancedLoginForm() {
 
       const result = await signIn(values.email, values.password)
 
-      if (result && result.error) {
+      if (result?.error) {
         setAuthError(getLocalizedErrorMessage(result.error))
         return
       }

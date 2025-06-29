@@ -9,12 +9,14 @@ interface AuthGuardProps {
   children: React.ReactNode
   requireAuth?: boolean
   redirectTo?: string
+  currentPath?: string // For testing purposes
 }
 
 export function AuthGuard({
   children,
   requireAuth = true,
   redirectTo = '/auth/login',
+  currentPath,
 }: AuthGuardProps) {
   const { user, isLoading } = useAuth()
   const router = useRouter()
@@ -23,16 +25,16 @@ export function AuthGuard({
     if (!isLoading) {
       if (requireAuth && !user) {
         // 認証が必要だがログインしていない場合
-        const currentPath = window.location.pathname
+        const path = currentPath || window.location.pathname
         const searchParams = new URLSearchParams()
-        searchParams.set('redirectTo', currentPath)
+        searchParams.set('redirectTo', path)
         router.push(`${redirectTo}?${searchParams.toString()}`)
       } else if (!requireAuth && user) {
         // 認証不要だがログイン済みの場合（ログインページなど）
         router.push('/dashboard')
       }
     }
-  }, [user, isLoading, requireAuth, redirectTo, router])
+  }, [user, isLoading, requireAuth, redirectTo, router, currentPath])
 
   if (isLoading) {
     return (

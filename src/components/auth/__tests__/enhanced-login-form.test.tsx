@@ -328,8 +328,8 @@ describe('EnhancedLoginForm', () => {
   it('shows loading state during submission', async () => {
     const user = userEvent.setup()
     mockGet.mockReturnValue(null)
-    let resolveSignIn: (value: unknown) => void
-    const signInPromise = new Promise<unknown>((resolve) => {
+    let resolveSignIn: () => void
+    const signInPromise = new Promise<void>((resolve) => {
       resolveSignIn = resolve
     })
     mockSignIn.mockReturnValue(signInPromise)
@@ -347,7 +347,7 @@ describe('EnhancedLoginForm', () => {
     expect(screen.getByText('ログイン中...')).toBeInTheDocument()
     expect(submitButton).toBeDisabled()
 
-    resolveSignIn!(undefined)
+    resolveSignIn!()
 
     await waitFor(() => {
       expect(screen.queryByText('ログイン中...')).not.toBeInTheDocument()

@@ -23,7 +23,8 @@ export function useLoginForm({
       setIsLoading(true)
       setError('')
 
-      const { error: authError } = await signIn(email, password)
+      const result = await signIn(email, password)
+      const { error: authError } = result || {}
 
       if (authError) {
         setError(authError)
