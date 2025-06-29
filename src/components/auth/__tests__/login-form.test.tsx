@@ -214,7 +214,7 @@ describe('LoginForm', () => {
 
   it('shows loading state during submission', async () => {
     const user = userEvent.setup()
-    let resolveSignIn: () => void
+    let resolveSignIn: (value: {}) => void
     const signInPromise = new Promise<{}>((resolve) => {
       resolveSignIn = resolve
     })
@@ -233,7 +233,7 @@ describe('LoginForm', () => {
     expect(screen.getByText('ログイン中...')).toBeInTheDocument()
     expect(submitButton).toBeDisabled()
 
-    resolveSignIn!()
+    resolveSignIn!({})
 
     await waitFor(() => {
       expect(screen.queryByText('ログイン中...')).not.toBeInTheDocument()
@@ -242,7 +242,7 @@ describe('LoginForm', () => {
 
   it('disables form fields during submission', async () => {
     const user = userEvent.setup()
-    let resolveSignIn: () => void
+    let resolveSignIn: (value: {}) => void
     const signInPromise = new Promise<{}>((resolve) => {
       resolveSignIn = resolve
     })
@@ -266,7 +266,7 @@ describe('LoginForm', () => {
     expect(submitButton).toBeDisabled()
     expect(toggleButton).toBeDisabled()
 
-    resolveSignIn!()
+    resolveSignIn!({})
 
     await waitFor(() => {
       expect(emailInput).not.toBeDisabled()

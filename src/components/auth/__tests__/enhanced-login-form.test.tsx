@@ -44,9 +44,10 @@ beforeEach(() => {
     refresh: jest.fn(),
   })
 
-  mockUseSearchParams.mockReturnValue({
+  const mockSearchParams = {
     get: mockGet,
-  })
+  } as unknown as URLSearchParams
+  mockUseSearchParams.mockReturnValue(mockSearchParams as any)
 
   mockSignIn.mockClear()
   mockPush.mockClear()
@@ -278,7 +279,11 @@ describe('EnhancedLoginForm', () => {
 
   it('shows demo login info in development mode', () => {
     const originalEnv = process.env.NODE_ENV
-    process.env.NODE_ENV = 'development'
+    Object.defineProperty(process.env, 'NODE_ENV', {
+      value: 'development',
+      writable: true,
+      configurable: true,
+    })
     mockGet.mockReturnValue(null)
 
     render(<EnhancedLoginForm />)
@@ -288,13 +293,21 @@ describe('EnhancedLoginForm', () => {
     expect(screen.getByText('password')).toBeInTheDocument()
     expect(screen.getByText('デモ用情報を入力')).toBeInTheDocument()
 
-    process.env.NODE_ENV = originalEnv
+    Object.defineProperty(process.env, 'NODE_ENV', {
+      value: originalEnv,
+      writable: true,
+      configurable: true,
+    })
   })
 
   it('fills demo login info when demo button is clicked', async () => {
     const user = userEvent.setup()
     const originalEnv = process.env.NODE_ENV
-    process.env.NODE_ENV = 'development'
+    Object.defineProperty(process.env, 'NODE_ENV', {
+      value: 'development',
+      writable: true,
+      configurable: true,
+    })
     mockGet.mockReturnValue(null)
 
     render(<EnhancedLoginForm />)
@@ -305,13 +318,17 @@ describe('EnhancedLoginForm', () => {
     expect(screen.getByDisplayValue('test@example.com')).toBeInTheDocument()
     expect(screen.getByDisplayValue('password')).toBeInTheDocument()
 
-    process.env.NODE_ENV = originalEnv
+    Object.defineProperty(process.env, 'NODE_ENV', {
+      value: originalEnv,
+      writable: true,
+      configurable: true,
+    })
   })
 
   it('shows loading state during submission', async () => {
     const user = userEvent.setup()
     mockGet.mockReturnValue(null)
-    let resolveSignIn: () => void
+    let resolveSignIn: (value: {}) => void
     const signInPromise = new Promise<{}>((resolve) => {
       resolveSignIn = resolve
     })
@@ -330,7 +347,7 @@ describe('EnhancedLoginForm', () => {
     expect(screen.getByText('ログイン中...')).toBeInTheDocument()
     expect(submitButton).toBeDisabled()
 
-    resolveSignIn!()
+    resolveSignIn!({})
 
     await waitFor(() => {
       expect(screen.queryByText('ログイン中...')).not.toBeInTheDocument()

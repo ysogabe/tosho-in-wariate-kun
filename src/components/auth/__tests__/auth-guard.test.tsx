@@ -17,6 +17,11 @@ jest.mock('@/components/common/loading-spinner', () => ({
 const mockPush = jest.fn()
 const mockUseRouter = useRouter as jest.MockedFunction<typeof useRouter>
 
+// Mock window.location.pathname using jest.spyOn
+const mockLocationPathname = jest.spyOn(window, 'location', 'get').mockReturnValue({
+  pathname: '/',
+} as Location)
+
 beforeEach(() => {
   mockUseRouter.mockReturnValue({
     push: mockPush,
@@ -26,6 +31,11 @@ beforeEach(() => {
     forward: jest.fn(),
     refresh: jest.fn(),
   })
+
+  // Reset pathname  
+  mockLocationPathname.mockReturnValue({
+    pathname: '/',
+  } as Location)
 
   mockPush.mockClear()
 })
@@ -78,13 +88,9 @@ describe('AuthGuard', () => {
   })
 
   it('redirects to login when user is not authenticated and auth is required', async () => {
-    // Mock window.location.pathname
-    Object.defineProperty(window, 'location', {
-      value: {
-        pathname: '/protected-page',
-      },
-      writable: true,
-    })
+    mockLocationPathname.mockReturnValue({
+      pathname: '/protected-page',
+    } as Location)
     
     ;(useAuth as jest.Mock).mockReturnValue({
       user: null,
@@ -122,12 +128,9 @@ describe('AuthGuard', () => {
   })
 
   it('uses custom redirectTo path when provided', async () => {
-    Object.defineProperty(window, 'location', {
-      value: {
-        pathname: '/admin',
-      },
-      writable: true,
-    })
+    mockLocationPathname.mockReturnValue({
+      pathname: '/admin',
+    } as Location)
     
     ;(useAuth as jest.Mock).mockReturnValue({
       user: null,
