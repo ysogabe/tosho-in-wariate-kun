@@ -62,7 +62,7 @@ describe('ProtectedRoute', () => {
     )
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/custom-login')
+      expect(mockPush).toHaveBeenCalledWith('/custom-login?redirectTo=%2F')
     })
   })
 
