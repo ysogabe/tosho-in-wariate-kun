@@ -50,22 +50,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // MVP: Check cookies for existing session
         if (typeof window !== 'undefined') {
           const cookies = document.cookie.split(';')
-          const authCookie = cookies.find(c => c.trim().startsWith('auth-session='))
-          const userDataCookie = cookies.find(c => c.trim().startsWith('user-data='))
-          
+          const authCookie = cookies.find((c) =>
+            c.trim().startsWith('auth-session=')
+          )
+          const userDataCookie = cookies.find((c) =>
+            c.trim().startsWith('user-data=')
+          )
+
           if (authCookie && userDataCookie) {
             const authValue = authCookie.split('=')[1]
             if (authValue === 'authenticated') {
               try {
                 const userDataValue = userDataCookie.split('=')[1]
-                const userData = JSON.parse(decodeURIComponent(userDataValue)) as MockUser
+                const userData = JSON.parse(
+                  decodeURIComponent(userDataValue)
+                ) as MockUser
                 setUser(userData)
               } catch (error) {
                 console.error('Error parsing user data:', error)
                 // Clear invalid cookies
-                document.cookie = 'auth-session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
-                document.cookie = 'user-data=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
-                document.cookie = 'user-role=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+                document.cookie =
+                  'auth-session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+                document.cookie =
+                  'user-data=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+                document.cookie =
+                  'user-role=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
               }
             }
           }
@@ -95,15 +104,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // ⚠️ WARNING: Mock implementation for testing ONLY
       // TODO: REMOVE hardcoded credentials before production deployment
-      
+
       // MVP: Support multiple test users with different roles
       const testUsers = [
         { email: 'test@example.com', password: 'Password123', role: 'teacher' },
         { email: 'admin@example.com', password: 'Password123', role: 'admin' },
       ]
-      
-      const matchedUser = testUsers.find(u => u.email === email && u.password === password)
-      
+
+      const matchedUser = testUsers.find(
+        (u) => u.email === email && u.password === password
+      )
+
       if (matchedUser) {
         const mockUser = {
           id: `mock-user-${matchedUser.role}`,
@@ -125,7 +136,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } as MockUser
 
         setUser(mockUser)
-        
+
         // MVP: Set cookies for middleware authentication
         if (typeof window !== 'undefined') {
           const maxAge = 60 * 60 * 24 * 7 // 7 days
@@ -133,7 +144,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           document.cookie = `user-data=${encodeURIComponent(JSON.stringify(mockUser))}; path=/; max-age=${maxAge}`
           document.cookie = `user-role=${matchedUser.role}; path=/; max-age=${maxAge}`
         }
-        
+
         return {}
       }
 
@@ -155,12 +166,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Mock implementation
       setUser(null)
-      
+
       // MVP: Clear authentication cookies
       if (typeof window !== 'undefined') {
-        document.cookie = 'auth-session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
-        document.cookie = 'user-data=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
-        document.cookie = 'user-role=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+        document.cookie =
+          'auth-session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+        document.cookie =
+          'user-data=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+        document.cookie =
+          'user-role=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
       }
     } catch (error) {
       console.error('Sign out error:', error)

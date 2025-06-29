@@ -1,9 +1,23 @@
+'use client'
+
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { AlertTriangle, ArrowLeft, Home } from 'lucide-react'
 
 export default function UnauthorizedPage() {
+  const handleBackClick = () => {
+    if (typeof window !== 'undefined') {
+      window.history.back()
+    }
+  }
+
   return (
     <div className="container mx-auto py-8 max-w-md">
       <Card>
@@ -28,7 +42,7 @@ export default function UnauthorizedPage() {
                 ダッシュボードに戻る
               </Link>
             </Button>
-            <Button variant="outline" onClick={() => window.history.back()}>
+            <Button variant="outline" onClick={handleBackClick}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               前のページに戻る
             </Button>
