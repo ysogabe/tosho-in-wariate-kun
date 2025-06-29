@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { LoginForm } from '../login-form'
 import { useAuth } from '@/lib/auth/auth-context'
@@ -214,8 +214,8 @@ describe('LoginForm', () => {
 
   it('shows loading state during submission', async () => {
     const user = userEvent.setup()
-    let resolveSignIn: (value: {}) => void
-    const signInPromise = new Promise<{}>((resolve) => {
+    let resolveSignIn: (value: unknown) => void
+    const signInPromise = new Promise<unknown>((resolve) => {
       resolveSignIn = resolve
     })
     mockSignIn.mockReturnValue(signInPromise)
@@ -233,7 +233,7 @@ describe('LoginForm', () => {
     expect(screen.getByText('ログイン中...')).toBeInTheDocument()
     expect(submitButton).toBeDisabled()
 
-    resolveSignIn!({})
+    resolveSignIn!(undefined)
 
     await waitFor(() => {
       expect(screen.queryByText('ログイン中...')).not.toBeInTheDocument()
@@ -242,8 +242,8 @@ describe('LoginForm', () => {
 
   it('disables form fields during submission', async () => {
     const user = userEvent.setup()
-    let resolveSignIn: (value: {}) => void
-    const signInPromise = new Promise<{}>((resolve) => {
+    let resolveSignIn: (value: unknown) => void
+    const signInPromise = new Promise<unknown>((resolve) => {
       resolveSignIn = resolve
     })
     mockSignIn.mockReturnValue(signInPromise)
@@ -266,7 +266,7 @@ describe('LoginForm', () => {
     expect(submitButton).toBeDisabled()
     expect(toggleButton).toBeDisabled()
 
-    resolveSignIn!({})
+    resolveSignIn!(undefined)
 
     await waitFor(() => {
       expect(emailInput).not.toBeDisabled()

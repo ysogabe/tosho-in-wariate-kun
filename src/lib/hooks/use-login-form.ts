@@ -38,7 +38,8 @@ export function useLoginForm({
       }
 
       return { success: true }
-    } catch (error) {
+    } catch (loginError) {
+      console.error('Login error:', loginError)
       const errorMessage =
         'ログインに失敗しました。しばらく時間をおいてから再度お試しください。'
       setError(errorMessage)
