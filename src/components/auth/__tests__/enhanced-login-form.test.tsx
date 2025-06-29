@@ -55,7 +55,7 @@ beforeEach(() => {
   localStorageMock.getItem.mockClear()
   localStorageMock.setItem.mockClear()
   localStorageMock.removeItem.mockClear()
-  
+
   // Default localStorage to return null (no saved credentials)
   localStorageMock.getItem.mockReturnValue(null)
 })
