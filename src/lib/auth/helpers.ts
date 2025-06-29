@@ -93,7 +93,7 @@ export function setClientSession(user: MVPUser) {
   if (typeof window !== 'undefined') {
     // Cookie設定 (httpOnly=falseでクライアントからアクセス可能)
     document.cookie = `auth-session=authenticated; path=/; max-age=${60 * 60 * 24 * 7}` // 7日間
-    document.cookie = `user-data=${JSON.stringify(user)}; path=/; max-age=${60 * 60 * 24 * 7}`
+    document.cookie = `user-data=${encodeURIComponent(JSON.stringify(user))}; path=/; max-age=${60 * 60 * 24 * 7}`
     document.cookie = `user-role=${user.role}; path=/; max-age=${60 * 60 * 24 * 7}`
   }
 }

@@ -8,6 +8,11 @@ import {
   useState,
   useCallback,
 } from 'react'
+import {
+  setClientSession,
+  clearClientSession,
+  getClientSession,
+} from './helpers'
 
 // Mock User type - will be replaced with actual Supabase User when integrated
 interface MockUser {
@@ -47,43 +52,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // MVP: Check for existing session from cookies
     const checkInitialSession = async () => {
       try {
-        // MVP: Check cookies for existing session
-        if (typeof window !== 'undefined') {
-          const cookies = document.cookie.split(';')
-          const authCookie = cookies.find((c) =>
-            c.trim().startsWith('auth-session=')
-          )
-          const userDataCookie = cookies.find((c) =>
-            c.trim().startsWith('user-data=')
-          )
-
-          if (authCookie && userDataCookie) {
-            const authValue = authCookie.split('=')[1]
-            if (authValue === 'authenticated') {
-              try {
-                const userDataValue = userDataCookie.split('=')[1]
-                const userData = JSON.parse(
-                  decodeURIComponent(userDataValue)
-                ) as MockUser
-                setUser(userData)
-              } catch (error) {
-                console.error('Error parsing user data:', error)
-                // Clear invalid cookies
-                document.cookie =
-                  'auth-session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
-                document.cookie =
-                  'user-data=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
-                document.cookie =
-                  'user-role=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
-              }
-            }
-          }
+        // Use helper function to get client session
+        const sessionData = getClientSession()
+        if (sessionData) {
+          setUser(sessionData as MockUser)
         }
 
         // Add small delay to simulate authentication check
         await new Promise((resolve) => setTimeout(resolve, 100))
       } catch (error) {
         console.error('Error getting initial session:', error)
+        // Clear invalid session on error
+        clearClientSession()
       } finally {
         setIsLoading(false)
       }
@@ -137,13 +117,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         setUser(mockUser)
 
-        // MVP: Set cookies for middleware authentication
-        if (typeof window !== 'undefined') {
-          const maxAge = 60 * 60 * 24 * 7 // 7 days
-          document.cookie = `auth-session=authenticated; path=/; max-age=${maxAge}`
-          document.cookie = `user-data=${encodeURIComponent(JSON.stringify(mockUser))}; path=/; max-age=${maxAge}`
-          document.cookie = `user-role=${matchedUser.role}; path=/; max-age=${maxAge}`
-        }
+        // MVP: Set session using helper function
+        setClientSession(mockUser)
 
         return {}
       }
@@ -167,15 +142,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Mock implementation
       setUser(null)
 
-      // MVP: Clear authentication cookies
-      if (typeof window !== 'undefined') {
-        document.cookie =
-          'auth-session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
-        document.cookie =
-          'user-data=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
-        document.cookie =
-          'user-role=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
-      }
+      // MVP: Clear session using helper function
+      clearClientSession()
     } catch (error) {
       console.error('Sign out error:', error)
     } finally {
