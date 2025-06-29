@@ -16,7 +16,7 @@ function TestComponent() {
         {user ? `Logged in: ${user.email}` : 'Not logged in'}
       </div>
       <button
-        onClick={() => signIn('test@example.com', 'password')}
+        onClick={() => signIn('test@example.com', 'Password123')}
         data-testid="sign-in"
       >
         Sign In
