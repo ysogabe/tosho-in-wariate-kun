@@ -44,16 +44,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Mock initial session check - replace with actual Supabase client when available
+    // MVP: Check for existing session from cookies
     const checkInitialSession = async () => {
       try {
-        // TODO: Replace with actual Supabase client integration
-        // const { data: { session } } = await supabase.auth.getSession()
-        // setUser(session?.user ?? null)
+        // MVP: Check cookies for existing session
+        if (typeof window !== 'undefined') {
+          const cookies = document.cookie.split(';')
+          const authCookie = cookies.find(c => c.trim().startsWith('auth-session='))
+          const userDataCookie = cookies.find(c => c.trim().startsWith('user-data='))
+          
+          if (authCookie && userDataCookie) {
+            const authValue = authCookie.split('=')[1]
+            if (authValue === 'authenticated') {
+              try {
+                const userDataValue = userDataCookie.split('=')[1]
+                const userData = JSON.parse(decodeURIComponent(userDataValue)) as MockUser
+                setUser(userData)
+              } catch (error) {
+                console.error('Error parsing user data:', error)
+                // Clear invalid cookies
+                document.cookie = 'auth-session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+                document.cookie = 'user-data=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+                document.cookie = 'user-role=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+              }
+            }
+          }
+        }
 
-        // Mock: Add small delay to simulate authentication check
+        // Add small delay to simulate authentication check
         await new Promise((resolve) => setTimeout(resolve, 100))
-        setUser(null) // Mock: no user initially
       } catch (error) {
         console.error('Error getting initial session:', error)
       } finally {
@@ -62,15 +81,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     checkInitialSession()
-
-    // TODO: Add auth state change listener when Supabase client is available
-    // const { data: { subscription } } = supabase.auth.onAuthStateChange(
-    //   async (event, session) => {
-    //     setUser(session?.user ?? null)
-    //     setIsLoading(false)
-    //   }
-    // )
-    // return () => subscription.unsubscribe()
   }, [])
 
   const signIn = useCallback(async (email: string, password: string) => {
@@ -85,10 +95,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // ⚠️ WARNING: Mock implementation for testing ONLY
       // TODO: REMOVE hardcoded credentials before production deployment
-      if (email === 'test@example.com' && password === 'password') {
+      
+      // MVP: Support multiple test users with different roles
+      const testUsers = [
+        { email: 'test@example.com', password: 'Password123', role: 'teacher' },
+        { email: 'admin@example.com', password: 'Password123', role: 'admin' },
+      ]
+      
+      const matchedUser = testUsers.find(u => u.email === email && u.password === password)
+      
+      if (matchedUser) {
         const mockUser = {
-          id: 'mock-user-id',
-          email: email,
+          id: `mock-user-${matchedUser.role}`,
+          email: matchedUser.email,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           app_metadata: {},
@@ -102,10 +121,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           phone: null,
           phone_confirmed_at: null,
           recovery_sent_at: null,
-          role: 'authenticated',
+          role: matchedUser.role,
         } as MockUser
 
         setUser(mockUser)
+        
+        // MVP: Set cookies for middleware authentication
+        if (typeof window !== 'undefined') {
+          const maxAge = 60 * 60 * 24 * 7 // 7 days
+          document.cookie = `auth-session=authenticated; path=/; max-age=${maxAge}`
+          document.cookie = `user-data=${encodeURIComponent(JSON.stringify(mockUser))}; path=/; max-age=${maxAge}`
+          document.cookie = `user-role=${matchedUser.role}; path=/; max-age=${maxAge}`
+        }
+        
         return {}
       }
 
@@ -127,6 +155,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Mock implementation
       setUser(null)
+      
+      // MVP: Clear authentication cookies
+      if (typeof window !== 'undefined') {
+        document.cookie = 'auth-session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+        document.cookie = 'user-data=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+        document.cookie = 'user-role=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+      }
     } catch (error) {
       console.error('Sign out error:', error)
     } finally {
