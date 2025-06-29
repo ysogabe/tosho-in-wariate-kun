@@ -120,7 +120,11 @@ describe('AuthGuard', () => {
     })
 
     render(
-      <AuthGuard requireAuth={true} redirectTo="/custom-login" currentPath="/admin">
+      <AuthGuard
+        requireAuth={true}
+        redirectTo="/custom-login"
+        currentPath="/admin"
+      >
         <div>Protected content</div>
       </AuthGuard>
     )
