@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { EnhancedLoginForm } from '../enhanced-login-form'
@@ -328,8 +328,8 @@ describe('EnhancedLoginForm', () => {
   it('shows loading state during submission', async () => {
     const user = userEvent.setup()
     mockGet.mockReturnValue(null)
-    let resolveSignIn: (value: {}) => void
-    const signInPromise = new Promise<{}>((resolve) => {
+    let resolveSignIn: (value: unknown) => void
+    const signInPromise = new Promise<unknown>((resolve) => {
       resolveSignIn = resolve
     })
     mockSignIn.mockReturnValue(signInPromise)
@@ -347,7 +347,7 @@ describe('EnhancedLoginForm', () => {
     expect(screen.getByText('ログイン中...')).toBeInTheDocument()
     expect(submitButton).toBeDisabled()
 
-    resolveSignIn!({})
+    resolveSignIn!(undefined)
 
     await waitFor(() => {
       expect(screen.queryByText('ログイン中...')).not.toBeInTheDocument()

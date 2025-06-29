@@ -18,9 +18,11 @@ const mockPush = jest.fn()
 const mockUseRouter = useRouter as jest.MockedFunction<typeof useRouter>
 
 // Mock window.location.pathname using jest.spyOn
-const mockLocationPathname = jest.spyOn(window, 'location', 'get').mockReturnValue({
-  pathname: '/',
-} as Location)
+const mockLocationPathname = jest
+  .spyOn(window, 'location', 'get')
+  .mockReturnValue({
+    pathname: '/',
+  } as Location)
 
 beforeEach(() => {
   mockUseRouter.mockReturnValue({
@@ -32,7 +34,7 @@ beforeEach(() => {
     refresh: jest.fn(),
   })
 
-  // Reset pathname  
+  // Reset pathname
   mockLocationPathname.mockReturnValue({
     pathname: '/',
   } as Location)
@@ -91,7 +93,6 @@ describe('AuthGuard', () => {
     mockLocationPathname.mockReturnValue({
       pathname: '/protected-page',
     } as Location)
-    
     ;(useAuth as jest.Mock).mockReturnValue({
       user: null,
       isLoading: false,
@@ -131,7 +132,6 @@ describe('AuthGuard', () => {
     mockLocationPathname.mockReturnValue({
       pathname: '/admin',
     } as Location)
-    
     ;(useAuth as jest.Mock).mockReturnValue({
       user: null,
       isLoading: false,
