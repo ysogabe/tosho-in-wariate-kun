@@ -37,32 +37,266 @@ jest.mock('framer-motion', () => ({
 // Mock lucide-react icons to avoid rendering issues
 jest.mock('lucide-react', () => ({
   ...jest.requireActual('lucide-react'),
-  Loader2: ({ className, ...props }) => <div className={className} data-testid="loader2-icon" aria-hidden="true" {...props}>Loading</div>,
-  AlertCircle: ({ className, ...props }) => <div className={className} data-testid="alert-circle-icon" aria-hidden="true" {...props}>Alert</div>,
-  RefreshCw: ({ className, ...props }) => <div className={className} data-testid="refresh-icon" aria-hidden="true" {...props}>Refresh</div>,
-  ChevronLeft: ({ className, ...props }) => <div className={className} data-testid="chevron-left-icon" aria-hidden="true" {...props}>Left</div>,
-  ChevronRight: ({ className, ...props }) => <div className={className} data-testid="chevron-right-icon" aria-hidden="true" {...props}>Right</div>,
-  ChevronsLeft: ({ className, ...props }) => <div className={className} data-testid="chevrons-left-icon" aria-hidden="true" {...props}>First</div>,
-  ChevronsRight: ({ className, ...props }) => <div className={className} data-testid="chevrons-right-icon" aria-hidden="true" {...props}>Last</div>,
-  Trash2: ({ className, ...props }) => <div className={className} data-testid="trash-icon" aria-hidden="true" {...props}>Delete</div>,
-  AlertTriangle: ({ className, ...props }) => <div className={className} data-testid="warning-icon" aria-hidden="true" {...props}>Warning</div>,
-  Plus: ({ className, ...props }) => <div className={className} data-testid="plus-icon" aria-hidden="true" {...props}>Add</div>,
-  Edit: ({ className, ...props }) => <div className={className} data-testid="edit-icon" aria-hidden="true" {...props}>Edit</div>,
-  Save: ({ className, ...props }) => <div className={className} data-testid="save-icon" aria-hidden="true" {...props}>Save</div>,
-  CheckCircle: ({ className, ...props }) => <div className={className} data-testid="check-circle-icon" aria-hidden="true" {...props}>Success</div>,
-  XCircle: ({ className, ...props }) => <div className={className} data-testid="x-circle-icon" aria-hidden="true" {...props}>Error</div>,
-  Info: ({ className, ...props }) => <div className={className} data-testid="info-icon" aria-hidden="true" {...props}>Info</div>,
-  Book: ({ className, ...props }) => <div className={className} data-testid="book-icon" aria-hidden="true" {...props}>Book</div>,
-  Calendar: ({ className, ...props }) => <div className={className} data-testid="calendar-icon" aria-hidden="true" {...props}>Calendar</div>,
-  Clock: ({ className, ...props }) => <div className={className} data-testid="clock-icon" aria-hidden="true" {...props}>Clock</div>,
-  GraduationCap: ({ className, ...props }) => <div className={className} data-testid="graduation-cap-icon" aria-hidden="true" {...props}>School</div>,
-  LayoutDashboard: ({ className, ...props }) => <div className={className} data-testid="dashboard-icon" aria-hidden="true" {...props}>Dashboard</div>,
-  Settings: ({ className, ...props }) => <div className={className} data-testid="settings-icon" aria-hidden="true" {...props}>Settings</div>,
-  Users: ({ className, ...props }) => <div className={className} data-testid="users-icon" aria-hidden="true" {...props}>Users</div>,
-  Check: ({ className, ...props }) => <div className={className} data-testid="check-icon" aria-hidden="true" {...props}>Check</div>,
-  ChevronDown: ({ className, ...props }) => <div className={className} data-testid="chevron-down-icon" aria-hidden="true" {...props}>Down</div>,
-  ChevronUp: ({ className, ...props }) => <div className={className} data-testid="chevron-up-icon" aria-hidden="true" {...props}>Up</div>,
-  X: ({ className, ...props }) => <div className={className} data-testid="x-icon" aria-hidden="true" {...props}>X</div>,
+  Loader2: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="loader2-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Loading
+    </div>
+  ),
+  AlertCircle: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="alert-circle-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Alert
+    </div>
+  ),
+  RefreshCw: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="refresh-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Refresh
+    </div>
+  ),
+  ChevronLeft: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="chevron-left-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Left
+    </div>
+  ),
+  ChevronRight: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="chevron-right-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Right
+    </div>
+  ),
+  ChevronsLeft: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="chevrons-left-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      First
+    </div>
+  ),
+  ChevronsRight: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="chevrons-right-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Last
+    </div>
+  ),
+  Trash2: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="trash-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Delete
+    </div>
+  ),
+  AlertTriangle: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="warning-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Warning
+    </div>
+  ),
+  Plus: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="plus-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Add
+    </div>
+  ),
+  Edit: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="edit-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Edit
+    </div>
+  ),
+  Save: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="save-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Save
+    </div>
+  ),
+  CheckCircle: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="check-circle-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Success
+    </div>
+  ),
+  XCircle: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="x-circle-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Error
+    </div>
+  ),
+  Info: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="info-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Info
+    </div>
+  ),
+  Book: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="book-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Book
+    </div>
+  ),
+  Calendar: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="calendar-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Calendar
+    </div>
+  ),
+  Clock: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="clock-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Clock
+    </div>
+  ),
+  GraduationCap: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="graduation-cap-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      School
+    </div>
+  ),
+  LayoutDashboard: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="dashboard-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Dashboard
+    </div>
+  ),
+  Settings: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="settings-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Settings
+    </div>
+  ),
+  Users: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="users-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Users
+    </div>
+  ),
+  Check: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="check-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Check
+    </div>
+  ),
+  ChevronDown: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="chevron-down-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Down
+    </div>
+  ),
+  ChevronUp: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="chevron-up-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Up
+    </div>
+  ),
+  X: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="x-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      X
+    </div>
+  ),
 }))
 
 // Global test utilities
@@ -82,7 +316,7 @@ global.IntersectionObserver = jest.fn().mockImplementation(() => ({
 // Mock matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: jest.fn().mockImplementation(query => ({
+  value: jest.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -96,7 +330,7 @@ Object.defineProperty(window, 'matchMedia', {
 
 // Mock @radix-ui/* components to avoid portal and DOM issues in tests
 jest.mock('@radix-ui/react-dialog', () => ({
-  Root: ({ children, open }) => open ? children : null,
+  Root: ({ children, open }) => (open ? children : null),
   Trigger: ({ children }) => children,
   Portal: ({ children }) => children,
   Overlay: ({ children }) => children,

@@ -34,16 +34,19 @@
 ### 修正された目標値の妥当性
 
 **MVPフェーズ（現在）:**
+
 - **カバレッジ目標: 40%**
 - **対象**: 重要なビジネスロジックとUI コンポーネント
 - **テスト範囲**: 単体テスト + CI/CD基盤
 
-**理由**: 
+**理由**:
+
 - 40%は実装コストと品質のバランスが取れた現実的な目標値
 - コアコンポーネントの品質は確保しつつ、開発速度を維持
 - 将来の拡張に向けたテスト基盤は確立
 
 **本格運用フェーズ（将来）:**
+
 - **カバレッジ目標: 70%**
 - **対象**: 全機能 + E2Eテスト
 - **テスト範囲**: 単体 + 統合 + E2E
@@ -86,17 +89,17 @@ const config = {
   coverageDirectory: 'coverage',
   coverageProvider: 'v8',
   coverageReporters: ['text', 'lcov', 'html'],
-  
+
   // MVPフェーズの現実的なカバレッジ目標
   coverageThreshold: {
     global: {
       branches: 40,
-      functions: 40, 
+      functions: 40,
       lines: 40,
       statements: 40,
     },
   },
-  
+
   testEnvironment: 'jsdom',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
@@ -125,9 +128,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, feature/** ]
+    branches: [main, feature/**]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test:
@@ -139,39 +142,39 @@ jobs:
         node-version: [18.x, 20.x]
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Run type check
-      run: npm run type-check
+      - name: Run type check
+        run: npm run type-check
 
-    - name: Run linter
-      run: npm run lint
+      - name: Run linter
+        run: npm run lint
 
-    - name: Run unit tests
-      run: npm run test:ci
+      - name: Run unit tests
+        run: npm run test:ci
 
-    - name: Upload coverage reports to Codecov
-      if: matrix.node-version == '20.x'
-      uses: codecov/codecov-action@v3
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./coverage/lcov.info
-        flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: false
+      - name: Upload coverage reports to Codecov
+        if: matrix.node-version == '20.x'
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
 
-    - name: Build application
-      run: npm run build
+      - name: Build application
+        run: npm run build
 ```
 
 ### テスト実装戦略（MVPフェーズ）
@@ -219,16 +222,19 @@ jobs:
 ## 段階的品質向上計画
 
 ### フェーズ1: MVP（現在）
+
 - **目標**: カバレッジ40%
 - **期間**: 開発初期〜MVP完成
 - **対象**: コアコンポーネント + ユーティリティ
 
 ### フェーズ2: ベータ版
+
 - **目標**: カバレッジ55%
 - **期間**: MVP完成後
 - **対象**: フォーム + API統合テスト追加
 
 ### フェーズ3: 本格運用
+
 - **目標**: カバレッジ70%
 - **期間**: ベータテスト後
 - **対象**: E2Eテスト + 統合テスト追加

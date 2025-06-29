@@ -150,7 +150,7 @@ All GitHub-related operations should use the `gh` CLI command for consistency:
 # Create issues
 gh issue create --title "Issue Title" --body "Issue description"
 
-# Link branch to issue 
+# Link branch to issue
 gh issue develop <issue-number> --checkout
 
 # Create pull requests
