@@ -1,7 +1,11 @@
 import { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+})
 
 export const metadata: Metadata = {
   title: {
@@ -17,5 +21,5 @@ export default function AuthLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <div className={inter.className}>{children}</div>
+  return <div className={`${inter.variable} font-sans`}>{children}</div>
 }

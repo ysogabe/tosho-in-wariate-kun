@@ -53,7 +53,7 @@ export function LoginForm({
 
       const result = await signIn(values.email, values.password)
 
-      if (result && result.error) {
+      if (result?.error) {
         setAuthError(result.error)
         return
       }

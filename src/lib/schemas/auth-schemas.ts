@@ -9,7 +9,11 @@ export const loginSchema = z.object({
   password: z
     .string()
     .min(1, 'パスワードは必須です')
-    .min(6, 'パスワードは6文字以上で入力してください')
+    .min(8, 'パスワードは8文字以上で入力してください')
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      'パスワードには大文字、小文字、数字を含めてください'
+    )
     .max(128, 'パスワードが長すぎます'),
 })
 
@@ -26,7 +30,11 @@ export const changePasswordSchema = z
     currentPassword: z.string().min(1, '現在のパスワードは必須です'),
     newPassword: z
       .string()
-      .min(6, '新しいパスワードは6文字以上で入力してください')
+      .min(8, '新しいパスワードは8文字以上で入力してください')
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        'パスワードには大文字、小文字、数字を含めてください'
+      )
       .max(128, 'パスワードが長すぎます'),
     confirmPassword: z.string().min(1, 'パスワード確認は必須です'),
   })
