@@ -39,7 +39,7 @@ export default function LoginTestPage() {
               <strong>テスト用アカウント:</strong>
             </p>
             <p>メール: test@example.com</p>
-            <p>パスワード: password</p>
+            <p>パスワード: Password123</p>
           </div>
         </CardContent>
       </Card>
