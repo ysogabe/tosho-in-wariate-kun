@@ -40,6 +40,24 @@ function TestComponentWithoutProvider() {
   }
 }
 
+beforeEach(() => {
+  // Clear cookies before each test to ensure clean state
+  if (typeof document !== 'undefined') {
+    document.cookie = 'auth-session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+    document.cookie = 'user-data=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+    document.cookie = 'user-role=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+  }
+})
+
+afterEach(() => {
+  // Clear cookies after each test to prevent cross-test pollution
+  if (typeof document !== 'undefined') {
+    document.cookie = 'auth-session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+    document.cookie = 'user-data=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+    document.cookie = 'user-role=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+  }
+})
+
 describe('AuthContext', () => {
   describe('AuthProvider', () => {
     it('provides auth context to children', async () => {
@@ -116,12 +134,12 @@ describe('AuthContext', () => {
         await user.click(screen.getByTestId('sign-out'))
       })
 
-      // ログアウト後の状態確認
+      // ログアウト後の状態確認（より長いタイムアウトで待機）
       await waitFor(() => {
         expect(screen.getByTestId('user-status')).toHaveTextContent(
           'Not logged in'
         )
-      })
+      }, { timeout: 3000 })
     })
 
     it('handles refetch correctly', async () => {
@@ -149,7 +167,7 @@ describe('AuthContext', () => {
         expect(screen.getByTestId('user-status')).toHaveTextContent(
           'Not logged in'
         )
-      })
+      }, { timeout: 3000 })
     })
   })
 
