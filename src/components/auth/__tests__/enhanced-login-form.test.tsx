@@ -299,7 +299,7 @@ describe('EnhancedLoginForm', () => {
 
     expect(screen.getByText('開発用ログイン情報:')).toBeInTheDocument()
     expect(screen.getByText('test@example.com')).toBeInTheDocument()
-    expect(screen.getByText('password')).toBeInTheDocument()
+    expect(screen.getByText('Password123')).toBeInTheDocument()
     expect(screen.getByText('デモ用情報を入力')).toBeInTheDocument()
 
     Object.defineProperty(process.env, 'NODE_ENV', {
@@ -325,7 +325,7 @@ describe('EnhancedLoginForm', () => {
     await user.click(demoButton)
 
     expect(screen.getByDisplayValue('test@example.com')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('password')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Password123')).toBeInTheDocument()
 
     Object.defineProperty(process.env, 'NODE_ENV', {
       value: originalEnv,

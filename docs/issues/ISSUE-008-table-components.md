@@ -615,7 +615,7 @@ export const studentsColumns: ColumnDef<Student>[] = [
 ### Testing Results
 
 - [x] デスクトップ表示確認
-- [x] モバイル表示確認  
+- [x] モバイル表示確認
 - [x] ソート機能確認
 - [x] フィルタ機能確認
 - [x] ページネーション確認
@@ -627,20 +627,24 @@ export const studentsColumns: ColumnDef<Student>[] = [
 ### Challenges Faced
 
 **TanStack React Table v8統合:**
+
 - 複雑な型定義とTanStack Tableの学習曲線
 - shadcn/uiとの統合で一部コンポーネント衝突
 
 **Import Path問題:**
+
 - dropdown-menuコンポーネントのパス解決エラー
 - Jest環境でのモジュール解決問題
 
 **型安全性の確保:**
+
 - 柔軟なColumnDef型定義と具体的なaccessorKeyのバランス
 - ヘルパーコンポーネントの型定義調整
 
 ### Code Review Feedback
 
 **実装完了 - レビュー待ち:**
+
 - 主要機能はすべて実装完了
 - 一部型エラーとimportの問題は今後のリファクタリングで解決
 - デモページ（/table-test）で全機能確認可能

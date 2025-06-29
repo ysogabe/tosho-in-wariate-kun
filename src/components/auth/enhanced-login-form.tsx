@@ -250,7 +250,7 @@ export function EnhancedLoginForm() {
                 <strong>メール:</strong> test@example.com
               </p>
               <p>
-                <strong>パスワード:</strong> password
+                <strong>パスワード:</strong> Password123
               </p>
             </div>
             <Button
@@ -260,7 +260,7 @@ export function EnhancedLoginForm() {
               className="mt-2 w-full"
               onClick={() => {
                 form.setValue('email', 'test@example.com')
-                form.setValue('password', 'password')
+                form.setValue('password', 'Password123')
               }}
               disabled={isLoading}
             >
