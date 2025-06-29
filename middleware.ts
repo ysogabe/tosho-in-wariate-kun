@@ -39,8 +39,25 @@ export async function middleware(req: NextRequest) {
     const authCookie = req.cookies.get('auth-session')
     const isAuthenticated = authCookie?.value === 'authenticated'
 
-    // 認証が必要なルートのチェック
-    if (isProtectedRoute(pathname)) {
+    // APIルートの認証チェック（先に処理）
+    if (pathname.startsWith('/api/') && !pathname.startsWith('/api/public/')) {
+      if (!isAuthenticated) {
+        return unauthorizedApiResponse()
+      }
+
+      // 管理者APIの権限チェック (MVP: 基本実装)
+      if (pathname.startsWith('/api/admin/')) {
+        const adminCookie = req.cookies.get('user-role')
+        const isAdmin = adminCookie?.value === 'admin'
+        
+        if (!isAdmin) {
+          return forbiddenApiResponse()
+        }
+      }
+    }
+
+    // 認証が必要なページルートのチェック
+    if (isProtectedRoute(pathname) && !pathname.startsWith('/api/')) {
       if (!isAuthenticated) {
         return redirectToLogin(req)
       }
@@ -60,23 +77,6 @@ export async function middleware(req: NextRequest) {
     // 認証済みユーザーが認証ページにアクセスした場合
     if (isAuthenticated && isAuthRestrictedRoute(pathname)) {
       return redirectToDashboard(req)
-    }
-
-    // APIルートの認証チェック
-    if (pathname.startsWith('/api/') && !pathname.startsWith('/api/public/')) {
-      if (!isAuthenticated) {
-        return unauthorizedApiResponse()
-      }
-
-      // 管理者APIの権限チェック (MVP: 基本実装)
-      if (pathname.startsWith('/api/admin/')) {
-        const adminCookie = req.cookies.get('user-role')
-        const isAdmin = adminCookie?.value === 'admin'
-        
-        if (!isAdmin) {
-          return forbiddenApiResponse()
-        }
-      }
     }
 
     return NextResponse.next()

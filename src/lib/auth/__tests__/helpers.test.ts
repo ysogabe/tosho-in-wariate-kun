@@ -17,7 +17,10 @@ global.Response = class Response {
   headers: Record<string, string>
   body: string
 
-  constructor(body: string, init?: { status?: number; headers?: Record<string, string> }) {
+  constructor(
+    body: string,
+    init?: { status?: number; headers?: Record<string, string> }
+  ) {
     this.body = body
     this.status = init?.status || 200
     this.headers = init?.headers || {}
@@ -88,15 +91,15 @@ describe('Auth Helpers', () => {
   describe('getClientSession', () => {
     it('returns user data when valid session exists', () => {
       setClientSession(mockTeacherUser)
-      
+
       const session = getClientSession()
-      
+
       expect(session).toEqual(mockTeacherUser)
     })
 
     it('returns null when no session exists', () => {
       const session = getClientSession()
-      
+
       expect(session).toBeNull()
     })
 
@@ -104,9 +107,9 @@ describe('Auth Helpers', () => {
       // Set invalid session cookie
       document.cookie = 'auth-session=invalid; path=/'
       document.cookie = 'user-data=invalid-json; path=/'
-      
+
       const session = getClientSession()
-      
+
       expect(session).toBeNull()
     })
   })
@@ -142,20 +145,20 @@ describe('Auth Helpers', () => {
   describe('createAuthErrorResponse', () => {
     it('creates 401 unauthorized response by default', () => {
       const response = createAuthErrorResponse('Test error message')
-      
+
       expect(response.status).toBe(401)
     })
 
     it('creates 403 forbidden response when specified', () => {
       const response = createAuthErrorResponse('Test error message', 403)
-      
+
       expect(response.status).toBe(403)
     })
 
     it('includes error message in response body', async () => {
       const response = createAuthErrorResponse('Test error message')
       const body = await response.json()
-      
+
       expect(body).toEqual({
         success: false,
         error: {
@@ -168,7 +171,7 @@ describe('Auth Helpers', () => {
     it('sets correct error code for forbidden response', async () => {
       const response = createAuthErrorResponse('Test error message', 403)
       const body = await response.json()
-      
+
       expect(body.error.code).toBe('FORBIDDEN')
     })
   })

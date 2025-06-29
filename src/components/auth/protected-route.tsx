@@ -14,7 +14,7 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({
   children,
   requireAdmin = false,
-  redirectTo = '/auth/login'
+  redirectTo = '/auth/login',
 }: ProtectedRouteProps) {
   const { user, isLoading } = useAuth()
   const router = useRouter()
@@ -26,7 +26,9 @@ export function ProtectedRoute({
           // 認証されていない場合はログインページへ
           const currentPath = window.location.pathname
           console.log('未認証ユーザーをリダイレクト:', currentPath)
-          router.push(`${redirectTo}?redirectTo=${encodeURIComponent(currentPath)}`)
+          router.push(
+            `${redirectTo}?redirectTo=${encodeURIComponent(currentPath)}`
+          )
           return
         }
 

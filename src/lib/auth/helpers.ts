@@ -15,8 +15,12 @@ export async function getServerSession(): Promise<MVPUser | null> {
     const cookieStore = await cookies()
     const authCookie = cookieStore.get('auth-session')
     const userDataCookie = cookieStore.get('user-data')
-    
-    if (!authCookie || authCookie.value !== 'authenticated' || !userDataCookie) {
+
+    if (
+      !authCookie ||
+      authCookie.value !== 'authenticated' ||
+      !userDataCookie
+    ) {
       return null
     }
 
@@ -56,8 +60,12 @@ export async function authenticate(req: NextRequest): Promise<MVPUser> {
   try {
     const authCookie = req.cookies.get('auth-session')
     const userDataCookie = req.cookies.get('user-data')
-    
-    if (!authCookie || authCookie.value !== 'authenticated' || !userDataCookie) {
+
+    if (
+      !authCookie ||
+      authCookie.value !== 'authenticated' ||
+      !userDataCookie
+    ) {
       throw new Error('認証が必要です')
     }
 
@@ -93,9 +101,12 @@ export function setClientSession(user: MVPUser) {
 // クライアントサイド用セッション削除
 export function clearClientSession() {
   if (typeof window !== 'undefined') {
-    document.cookie = 'auth-session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
-    document.cookie = 'user-data=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
-    document.cookie = 'user-role=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+    document.cookie =
+      'auth-session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+    document.cookie =
+      'user-data=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+    document.cookie =
+      'user-role=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
   }
 }
 
@@ -107,9 +118,11 @@ export function getClientSession(): MVPUser | null {
 
   try {
     const cookies = document.cookie.split(';')
-    const authCookie = cookies.find(c => c.trim().startsWith('auth-session='))
-    const userDataCookie = cookies.find(c => c.trim().startsWith('user-data='))
-    
+    const authCookie = cookies.find((c) => c.trim().startsWith('auth-session='))
+    const userDataCookie = cookies.find((c) =>
+      c.trim().startsWith('user-data=')
+    )
+
     if (!authCookie || !userDataCookie) {
       return null
     }
@@ -132,7 +145,7 @@ export function getClientSession(): MVPUser | null {
 export async function getUserProfile(userId: string): Promise<MVPUser | null> {
   try {
     const session = await getServerSession()
-    
+
     if (!session || session.id !== userId) {
       return null
     }

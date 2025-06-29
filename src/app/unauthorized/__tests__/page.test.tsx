@@ -9,9 +9,15 @@ jest.mock('next/navigation', () => ({
 
 // Mock next/link
 jest.mock('next/link', () => {
-  return ({ children, href }: { children: React.ReactNode; href: string }) => (
-    <a href={href}>{children}</a>
-  )
+  const MockLink = ({
+    children,
+    href,
+  }: {
+    children: React.ReactNode
+    href: string
+  }) => <a href={href}>{children}</a>
+  MockLink.displayName = 'MockLink'
+  return MockLink
 })
 
 const mockPush = jest.fn()
@@ -89,8 +95,10 @@ describe('UnauthorizedPage', () => {
 
     // Check for card components (from shadcn/ui)
     const cardTitle = screen.getByText('アクセス権限がありません')
-    const cardDescription = screen.getByText('このページにアクセスする権限がありません。')
-    
+    const cardDescription = screen.getByText(
+      'このページにアクセスする権限がありません。'
+    )
+
     expect(cardTitle).toBeInTheDocument()
     expect(cardDescription).toBeInTheDocument()
   })
