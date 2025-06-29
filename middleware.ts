@@ -47,10 +47,7 @@ export async function middleware(req: NextRequest) {
 
       // 管理者APIの権限チェック (MVP: 基本実装)
       if (pathname.startsWith('/api/admin/')) {
-        const adminCookie = req.cookies.get('user-role')
-        const isAdmin = adminCookie?.value === 'admin'
-        
-        if (!isAdmin) {
+        if (!checkAdminRole(req)) {
           return forbiddenApiResponse()
         }
       }
@@ -64,11 +61,7 @@ export async function middleware(req: NextRequest) {
 
       // 管理者専用ルートのチェック (MVP: 基本実装)
       if (isAdminRoute(pathname)) {
-        // MVP: 簡略化された管理者チェック
-        const adminCookie = req.cookies.get('user-role')
-        const isAdmin = adminCookie?.value === 'admin'
-        
-        if (!isAdmin) {
+        if (!checkAdminRole(req)) {
           return redirectToUnauthorized(req)
         }
       }
@@ -151,6 +144,12 @@ export async function middleware(req: NextRequest) {
     // その他の場合は処理を続行
     return NextResponse.next()
   }
+}
+
+// 管理者権限チェック関数
+function checkAdminRole(req: NextRequest): boolean {
+  const adminCookie = req.cookies.get('user-role')
+  return adminCookie?.value === 'admin'
 }
 
 // ルート判定ヘルパー関数
