@@ -366,7 +366,7 @@ export default function LayoutTestPage() {
 ### Work Completed
 
 - [x] Headerコンポーネント作成
-- [x] PageLayoutコンポーネント作成  
+- [x] PageLayoutコンポーネント作成
 - [x] MainLayoutコンポーネント作成
 - [x] RootLayout更新
 - [x] レスポンシブ対応実装
@@ -379,21 +379,24 @@ export default function LayoutTestPage() {
 ### Challenges Faced
 
 **shadcn/uiコンポーネントの統合:**
+
 - dropdown-menuとsheetの個別インストールが必要
 - Prettierの書式設定との競合を自動修正で解決
 
-**テストカバレッジ:**  
+**テストカバレッジ:**
+
 - 新規レイアウトコンポーネント追加によりカバレッジが一時的に低下
 - PageLayoutとMainLayoutの基本テストを追加して改善
 
 **レスポンシブデザイン:**
+
 - モバイルファーストアプローチでの実装
 - shadcn/ui Sheetコンポーネントを活用したモバイルメニュー
 
 ### Testing Results
 
 - [x] デスクトップ表示確認
-- [x] タブレット表示確認  
+- [x] タブレット表示確認
 - [x] モバイル表示確認
 - [x] ナビゲーション動作確認
 - [x] キーボードナビゲーション確認
@@ -405,6 +408,7 @@ export default function LayoutTestPage() {
 ### Code Review Feedback
 
 **実装完了 - レビュー待ち:**
+
 - PR作成済み: feature/issue-007-layout-components
 - 全Acceptance Criteria達成
 - テストページ(/layout-test)で動作確認可能
