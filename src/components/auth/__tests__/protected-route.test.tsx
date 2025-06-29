@@ -31,7 +31,7 @@ describe('ProtectedRoute', () => {
 
     // ローディング完了後にリダイレクトが発生することを確認
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/auth/login')
+      expect(mockPush).toHaveBeenCalledWith('/auth/login?redirectTo=%2F')
     })
   })
 
@@ -45,7 +45,7 @@ describe('ProtectedRoute', () => {
     )
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/auth/login')
+      expect(mockPush).toHaveBeenCalledWith('/auth/login?redirectTo=%2F')
     })
 
     // 認証されていないので、コンテンツは表示されない
