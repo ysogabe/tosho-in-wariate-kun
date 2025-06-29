@@ -55,6 +55,9 @@ beforeEach(() => {
   localStorageMock.getItem.mockClear()
   localStorageMock.setItem.mockClear()
   localStorageMock.removeItem.mockClear()
+  
+  // Default localStorage to return null (no saved credentials)
+  localStorageMock.getItem.mockReturnValue(null)
 })
 
 describe('EnhancedLoginForm', () => {
@@ -151,6 +154,8 @@ describe('EnhancedLoginForm', () => {
     const user = userEvent.setup()
     mockGet.mockReturnValue(null)
     mockSignIn.mockResolvedValue({})
+    // Ensure no saved credentials
+    localStorageMock.getItem.mockReturnValue(null)
 
     render(<EnhancedLoginForm />)
 
@@ -158,12 +163,13 @@ describe('EnhancedLoginForm', () => {
     const passwordInput = screen.getByPlaceholderText('パスワードを入力')
     const submitButton = screen.getByRole('button', { name: /ログイン/i })
 
+    await user.clear(emailInput) // Clear any existing value
     await user.type(emailInput, 'test@example.com')
-    await user.type(passwordInput, 'password123')
+    await user.type(passwordInput, 'Password123')
     await user.click(submitButton)
 
     await waitFor(() => {
-      expect(mockSignIn).toHaveBeenCalledWith('test@example.com', 'password123')
+      expect(mockSignIn).toHaveBeenCalledWith('test@example.com', 'Password123')
       expect(mockPush).toHaveBeenCalledWith('/dashboard')
     })
   })
@@ -175,6 +181,8 @@ describe('EnhancedLoginForm', () => {
       return null
     })
     mockSignIn.mockResolvedValue({})
+    // Ensure no saved credentials
+    localStorageMock.getItem.mockReturnValue(null)
 
     render(<EnhancedLoginForm />)
 
@@ -182,8 +190,9 @@ describe('EnhancedLoginForm', () => {
     const passwordInput = screen.getByPlaceholderText('パスワードを入力')
     const submitButton = screen.getByRole('button', { name: /ログイン/i })
 
+    await user.clear(emailInput) // Clear any existing value
     await user.type(emailInput, 'test@example.com')
-    await user.type(passwordInput, 'password123')
+    await user.type(passwordInput, 'Password123')
     await user.click(submitButton)
 
     await waitFor(() => {
@@ -204,7 +213,7 @@ describe('EnhancedLoginForm', () => {
     const submitButton = screen.getByRole('button', { name: /ログイン/i })
 
     await user.type(emailInput, 'test@example.com')
-    await user.type(passwordInput, 'password123')
+    await user.type(passwordInput, 'Password123')
     await user.click(rememberCheckbox)
     await user.click(submitButton)
 
@@ -232,7 +241,7 @@ describe('EnhancedLoginForm', () => {
     const submitButton = screen.getByRole('button', { name: /ログイン/i })
 
     await user.type(emailInput, 'test@example.com')
-    await user.type(passwordInput, 'password123')
+    await user.type(passwordInput, 'Password123')
     await user.click(submitButton)
 
     await waitFor(() => {
@@ -253,7 +262,7 @@ describe('EnhancedLoginForm', () => {
     const submitButton = screen.getByRole('button', { name: /ログイン/i })
 
     await user.type(emailInput, 'test@example.com')
-    await user.type(passwordInput, 'wrongpassword')
+    await user.type(passwordInput, 'WrongPassword123')
     await user.click(submitButton)
 
     await waitFor(() => {
@@ -341,7 +350,7 @@ describe('EnhancedLoginForm', () => {
     const submitButton = screen.getByRole('button', { name: /ログイン/i })
 
     await user.type(emailInput, 'test@example.com')
-    await user.type(passwordInput, 'password123')
+    await user.type(passwordInput, 'Password123')
     await user.click(submitButton)
 
     expect(screen.getByText('ログイン中...')).toBeInTheDocument()
