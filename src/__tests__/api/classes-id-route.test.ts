@@ -14,6 +14,7 @@ jest.mock('@/lib/database/client', () => ({
   prisma: {
     class: {
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
     },
@@ -70,14 +71,14 @@ describe('/api/classes/[id] Route Tests', () => {
 
       expect(response.status).toBe(200)
       expect(data.success).toBe(true)
-      expect(data.data.id).toBe('class-1')
-      expect(data.data.name).toBe('5年1組')
-      expect(data.data.studentCount).toBe(25)
+      expect(data.data.class.id).toBe('class-1')
+      expect(data.data.class.name).toBe('5年1組')
+      expect(data.data.class.studentCount).toBe(25)
       expect(mockPrisma.class.findUnique).toHaveBeenCalledWith({
         where: { id: 'class-1' },
         include: {
           _count: {
-            select: { students: true },
+            select: { students: { where: { isActive: true } } },
           },
         },
       })
@@ -92,7 +93,7 @@ describe('/api/classes/[id] Route Tests', () => {
 
       expect(response.status).toBe(404)
       expect(data.success).toBe(false)
-      expect(data.error.code).toBe('NOT_FOUND')
+      expect(data.error.code).toBe('CLASS_NOT_FOUND')
       expect(data.error.message).toBe('クラスが見つかりません')
     })
 
@@ -122,18 +123,32 @@ describe('/api/classes/[id] Route Tests', () => {
 
   describe('PUT /api/classes/[id]', () => {
     it('クラス情報を正常に更新できる', async () => {
+      const existingClass = {
+        id: 'class-1',
+        name: '5年1組',
+        year: 5,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+      }
+
       const updatedClass = {
         id: 'class-1',
-        name: '5年1組（更新）',
+        name: '1組更新',
         year: 5,
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-02'),
+        _count: { students: 0 },
       }
 
+      // 既存クラスの取得
+      mockPrisma.class.findUnique.mockResolvedValue(existingClass)
+      // 重複チェック（重複なし）
+      mockPrisma.class.findFirst.mockResolvedValue(null)
+      // 更新実行
       mockPrisma.class.update.mockResolvedValue(updatedClass)
 
       const requestBody = {
-        name: '5年1組（更新）',
+        name: '1組更新',
       }
 
       const request = new NextRequest('http://localhost:3000/api/classes/class-1', {
@@ -147,22 +162,42 @@ describe('/api/classes/[id] Route Tests', () => {
 
       expect(response.status).toBe(200)
       expect(data.success).toBe(true)
-      expect(data.data.name).toBe('5年1組（更新）')
+      expect(data.data.class.name).toBe('1組更新')
+      expect(data.data.message).toBe('5年1組更新を更新しました')
       expect(mockPrisma.class.update).toHaveBeenCalledWith({
         where: { id: 'class-1' },
         data: requestBody,
+        include: {
+          _count: {
+            select: { students: { where: { isActive: true } } },
+          },
+        },
       })
     })
 
     it('年度のみ更新できる', async () => {
+      const existingClass = {
+        id: 'class-1',
+        name: '1組',
+        year: 5,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+      }
+
       const updatedClass = {
         id: 'class-1',
-        name: '5年1組',
+        name: '1組',
         year: 6,
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-02'),
+        _count: { students: 0 },
       }
 
+      // 既存クラスの取得
+      mockPrisma.class.findUnique.mockResolvedValue(existingClass)
+      // 重複チェック（重複なし）
+      mockPrisma.class.findFirst.mockResolvedValue(null)
+      // 更新実行
       mockPrisma.class.update.mockResolvedValue(updatedClass)
 
       const requestBody = {
@@ -180,16 +215,13 @@ describe('/api/classes/[id] Route Tests', () => {
 
       expect(response.status).toBe(200)
       expect(data.success).toBe(true)
-      expect(data.data.year).toBe(6)
+      expect(data.data.class.year).toBe(6)
+      expect(data.data.message).toBe('6年1組を更新しました')
     })
 
     it('存在しないクラスの更新で404エラー', async () => {
-      const notFoundError = {
-        code: 'P2025',
-        message: 'Record not found',
-      }
-
-      mockPrisma.class.update.mockRejectedValue(notFoundError)
+      // 既存クラスの存在確認で見つからない
+      mockPrisma.class.findUnique.mockResolvedValue(null)
 
       const requestBody = {
         name: '存在しないクラス',
@@ -206,7 +238,7 @@ describe('/api/classes/[id] Route Tests', () => {
 
       expect(response.status).toBe(404)
       expect(data.success).toBe(false)
-      expect(data.error.code).toBe('NOT_FOUND')
+      expect(data.error.code).toBe('CLASS_NOT_FOUND')
     })
 
     it('バリデーションエラーの場合400を返す', async () => {
@@ -253,15 +285,19 @@ describe('/api/classes/[id] Route Tests', () => {
 
   describe('DELETE /api/classes/[id]', () => {
     it('クラスを正常に削除できる', async () => {
-      const deletedClass = {
+      const existingClass = {
         id: 'class-1',
-        name: '5年1組',
+        name: '1組',
         year: 5,
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-01'),
+        _count: { students: 0 },
       }
 
-      mockPrisma.class.delete.mockResolvedValue(deletedClass)
+      // 削除前の存在確認で見つかる
+      mockPrisma.class.findUnique.mockResolvedValue(existingClass)
+      // 削除実行
+      mockPrisma.class.delete.mockResolvedValue(existingClass)
 
       const request = new NextRequest('http://localhost:3000/api/classes/class-1')
       const response = await DELETE(request, { params: { id: 'class-1' } })
@@ -269,20 +305,17 @@ describe('/api/classes/[id] Route Tests', () => {
 
       expect(response.status).toBe(200)
       expect(data.success).toBe(true)
-      expect(data.data.id).toBe('class-1')
-      expect(data.data.name).toBe('5年1組')
+      expect(data.data.deletedClass.id).toBe('class-1')
+      expect(data.data.deletedClass.name).toBe('1組')
+      expect(data.data.message).toBe('5年1組を削除しました')
       expect(mockPrisma.class.delete).toHaveBeenCalledWith({
         where: { id: 'class-1' },
       })
     })
 
     it('存在しないクラスの削除で404エラー', async () => {
-      const notFoundError = {
-        code: 'P2025',
-        message: 'Record not found',
-      }
-
-      mockPrisma.class.delete.mockRejectedValue(notFoundError)
+      // 削除前の存在確認で見つからない
+      mockPrisma.class.findUnique.mockResolvedValue(null)
 
       const request = new NextRequest('http://localhost:3000/api/classes/nonexistent')
       const response = await DELETE(request, { params: { id: 'nonexistent' } })
@@ -290,7 +323,7 @@ describe('/api/classes/[id] Route Tests', () => {
 
       expect(response.status).toBe(404)
       expect(data.success).toBe(false)
-      expect(data.error.code).toBe('NOT_FOUND')
+      expect(data.error.code).toBe('CLASS_NOT_FOUND')
     })
 
     it('無効なクラスIDの場合400を返す', async () => {
@@ -317,20 +350,26 @@ describe('/api/classes/[id] Route Tests', () => {
     })
 
     it('関連データ制約エラーを適切に処理する', async () => {
-      const constraintError = {
-        code: 'P2003',
-        message: 'Foreign key constraint failed',
+      const existingClassWithStudents = {
+        id: 'class-1',
+        name: '1組',
+        year: 5,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+        _count: { students: 3 }, // 図書委員が3名いる
       }
 
-      mockPrisma.class.delete.mockRejectedValue(constraintError)
+      // 削除前の存在確認で学生がいるクラスが見つかる
+      mockPrisma.class.findUnique.mockResolvedValue(existingClassWithStudents)
 
       const request = new NextRequest('http://localhost:3000/api/classes/class-1')
       const response = await DELETE(request, { params: { id: 'class-1' } })
       const data = await response.json()
 
-      expect(response.status).toBe(500)
+      expect(response.status).toBe(409)
       expect(data.success).toBe(false)
-      expect(data.error.code).toBe('DATABASE_ERROR')
+      expect(data.error.code).toBe('CLASS_HAS_STUDENTS')
+      expect(data.error.message).toBe('このクラスには3名の図書委員が登録されているため削除できません')
     })
   })
 
@@ -350,6 +389,27 @@ describe('/api/classes/[id] Route Tests', () => {
     })
 
     it('空のリクエストボディを適切に処理する', async () => {
+      const existingClass = {
+        id: 'class-1',
+        name: '1組',
+        year: 5,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+      }
+
+      const updatedClass = {
+        ...existingClass,
+        updatedAt: new Date('2024-01-02'),
+        _count: { students: 0 },
+      }
+
+      // 既存クラスの取得
+      mockPrisma.class.findUnique.mockResolvedValue(existingClass)
+      // 重複チェック（実行されない）
+      mockPrisma.class.findFirst.mockResolvedValue(null)
+      // 更新実行
+      mockPrisma.class.update.mockResolvedValue(updatedClass)
+
       const request = new NextRequest('http://localhost:3000/api/classes/class-1', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
