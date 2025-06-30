@@ -66,7 +66,7 @@ describe('/api/classes/[id] Route Tests', () => {
       mockPrisma.class.findUnique.mockResolvedValue(mockClass)
 
       const request = new NextRequest('http://localhost:3000/api/classes/class-1')
-      const response = await GET(request, { params: { id: 'class-1' } })
+      const response = await GET(request, { params: Promise.resolve({ id: 'class-1' }) })
       const data = await response.json()
 
       expect(response.status).toBe(200)
@@ -88,7 +88,7 @@ describe('/api/classes/[id] Route Tests', () => {
       mockPrisma.class.findUnique.mockResolvedValue(null)
 
       const request = new NextRequest('http://localhost:3000/api/classes/nonexistent')
-      const response = await GET(request, { params: { id: 'nonexistent' } })
+      const response = await GET(request, { params: Promise.resolve({ id: 'nonexistent' }) })
       const data = await response.json()
 
       expect(response.status).toBe(404)
@@ -99,7 +99,7 @@ describe('/api/classes/[id] Route Tests', () => {
 
     it('無効なクラスIDの場合400を返す', async () => {
       const request = new NextRequest('http://localhost:3000/api/classes/invalid@id')
-      const response = await GET(request, { params: { id: 'invalid@id' } })
+      const response = await GET(request, { params: Promise.resolve({ id: 'invalid@id' }) })
       const data = await response.json()
 
       expect(response.status).toBe(400)
@@ -112,7 +112,7 @@ describe('/api/classes/[id] Route Tests', () => {
       authenticate.mockRejectedValue(new Error('認証が必要です'))
 
       const request = new NextRequest('http://localhost:3000/api/classes/class-1')
-      const response = await GET(request, { params: { id: 'class-1' } })
+      const response = await GET(request, { params: Promise.resolve({ id: 'class-1' }) })
       const data = await response.json()
 
       expect(response.status).toBe(401)
@@ -157,7 +157,7 @@ describe('/api/classes/[id] Route Tests', () => {
         body: JSON.stringify(requestBody),
       })
 
-      const response = await PUT(request, { params: { id: 'class-1' } })
+      const response = await PUT(request, { params: Promise.resolve({ id: 'class-1' }) })
       const data = await response.json()
 
       expect(response.status).toBe(200)
@@ -210,7 +210,7 @@ describe('/api/classes/[id] Route Tests', () => {
         body: JSON.stringify(requestBody),
       })
 
-      const response = await PUT(request, { params: { id: 'class-1' } })
+      const response = await PUT(request, { params: Promise.resolve({ id: 'class-1' }) })
       const data = await response.json()
 
       expect(response.status).toBe(200)
@@ -233,7 +233,7 @@ describe('/api/classes/[id] Route Tests', () => {
         body: JSON.stringify(requestBody),
       })
 
-      const response = await PUT(request, { params: { id: 'nonexistent' } })
+      const response = await PUT(request, { params: Promise.resolve({ id: 'nonexistent' }) })
       const data = await response.json()
 
       expect(response.status).toBe(404)
@@ -252,7 +252,7 @@ describe('/api/classes/[id] Route Tests', () => {
         body: JSON.stringify(requestBody),
       })
 
-      const response = await PUT(request, { params: { id: 'class-1' } })
+      const response = await PUT(request, { params: Promise.resolve({ id: 'class-1' }) })
       const data = await response.json()
 
       expect(response.status).toBe(400)
@@ -274,7 +274,7 @@ describe('/api/classes/[id] Route Tests', () => {
         body: JSON.stringify(requestBody),
       })
 
-      const response = await PUT(request, { params: { id: 'class-1' } })
+      const response = await PUT(request, { params: Promise.resolve({ id: 'class-1' }) })
       const data = await response.json()
 
       expect(response.status).toBe(403)
@@ -300,7 +300,7 @@ describe('/api/classes/[id] Route Tests', () => {
       mockPrisma.class.delete.mockResolvedValue(existingClass)
 
       const request = new NextRequest('http://localhost:3000/api/classes/class-1')
-      const response = await DELETE(request, { params: { id: 'class-1' } })
+      const response = await DELETE(request, { params: Promise.resolve({ id: 'class-1' }) })
       const data = await response.json()
 
       expect(response.status).toBe(200)
@@ -318,7 +318,7 @@ describe('/api/classes/[id] Route Tests', () => {
       mockPrisma.class.findUnique.mockResolvedValue(null)
 
       const request = new NextRequest('http://localhost:3000/api/classes/nonexistent')
-      const response = await DELETE(request, { params: { id: 'nonexistent' } })
+      const response = await DELETE(request, { params: Promise.resolve({ id: 'nonexistent' }) })
       const data = await response.json()
 
       expect(response.status).toBe(404)
@@ -328,7 +328,7 @@ describe('/api/classes/[id] Route Tests', () => {
 
     it('無効なクラスIDの場合400を返す', async () => {
       const request = new NextRequest('http://localhost:3000/api/classes/invalid@id')
-      const response = await DELETE(request, { params: { id: 'invalid@id' } })
+      const response = await DELETE(request, { params: Promise.resolve({ id: 'invalid@id' }) })
       const data = await response.json()
 
       expect(response.status).toBe(400)
@@ -341,7 +341,7 @@ describe('/api/classes/[id] Route Tests', () => {
       authenticateAdmin.mockRejectedValue(new Error('管理者権限が必要です'))
 
       const request = new NextRequest('http://localhost:3000/api/classes/class-1')
-      const response = await DELETE(request, { params: { id: 'class-1' } })
+      const response = await DELETE(request, { params: Promise.resolve({ id: 'class-1' }) })
       const data = await response.json()
 
       expect(response.status).toBe(403)
@@ -363,7 +363,7 @@ describe('/api/classes/[id] Route Tests', () => {
       mockPrisma.class.findUnique.mockResolvedValue(existingClassWithStudents)
 
       const request = new NextRequest('http://localhost:3000/api/classes/class-1')
-      const response = await DELETE(request, { params: { id: 'class-1' } })
+      const response = await DELETE(request, { params: Promise.resolve({ id: 'class-1' }) })
       const data = await response.json()
 
       expect(response.status).toBe(409)
@@ -380,7 +380,7 @@ describe('/api/classes/[id] Route Tests', () => {
       )
 
       const request = new NextRequest('http://localhost:3000/api/classes/class-1')
-      const response = await GET(request, { params: { id: 'class-1' } })
+      const response = await GET(request, { params: Promise.resolve({ id: 'class-1' }) })
       const data = await response.json()
 
       expect(response.status).toBe(500)
@@ -416,7 +416,7 @@ describe('/api/classes/[id] Route Tests', () => {
         body: JSON.stringify({}),
       })
 
-      const response = await PUT(request, { params: { id: 'class-1' } })
+      const response = await PUT(request, { params: Promise.resolve({ id: 'class-1' }) })
       const data = await response.json()
 
       expect(response.status).toBe(200)
