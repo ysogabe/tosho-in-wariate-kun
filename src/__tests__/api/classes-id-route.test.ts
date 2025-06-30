@@ -1,0 +1,366 @@
+/**
+ * @jest-environment node
+ */
+
+/**
+ * /api/classes/[id] ルートの統合テスト
+ */
+
+import { NextRequest } from 'next/server'
+import { GET, PUT, DELETE } from '@/app/api/classes/[id]/route'
+
+// データベースクライアントをモック
+jest.mock('@/lib/database/client', () => ({
+  prisma: {
+    class: {
+      findUnique: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    },
+  },
+}))
+
+// 認証ヘルパーをモック
+jest.mock('@/lib/auth/helpers', () => ({
+  authenticate: jest.fn(),
+  authenticateAdmin: jest.fn(),
+}))
+
+// NextAuthをモック
+jest.mock('next-auth/next', () => ({
+  getServerSession: jest.fn(),
+}))
+
+describe('/api/classes/[id] Route Tests', () => {
+  const mockPrisma = require('@/lib/database/client').prisma
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    
+    // デフォルトの認証モック
+    const { authenticate, authenticateAdmin } = require('@/lib/auth/helpers')
+    authenticate.mockResolvedValue({
+      id: 'user-1',
+      email: 'admin@test.com',
+      role: 'admin',
+    })
+    authenticateAdmin.mockResolvedValue({
+      id: 'user-1',
+      email: 'admin@test.com',
+      role: 'admin',
+    })
+  })
+
+  describe('GET /api/classes/[id]', () => {
+    it('指定されたクラスの詳細を取得できる', async () => {
+      const mockClass = {
+        id: 'class-1',
+        name: '5年1組',
+        year: 5,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+        _count: { students: 25 },
+      }
+
+      mockPrisma.class.findUnique.mockResolvedValue(mockClass)
+
+      const request = new NextRequest('http://localhost:3000/api/classes/class-1')
+      const response = await GET(request, { params: { id: 'class-1' } })
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(data.success).toBe(true)
+      expect(data.data.id).toBe('class-1')
+      expect(data.data.name).toBe('5年1組')
+      expect(data.data.studentCount).toBe(25)
+      expect(mockPrisma.class.findUnique).toHaveBeenCalledWith({
+        where: { id: 'class-1' },
+        include: {
+          _count: {
+            select: { students: true },
+          },
+        },
+      })
+    })
+
+    it('存在しないクラスの場合404を返す', async () => {
+      mockPrisma.class.findUnique.mockResolvedValue(null)
+
+      const request = new NextRequest('http://localhost:3000/api/classes/nonexistent')
+      const response = await GET(request, { params: { id: 'nonexistent' } })
+      const data = await response.json()
+
+      expect(response.status).toBe(404)
+      expect(data.success).toBe(false)
+      expect(data.error.code).toBe('NOT_FOUND')
+      expect(data.error.message).toBe('クラスが見つかりません')
+    })
+
+    it('無効なクラスIDの場合400を返す', async () => {
+      const request = new NextRequest('http://localhost:3000/api/classes/invalid@id')
+      const response = await GET(request, { params: { id: 'invalid@id' } })
+      const data = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(data.success).toBe(false)
+      expect(data.error.code).toBe('VALIDATION_ERROR')
+    })
+
+    it('認証エラーの場合401を返す', async () => {
+      const { authenticate } = require('@/lib/auth/helpers')
+      authenticate.mockRejectedValue(new Error('認証が必要です'))
+
+      const request = new NextRequest('http://localhost:3000/api/classes/class-1')
+      const response = await GET(request, { params: { id: 'class-1' } })
+      const data = await response.json()
+
+      expect(response.status).toBe(401)
+      expect(data.success).toBe(false)
+      expect(data.error.code).toBe('UNAUTHORIZED')
+    })
+  })
+
+  describe('PUT /api/classes/[id]', () => {
+    it('クラス情報を正常に更新できる', async () => {
+      const updatedClass = {
+        id: 'class-1',
+        name: '5年1組（更新）',
+        year: 5,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-02'),
+      }
+
+      mockPrisma.class.update.mockResolvedValue(updatedClass)
+
+      const requestBody = {
+        name: '5年1組（更新）',
+      }
+
+      const request = new NextRequest('http://localhost:3000/api/classes/class-1', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+      })
+
+      const response = await PUT(request, { params: { id: 'class-1' } })
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(data.success).toBe(true)
+      expect(data.data.name).toBe('5年1組（更新）')
+      expect(mockPrisma.class.update).toHaveBeenCalledWith({
+        where: { id: 'class-1' },
+        data: requestBody,
+      })
+    })
+
+    it('年度のみ更新できる', async () => {
+      const updatedClass = {
+        id: 'class-1',
+        name: '5年1組',
+        year: 6,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-02'),
+      }
+
+      mockPrisma.class.update.mockResolvedValue(updatedClass)
+
+      const requestBody = {
+        year: 6,
+      }
+
+      const request = new NextRequest('http://localhost:3000/api/classes/class-1', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+      })
+
+      const response = await PUT(request, { params: { id: 'class-1' } })
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(data.success).toBe(true)
+      expect(data.data.year).toBe(6)
+    })
+
+    it('存在しないクラスの更新で404エラー', async () => {
+      const notFoundError = {
+        code: 'P2025',
+        message: 'Record not found',
+      }
+
+      mockPrisma.class.update.mockRejectedValue(notFoundError)
+
+      const requestBody = {
+        name: '存在しないクラス',
+      }
+
+      const request = new NextRequest('http://localhost:3000/api/classes/nonexistent', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+      })
+
+      const response = await PUT(request, { params: { id: 'nonexistent' } })
+      const data = await response.json()
+
+      expect(response.status).toBe(404)
+      expect(data.success).toBe(false)
+      expect(data.error.code).toBe('NOT_FOUND')
+    })
+
+    it('バリデーションエラーの場合400を返す', async () => {
+      const requestBody = {
+        year: 4, // 無効な年度
+      }
+
+      const request = new NextRequest('http://localhost:3000/api/classes/class-1', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+      })
+
+      const response = await PUT(request, { params: { id: 'class-1' } })
+      const data = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(data.success).toBe(false)
+      expect(data.error.code).toBe('VALIDATION_ERROR')
+    })
+
+    it('管理者権限が必要なエラーの場合403を返す', async () => {
+      const { authenticateAdmin } = require('@/lib/auth/helpers')
+      authenticateAdmin.mockRejectedValue(new Error('管理者権限が必要です'))
+
+      const requestBody = {
+        name: '更新テスト',
+      }
+
+      const request = new NextRequest('http://localhost:3000/api/classes/class-1', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+      })
+
+      const response = await PUT(request, { params: { id: 'class-1' } })
+      const data = await response.json()
+
+      expect(response.status).toBe(403)
+      expect(data.success).toBe(false)
+      expect(data.error.code).toBe('FORBIDDEN')
+    })
+  })
+
+  describe('DELETE /api/classes/[id]', () => {
+    it('クラスを正常に削除できる', async () => {
+      const deletedClass = {
+        id: 'class-1',
+        name: '5年1組',
+        year: 5,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+      }
+
+      mockPrisma.class.delete.mockResolvedValue(deletedClass)
+
+      const request = new NextRequest('http://localhost:3000/api/classes/class-1')
+      const response = await DELETE(request, { params: { id: 'class-1' } })
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(data.success).toBe(true)
+      expect(data.data.id).toBe('class-1')
+      expect(data.data.name).toBe('5年1組')
+      expect(mockPrisma.class.delete).toHaveBeenCalledWith({
+        where: { id: 'class-1' },
+      })
+    })
+
+    it('存在しないクラスの削除で404エラー', async () => {
+      const notFoundError = {
+        code: 'P2025',
+        message: 'Record not found',
+      }
+
+      mockPrisma.class.delete.mockRejectedValue(notFoundError)
+
+      const request = new NextRequest('http://localhost:3000/api/classes/nonexistent')
+      const response = await DELETE(request, { params: { id: 'nonexistent' } })
+      const data = await response.json()
+
+      expect(response.status).toBe(404)
+      expect(data.success).toBe(false)
+      expect(data.error.code).toBe('NOT_FOUND')
+    })
+
+    it('無効なクラスIDの場合400を返す', async () => {
+      const request = new NextRequest('http://localhost:3000/api/classes/invalid@id')
+      const response = await DELETE(request, { params: { id: 'invalid@id' } })
+      const data = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(data.success).toBe(false)
+      expect(data.error.code).toBe('VALIDATION_ERROR')
+    })
+
+    it('管理者権限が必要なエラーの場合403を返す', async () => {
+      const { authenticateAdmin } = require('@/lib/auth/helpers')
+      authenticateAdmin.mockRejectedValue(new Error('管理者権限が必要です'))
+
+      const request = new NextRequest('http://localhost:3000/api/classes/class-1')
+      const response = await DELETE(request, { params: { id: 'class-1' } })
+      const data = await response.json()
+
+      expect(response.status).toBe(403)
+      expect(data.success).toBe(false)
+      expect(data.error.code).toBe('FORBIDDEN')
+    })
+
+    it('関連データ制約エラーを適切に処理する', async () => {
+      const constraintError = {
+        code: 'P2003',
+        message: 'Foreign key constraint failed',
+      }
+
+      mockPrisma.class.delete.mockRejectedValue(constraintError)
+
+      const request = new NextRequest('http://localhost:3000/api/classes/class-1')
+      const response = await DELETE(request, { params: { id: 'class-1' } })
+      const data = await response.json()
+
+      expect(response.status).toBe(500)
+      expect(data.success).toBe(false)
+      expect(data.error.code).toBe('DATABASE_ERROR')
+    })
+  })
+
+  describe('エラーハンドリング統合テスト', () => {
+    it('データベース接続エラーを適切に処理する', async () => {
+      mockPrisma.class.findUnique.mockRejectedValue(
+        new Error('Database connection failed')
+      )
+
+      const request = new NextRequest('http://localhost:3000/api/classes/class-1')
+      const response = await GET(request, { params: { id: 'class-1' } })
+      const data = await response.json()
+
+      expect(response.status).toBe(500)
+      expect(data.success).toBe(false)
+      expect(data.error.code).toBe('INTERNAL_ERROR')
+    })
+
+    it('空のリクエストボディを適切に処理する', async () => {
+      const request = new NextRequest('http://localhost:3000/api/classes/class-1', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+
+      const response = await PUT(request, { params: { id: 'class-1' } })
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(data.success).toBe(true)
+    })
+  })
+})

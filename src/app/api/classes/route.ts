@@ -12,6 +12,19 @@ import {
   CreateClassSchema,
   type ClassResponse,
 } from '@/lib/schemas/class-schemas'
+import {
+  transformClassesToResponse,
+  buildClassSearchWhere,
+  buildDuplicateCheckWhere,
+  createClassSuccessMessage,
+  createClassDuplicateMessage,
+  validatePaginationParams,
+  calculateOffset,
+  normalizeClassName,
+  isValidClassName,
+  isValidYear,
+  transformClassToResponse,
+} from '@/lib/services/class-service'
 
 /**
  * GET /api/classes
@@ -26,13 +39,24 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const params = ClassesQuerySchema.parse(Object.fromEntries(searchParams))
 
-    // WHERE条件の構築
-    const where = {
-      ...(params.year && { year: params.year }),
-      ...(params.search && {
-        name: { contains: params.search, mode: 'insensitive' as const },
-      }),
+    // ページネーションバリデーション（サービス層）
+    const paginationValidation = validatePaginationParams(params.page, params.limit)
+    if (!paginationValidation.isValid) {
+      return createErrorResponse(
+        'VALIDATION_ERROR',
+        paginationValidation.errors.join(', '),
+        400
+      )
     }
+
+    // WHERE条件の構築（サービス層）
+    const where = buildClassSearchWhere({
+      year: params.year,
+      search: params.search,
+    })
+
+    // オフセット計算（サービス層）
+    const offset = calculateOffset(params.page, params.limit)
 
     // データ取得（並列処理）
     const [classes, total] = await Promise.all([
@@ -44,21 +68,14 @@ export async function GET(request: NextRequest) {
           },
         },
         orderBy: [{ year: 'asc' }, { name: 'asc' }],
-        skip: (params.page - 1) * params.limit,
+        skip: offset,
         take: params.limit,
       }),
       prisma.class.count({ where }),
     ])
 
-    // レスポンス用データ変換
-    const classesResponse: ClassResponse[] = classes.map((c) => ({
-      id: c.id,
-      name: c.name,
-      year: c.year,
-      studentCount: c._count.students,
-      createdAt: c.createdAt,
-      updatedAt: c.updatedAt,
-    }))
+    // レスポンス用データ変換（サービス層）
+    const classesResponse = transformClassesToResponse(classes)
 
     // ページネーション情報の作成
     const pagination = createPaginationMeta(params.page, params.limit, total)
@@ -85,22 +102,44 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { name, year } = CreateClassSchema.parse(body)
 
-    // 既存クラスの重複チェック
+    // 入力データの正規化と追加バリデーション（サービス層）
+    const normalizedName = normalizeClassName(name)
+    
+    if (!isValidClassName(normalizedName)) {
+      return createErrorResponse(
+        'VALIDATION_ERROR',
+        'クラス名が無効です',
+        400
+      )
+    }
+
+    if (!isValidYear(year)) {
+      return createErrorResponse(
+        'VALIDATION_ERROR',
+        '年度は5年または6年である必要があります',
+        400
+      )
+    }
+
+    // 重複チェック条件生成（サービス層）
+    const duplicateWhere = buildDuplicateCheckWhere(normalizedName, year)
     const existingClass = await prisma.class.findFirst({
-      where: { name, year },
+      where: duplicateWhere,
     })
 
     if (existingClass) {
+      // 重複エラーメッセージ生成（サービス層）
+      const duplicateMessage = createClassDuplicateMessage(normalizedName, year)
       return createErrorResponse(
         'CLASS_ALREADY_EXISTS',
-        `${year}年${name}組は既に存在します`,
+        duplicateMessage,
         409
       )
     }
 
     // 新規クラス作成
     const newClass = await prisma.class.create({
-      data: { name, year },
+      data: { name: normalizedName, year },
       include: {
         _count: {
           select: { students: { where: { isActive: true } } },
@@ -108,20 +147,16 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // レスポンス用データ変換
-    const classResponse: ClassResponse = {
-      id: newClass.id,
-      name: newClass.name,
-      year: newClass.year,
-      studentCount: newClass._count.students,
-      createdAt: newClass.createdAt,
-      updatedAt: newClass.updatedAt,
-    }
+    // レスポンス用データ変換（サービス層）
+    const classResponse = transformClassToResponse(newClass)
+
+    // 成功メッセージ生成（サービス層）
+    const successMessage = createClassSuccessMessage(normalizedName, year)
 
     return createSuccessResponse(
       {
         class: classResponse,
-        message: `${year}年${name}組を作成しました`,
+        message: successMessage,
       },
       201
     )
