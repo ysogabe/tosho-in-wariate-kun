@@ -8,26 +8,15 @@ import {
   useState,
   useCallback,
 } from 'react'
+import {
+  setClientSession,
+  clearClientSession,
+  getClientSession,
+} from './client-helpers'
+import { MVPUser } from './types'
 
-// Mock User type - will be replaced with actual Supabase User when integrated
-interface MockUser {
-  id: string
-  email: string
-  created_at: string
-  updated_at: string
-  app_metadata: Record<string, any>
-  user_metadata: Record<string, any>
-  aud: string
-  confirmation_sent_at: string | null
-  confirmed_at: string | null
-  email_confirmed_at: string | null
-  invited_at: string | null
-  last_sign_in_at: string | null
-  phone: string | null
-  phone_confirmed_at: string | null
-  recovery_sent_at: string | null
-  role: string
-}
+// Mock User type - alias for MVPUser for backwards compatibility
+type MockUser = MVPUser
 
 interface AuthContextType {
   user: MockUser | null
@@ -44,33 +33,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Mock initial session check - replace with actual Supabase client when available
+    // MVP: Check for existing session from cookies
     const checkInitialSession = async () => {
       try {
-        // TODO: Replace with actual Supabase client integration
-        // const { data: { session } } = await supabase.auth.getSession()
-        // setUser(session?.user ?? null)
+        // Use helper function to get client session
+        const sessionData = getClientSession()
+        if (sessionData) {
+          setUser(sessionData as MockUser)
+        }
 
-        // Mock: Add small delay to simulate authentication check
+        // Add small delay to simulate authentication check
         await new Promise((resolve) => setTimeout(resolve, 100))
-        setUser(null) // Mock: no user initially
       } catch (error) {
         console.error('Error getting initial session:', error)
+        // Clear invalid session on error
+        clearClientSession()
       } finally {
         setIsLoading(false)
       }
     }
 
     checkInitialSession()
-
-    // TODO: Add auth state change listener when Supabase client is available
-    // const { data: { subscription } } = supabase.auth.onAuthStateChange(
-    //   async (event, session) => {
-    //     setUser(session?.user ?? null)
-    //     setIsLoading(false)
-    //   }
-    // )
-    // return () => subscription.unsubscribe()
   }, [])
 
   const signIn = useCallback(async (email: string, password: string) => {
@@ -85,10 +68,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // ⚠️ WARNING: Mock implementation for testing ONLY
       // TODO: REMOVE hardcoded credentials before production deployment
-      if (email === 'test@example.com' && password === 'password') {
+
+      // MVP: Support multiple test users with different roles
+      const testUsers = [
+        { email: 'test@example.com', password: 'Password123', role: 'teacher' },
+        { email: 'admin@example.com', password: 'Password123', role: 'admin' },
+      ]
+
+      const matchedUser = testUsers.find(
+        (u) => u.email === email && u.password === password
+      )
+
+      if (matchedUser) {
         const mockUser = {
-          id: 'mock-user-id',
-          email: email,
+          id: `mock-user-${matchedUser.role}`,
+          email: matchedUser.email,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           app_metadata: {},
@@ -102,10 +96,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           phone: null,
           phone_confirmed_at: null,
           recovery_sent_at: null,
-          role: 'authenticated',
+          role: matchedUser.role,
         } as MockUser
 
         setUser(mockUser)
+
+        // MVP: Set session using helper function
+        setClientSession(mockUser)
+
         return {}
       }
 
@@ -127,6 +125,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Mock implementation
       setUser(null)
+
+      // MVP: Clear session using helper function
+      clearClientSession()
     } catch (error) {
       console.error('Sign out error:', error)
     } finally {
