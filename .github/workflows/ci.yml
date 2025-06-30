@@ -9,6 +9,8 @@ on:
 jobs:
   test:
     name: Test & Build
+    # REQUIRED: Must use self-hosted runner exclusively
+    # DO NOT change to ubuntu-latest, windows-latest, or any GitHub-hosted runner
     runs-on: self-hosted
     permissions:
       contents: read
@@ -157,6 +159,8 @@ jobs:
 
   build-check:
     name: Build Check (Production)
+    # REQUIRED: Must use self-hosted runner exclusively
+    # DO NOT change to ubuntu-latest, windows-latest, or any GitHub-hosted runner
     runs-on: self-hosted
     needs: test
 

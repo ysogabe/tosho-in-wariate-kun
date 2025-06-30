@@ -239,6 +239,57 @@ pnpm --filter backend dev   # Start backend only
 - **Frontend**: TailwindCSS, Next.js, shadcn-ui configurations
 - **Backend**: NestJS, Prisma, database configurations
 
+## CI/CD Configuration
+
+### GitHub Actions
+
+**IMPORTANT**: All GitHub Actions workflows **MUST** use self-hosted runners exclusively.
+
+#### CI Workflow (`.github/workflows/ci.yml`)
+
+- **Runner**: `runs-on: self-hosted` - **REQUIRED**
+- **Matrix Strategy**: Node.js 18.x and 20.x
+- **Steps**: Type check, linting, unit tests, build verification
+- **Coverage**: 30% minimum threshold for MVP phase
+
+#### Workflow Jobs
+
+1. **Test & Build**
+   - Runs on: `self-hosted`
+   - Node versions: 18.x, 20.x
+   - Coverage reporting to Codecov
+   - PR comment integration
+
+2. **Build Check (Production)**
+   - Runs on: `self-hosted`
+   - Production build verification
+   - Build size monitoring
+
+#### Self-Hosted Runner Requirements
+
+- **Mandatory**: All jobs must specify `runs-on: self-hosted`
+- **No GitHub-hosted runners**: Do not use `ubuntu-latest`, `windows-latest`, etc.
+- **Performance**: Self-hosted runners provide better performance and resource control
+- **Security**: Enhanced security for proprietary code
+
+### Test Execution Commands
+
+```bash
+# Local development
+npm run test              # Watch mode
+npm run test:ci          # CI mode with coverage
+npm run lint             # ESLint validation
+npm run type-check       # TypeScript validation
+npm run build            # Production build
+```
+
+### Coverage Requirements
+
+- **MVP Target**: 30% minimum coverage
+- **Reporting**: Automatic coverage reports on PRs
+- **Integration**: Codecov for trend tracking
+- **Enforcement**: CI fails if coverage drops below threshold
+
 ## Documentation Structure
 
 ### Development Documentation
