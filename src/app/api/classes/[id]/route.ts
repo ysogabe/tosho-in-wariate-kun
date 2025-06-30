@@ -9,7 +9,6 @@ import {
 import {
   UpdateClassSchema,
   ClassIdParamSchema,
-  type ClassResponse,
 } from '@/lib/schemas/class-schemas'
 import {
   transformClassToResponse,
@@ -159,8 +158,14 @@ export async function PUT(
     const classResponse = transformClassToResponse(updatedClass)
 
     // 成功メッセージ生成（サービス層）
-    const successMessage = createClassSuccessMessage(updatedClass.name, updatedClass.year)
-    const updateMessage = successMessage.replace('を作成しました', 'を更新しました')
+    const successMessage = createClassSuccessMessage(
+      updatedClass.name,
+      updatedClass.year
+    )
+    const updateMessage = successMessage.replace(
+      'を作成しました',
+      'を更新しました'
+    )
 
     return createSuccessResponse({
       class: classResponse,
@@ -219,8 +224,14 @@ export async function DELETE(
     })
 
     // 成功メッセージ生成（サービス層）
-    const successMessage = createClassSuccessMessage(existingClass.name, existingClass.year)
-    const deleteMessage = successMessage.replace('を作成しました', 'を削除しました')
+    const successMessage = createClassSuccessMessage(
+      existingClass.name,
+      existingClass.year
+    )
+    const deleteMessage = successMessage.replace(
+      'を作成しました',
+      'を削除しました'
+    )
 
     return createSuccessResponse({
       message: deleteMessage,

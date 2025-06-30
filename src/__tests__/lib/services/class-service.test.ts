@@ -137,9 +137,9 @@ describe('Class Service Business Logic', () => {
       })
 
       it('undefined値を適切に無視する', () => {
-        const result = buildClassSearchWhere({ 
-          year: undefined, 
-          search: undefined 
+        const result = buildClassSearchWhere({
+          year: undefined,
+          search: undefined,
         })
         expect(result).toEqual({})
       })
