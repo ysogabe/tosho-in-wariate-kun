@@ -12,27 +12,11 @@ import {
   setClientSession,
   clearClientSession,
   getClientSession,
-} from './helpers'
+} from './client-helpers'
+import { MVPUser } from './types'
 
-// Mock User type - will be replaced with actual Supabase User when integrated
-interface MockUser {
-  id: string
-  email: string
-  created_at: string
-  updated_at: string
-  app_metadata: Record<string, any>
-  user_metadata: Record<string, any>
-  aud: string
-  confirmation_sent_at: string | null
-  confirmed_at: string | null
-  email_confirmed_at: string | null
-  invited_at: string | null
-  last_sign_in_at: string | null
-  phone: string | null
-  phone_confirmed_at: string | null
-  recovery_sent_at: string | null
-  role: string
-}
+// Mock User type - alias for MVPUser for backwards compatibility
+type MockUser = MVPUser
 
 interface AuthContextType {
   user: MockUser | null
