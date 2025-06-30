@@ -19,13 +19,10 @@ async function safeReset() {
 
     console.log('🗄️  Starting database reset...')
 
-    // 実際のリセットコマンドを実行
-    const resetCommand = isDev 
-      ? ['run', 'db:migrate:reset', '--force', '&&', 'npm', 'run', 'db:seed:dev']
-      : ['run', 'db:migrate:reset', '--force', '&&', 'npm', 'run', 'db:seed']
-
-    await safelyExecuteCommand('npm', resetCommand.slice(0, 3)) // first part: npm run db:migrate:reset --force
+    // データベースリセットを実行
+    await safelyExecuteCommand('npm', ['run', 'db:migrate:reset', '--force'])
     
+    // 適切なシードスクリプトを実行
     if (isDev) {
       await safelyExecuteCommand('npm', ['run', 'db:seed:dev'])
     } else {
@@ -46,8 +43,7 @@ async function safeReset() {
 function safelyExecuteCommand(command: string, args: string[]): Promise<void> {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
-      stdio: 'inherit',
-      shell: true
+      stdio: 'inherit'
     })
 
     child.on('close', (code) => {

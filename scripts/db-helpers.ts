@@ -1,5 +1,5 @@
 import { createInterface } from 'readline'
-import { execSync } from 'child_process'
+import path from 'path'
 
 /**
  * 安全な確認プロンプト
@@ -29,22 +29,6 @@ export async function confirmDestructiveOperation(
   })
 }
 
-/**
- * 安全なコマンド実行（コマンドインジェクション対策）
- */
-export function safeExecSync(
-  command: string,
-  args: string[] = [],
-  options: { stdio?: 'inherit' | 'pipe'; cwd?: string } = {}
-): void {
-  try {
-    // コマンドと引数を分離して実行
-    const fullCommand = `${command} ${args.map(arg => `"${arg.replace(/"/g, '\\"')}"`).join(' ')}`
-    execSync(fullCommand, { stdio: 'inherit', ...options })
-  } catch (error) {
-    throw new Error(`Command execution failed: ${error}`)
-  }
-}
 
 /**
  * 環境変数の安全な取得
@@ -81,6 +65,5 @@ export function getBackupDir(): string {
   if (customPath) {
     return customPath
   }
-  const path = require('path')
   return path.join(process.cwd(), 'backups')
 }

@@ -91,16 +91,6 @@ async function seedDevelopmentAssignments() {
     })
   }
 
-  for (const assignment of firstTermAssignments) {
-    await prisma.assignment.create({
-      data: assignment,
-    })
-  }
-
-  console.log(
-    `  ✓ Created ${firstTermAssignments.length} first term assignments`
-  )
-
   // 後期の割り当てサンプル
   const secondTermAssignments = []
   for (let i = 15; i < Math.min(30, students.length); i++) {
@@ -116,15 +106,36 @@ async function seedDevelopmentAssignments() {
     })
   }
 
-  for (const assignment of secondTermAssignments) {
-    await prisma.assignment.create({
-      data: assignment,
-    })
+  // 両学期の割り当てをまとめてバッチ作成
+  const allAssignments = [...firstTermAssignments, ...secondTermAssignments]
+  
+  if (allAssignments.length > 0) {
+    try {
+      const result = await prisma.assignment.createMany({
+        data: allAssignments,
+        skipDuplicates: true, // 重複データの防止
+      })
+      console.log(`  ✓ Created ${result.count} assignments in batch operation`)
+      console.log(`    - First term: ${firstTermAssignments.length} assignments`)
+      console.log(`    - Second term: ${secondTermAssignments.length} assignments`)
+    } catch (error) {
+      console.warn('  ⚠️ Warning: Batch assignment creation failed, falling back to individual creation')
+      
+      // フォールバック：一つずつ作成
+      let createdAssignments = 0
+      for (const assignment of allAssignments) {
+        try {
+          await prisma.assignment.create({
+            data: assignment,
+          })
+          createdAssignments++
+        } catch (error) {
+          console.warn(`  ⚠️ Warning: Could not create assignment:`, error)
+        }
+      }
+      console.log(`  ✓ Created ${createdAssignments} assignments individually`)
+    }
   }
-
-  console.log(
-    `  ✓ Created ${secondTermAssignments.length} second term assignments`
-  )
 }
 
 async function seedMoreTestData() {
@@ -142,25 +153,44 @@ async function seedMoreTestData() {
     })
 
     // テストクラス用の学生（設定ファイルから読み込み）
-    const testStudents = seedData.testStudentNames || ['テスト太郎', 'テスト花子']
+    const testStudentNames = seedData.testStudentNames || ['テスト太郎', 'テスト花子']
 
-    let createdStudents = 0
-    for (const name of testStudents) {
-      try {
-        await prisma.student.create({
-          data: {
-            name,
-            grade: 5,
-            classId: testClass.id,
-          },
-        })
-        createdStudents++
-      } catch (error) {
-        console.warn(`  ⚠️ Warning: Could not create test student ${name}:`, error)
+    // バッチで学生を作成
+    const testStudentsData = testStudentNames.map(name => ({
+      name,
+      grade: 5,
+      classId: testClass.id,
+    }))
+
+    try {
+      const result = await prisma.student.createMany({
+        data: testStudentsData,
+        skipDuplicates: true, // 重複データの防止
+      })
+      console.log(`  ✓ Created test class and ${result.count} test students in batch operation`)
+      
+      // 作成された学生名をログ出力
+      testStudentNames.forEach(name => {
+        console.log(`    - ${name}`)
+      })
+    } catch (error) {
+      console.warn('  ⚠️ Warning: Batch creation failed, falling back to individual creation')
+      
+      // フォールバック：一つずつ作成
+      let createdStudents = 0
+      for (const studentData of testStudentsData) {
+        try {
+          await prisma.student.create({
+            data: studentData,
+          })
+          console.log(`    - ${studentData.name}`)
+          createdStudents++
+        } catch (error) {
+          console.warn(`  ⚠️ Warning: Could not create test student ${studentData.name}:`, error)
+        }
       }
+      console.log(`  ✓ Created test class and ${createdStudents} test students individually`)
     }
-
-    console.log(`  ✓ Created test class and ${createdStudents} test students`)
 
     // 追加のテスト図書室
     const testRoom = await prisma.room.upsert({
