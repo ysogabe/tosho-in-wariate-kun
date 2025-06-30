@@ -1,0 +1,117 @@
+{
+  "studentNames": [
+    "田中太郎",
+    "山田花子",
+    "佐藤次郎",
+    "鈴木美咲",
+    "高橋健太",
+    "伊藤涼子",
+    "渡辺俊介",
+    "中村千春",
+    "小林大輔",
+    "加藤結衣",
+    "吉田翔太",
+    "森本彩香",
+    "清水拓海",
+    "斎藤七海",
+    "松本航平",
+    "井上優奈",
+    "藤田裕太",
+    "木村さくら",
+    "中島悠人",
+    "橋本美優",
+    "岡田拓也",
+    "村田愛子",
+    "石井翔太",
+    "宮本結菜",
+    "前田和也",
+    "小川麻美",
+    "西村正樹",
+    "野田恵子",
+    "長谷川春香",
+    "池田雄一"
+  ],
+  "testStudentNames": [
+    "テスト太郎",
+    "テスト花子",
+    "サンプル次郎",
+    "サンプル美咲",
+    "デモ健太",
+    "デモ涼子",
+    "練習一郎",
+    "練習恵美",
+    "試験和子",
+    "実習明彦"
+  ],
+  "rooms": [
+    {
+      "name": "図書室A",
+      "capacity": 4
+    },
+    {
+      "name": "図書室B", 
+      "capacity": 3
+    },
+    {
+      "name": "読み聞かせコーナー",
+      "capacity": 2
+    }
+  ],
+  "classes": [
+    { "name": "5年1組", "year": 5 },
+    { "name": "5年2組", "year": 5 },
+    { "name": "5年3組", "year": 5 },
+    { "name": "6年1組", "year": 6 },
+    { "name": "6年2組", "year": 6 },
+    { "name": "6年3組", "year": 6 }
+  ],
+  "settings": [
+    {
+      "key": "view_only_token",
+      "value": "demo-token-replace-in-production",
+      "description": "表示専用URL用トークン"
+    },
+    {
+      "key": "current_year",
+      "value": "2025",
+      "description": "現在の年度"
+    },
+    {
+      "key": "school_name",
+      "value": "○○小学校",
+      "description": "学校名"
+    },
+    {
+      "key": "term_start_date",
+      "value": "2025-04-01",
+      "description": "年度開始日"
+    },
+    {
+      "key": "schedule_weeks",
+      "value": "40",
+      "description": "スケジュール週数"
+    }
+  ],
+  "developmentSettings": [
+    {
+      "key": "dev_mode",
+      "value": "true",
+      "description": "開発モードフラグ"
+    },
+    {
+      "key": "debug_logs",
+      "value": "true",
+      "description": "デバッグログの有効化"
+    },
+    {
+      "key": "test_data_visible",
+      "value": "true",
+      "description": "テストデータの表示"
+    },
+    {
+      "key": "auto_assign_enabled",
+      "value": "true",
+      "description": "自動割り当て機能"
+    }
+  ]
+}
