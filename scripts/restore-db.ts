@@ -1,6 +1,7 @@
-import { execSync } from 'child_process'
+import { spawn } from 'child_process'
 import fs from 'fs'
 import path from 'path'
+import { confirmDestructiveOperation, getRequiredEnvVar, getBackupDir } from './db-helpers'
 
 async function restoreDatabase() {
   const backupFile = process.argv[2]
@@ -21,7 +22,7 @@ async function restoreDatabase() {
     console.error(`❌ Backup file not found: ${absoluteBackupFile}`)
     
     // バックアップディレクトリ内のファイル一覧を表示
-    const backupDir = path.join(process.cwd(), 'backups')
+    const backupDir = getBackupDir()
     if (fs.existsSync(backupDir)) {
       console.log('\n📁 Available backup files:')
       const files = fs.readdirSync(backupDir)
@@ -46,41 +47,45 @@ async function restoreDatabase() {
     process.exit(1)
   }
 
-  console.log(`📥 Restoring database from: ${absoluteBackupFile}`)
+  // バックアップファイルのバリデーション
+  const validationResult = validateBackupFile(absoluteBackupFile)
+  if (!validationResult.isValid) {
+    console.error('❌ Invalid backup file:', validationResult.reason)
+    process.exit(1)
+  }
 
   try {
-    const databaseUrl = process.env.DATABASE_URL
-    if (!databaseUrl) {
-      throw new Error('DATABASE_URL environment variable is required')
+    const databaseUrl = getRequiredEnvVar('DATABASE_URL')
+
+    // 破壊的操作の確認プロンプト
+    const shouldProceed = await confirmDestructiveOperation(
+      'Database Restore',
+      `This will overwrite the current database with data from: ${path.basename(absoluteBackupFile)}`
+    )
+
+    if (!shouldProceed) {
+      console.log('❌ Operation cancelled by user')
+      process.exit(0)
     }
 
-    // 復元前の確認
-    console.log('⚠️  WARNING: This will overwrite the current database!')
-    console.log('   Make sure you have a backup of the current data if needed.')
-    
-    // 本番環境での安全チェック
-    if (process.env.NODE_ENV === 'production') {
+    // 本番環境での追加安全チェック
+    if (process.env.NODE_ENV === 'production' && process.env.FORCE_RESTORE !== 'true') {
       console.log('')
       console.log('🛑 PRODUCTION ENVIRONMENT DETECTED!')
-      console.log('   Please manually confirm the restore operation.')
       console.log('   Run with FORCE_RESTORE=true to bypass this check.')
-      
-      if (process.env.FORCE_RESTORE !== 'true') {
-        process.exit(1)
-      }
+      process.exit(1)
     }
 
     console.log('🗄️  Starting database restore...')
 
-    // データベースの復元
-    const command = `psql "${databaseUrl}" < "${absoluteBackupFile}"`
-    execSync(command, { stdio: 'inherit' })
+    // データベースの安全な復元
+    await safelyExecutePsqlRestore(databaseUrl, absoluteBackupFile)
 
     console.log('✅ Database restored successfully')
 
     // Prismaの同期
     console.log('🔄 Regenerating Prisma client...')
-    execSync('npm run db:generate', { stdio: 'inherit' })
+    await safelyExecuteNpmScript('db:generate')
 
     console.log('✅ Prisma client regenerated')
     console.log('')
@@ -99,24 +104,94 @@ async function restoreDatabase() {
   }
 }
 
+/**
+ * psqlを安全に実行してデータベースを復元
+ */
+function safelyExecutePsqlRestore(databaseUrl: string, backupFile: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const child = spawn('psql', [databaseUrl], {
+      stdio: ['pipe', 'inherit', 'inherit']
+    })
+
+    const inputStream = fs.createReadStream(backupFile)
+    inputStream.pipe(child.stdin)
+
+    child.on('close', (code) => {
+      if (code === 0) {
+        resolve()
+      } else {
+        reject(new Error(`psql exited with code ${code}`))
+      }
+    })
+
+    child.on('error', (error) => {
+      reject(new Error(`psql failed to start: ${error.message}`))
+    })
+  })
+}
+
+/**
+ * npmスクリプトを安全に実行
+ */
+function safelyExecuteNpmScript(script: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const child = spawn('npm', ['run', script], {
+      stdio: 'inherit'
+    })
+
+    child.on('close', (code) => {
+      if (code === 0) {
+        resolve()
+      } else {
+        reject(new Error(`npm run ${script} exited with code ${code}`))
+      }
+    })
+
+    child.on('error', (error) => {
+      reject(new Error(`npm run ${script} failed to start: ${error.message}`))
+    })
+  })
+}
+
 // バックアップファイルのバリデーション
-function validateBackupFile(filePath: string): boolean {
+function validateBackupFile(filePath: string): { isValid: boolean; reason?: string } {
   try {
-    const content = fs.readFileSync(filePath, 'utf8')
+    const stats = fs.statSync(filePath)
+    
+    // ファイルサイズチェック（空ファイルや極端に小さいファイルを除外）
+    if (stats.size < 100) {
+      return { isValid: false, reason: 'File is too small to be a valid backup' }
+    }
+
+    // ファイル拡張子チェック
+    if (!filePath.endsWith('.sql')) {
+      return { isValid: false, reason: 'File must have .sql extension' }
+    }
+
+    // ファイル内容の基本チェック
+    const content = fs.readFileSync(filePath, 'utf8', { flag: 'r' })
+    const contentSample = content.substring(0, 1000) // 最初の1000文字をチェック
     
     // PostgreSQLダンプファイルの基本的なチェック
-    const hasPostgreSQLHeader = content.includes('PostgreSQL database dump')
-    const hasSQLCommands = content.includes('CREATE TABLE') || content.includes('INSERT INTO')
+    const hasPostgreSQLHeader = contentSample.includes('PostgreSQL database dump') ||
+                               contentSample.includes('-- Dumped from database version')
+    const hasSQLCommands = contentSample.includes('CREATE TABLE') || 
+                          contentSample.includes('INSERT INTO') ||
+                          contentSample.includes('COPY ')
     
-    return hasPostgreSQLHeader || hasSQLCommands
+    if (!hasPostgreSQLHeader && !hasSQLCommands) {
+      return { isValid: false, reason: 'File does not appear to be a valid PostgreSQL dump' }
+    }
+
+    return { isValid: true }
   } catch (error) {
-    return false
+    return { isValid: false, reason: `Failed to validate file: ${error}` }
   }
 }
 
 // 利用可能なバックアップファイル一覧を表示
 function listAvailableBackups(): void {
-  const backupDir = path.join(process.cwd(), 'backups')
+  const backupDir = getBackupDir()
   
   if (!fs.existsSync(backupDir)) {
     console.log('📁 No backup directory found')
@@ -136,9 +211,13 @@ function listAvailableBackups(): void {
   console.log('📁 Available backup files:')
   files.forEach((file, index) => {
     const filePath = path.join(backupDir, file)
-    const stats = fs.statSync(filePath)
-    const size = (stats.size / 1024).toFixed(1) + ' KB'
-    console.log(`  ${index + 1}. ${file} (${stats.mtime.toLocaleDateString()} ${stats.mtime.toLocaleTimeString()}, ${size})`)
+    try {
+      const stats = fs.statSync(filePath)
+      const size = (stats.size / 1024).toFixed(1) + ' KB'
+      console.log(`  ${index + 1}. ${file} (${stats.mtime.toLocaleDateString()} ${stats.mtime.toLocaleTimeString()}, ${size})`)
+    } catch (error) {
+      console.log(`  ${index + 1}. ${file} (error reading file info)`)
+    }
   })
 }
 

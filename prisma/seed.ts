@@ -1,6 +1,26 @@
 import { PrismaClient } from '@prisma/client'
+import fs from 'fs'
+import path from 'path'
 
 const prisma = new PrismaClient()
+
+// シードデータを設定ファイルから読み込み
+const seedDataPath = path.join(__dirname, 'seed-data.json')
+let seedData: any = {}
+
+try {
+  const seedDataContent = fs.readFileSync(seedDataPath, 'utf8')
+  seedData = JSON.parse(seedDataContent)
+} catch (error) {
+  console.error('⚠️ Warning: Could not load seed-data.json, using default values')
+  // フォールバック用のデフォルトデータ
+  seedData = {
+    studentNames: ['田中太郎', '山田花子', '佐藤次郎', '鈴木美咲'],
+    rooms: [{ name: '図書室A', capacity: 4 }],
+    classes: [{ name: '5年1組', year: 5 }],
+    settings: []
+  }
+}
 
 async function main() {
   console.log('🌱 Seeding database...')
@@ -38,147 +58,114 @@ async function clearDatabase() {
 async function seedSettings() {
   console.log('⚙️ Creating system settings...')
 
-  const settings = [
-    {
-      key: 'view_only_token',
-      value: 'demo-token-replace-in-production',
-      description: '表示専用URL用トークン',
-    },
-    {
-      key: 'current_year',
-      value: '2025',
-      description: '現在の年度',
-    },
-    {
-      key: 'school_name',
-      value: '○○小学校',
-      description: '学校名',
-    },
-    {
-      key: 'term_start_date',
-      value: '2025-04-01',
-      description: '年度開始日',
-    },
-    {
-      key: 'schedule_weeks',
-      value: '40',
-      description: 'スケジュール週数',
-    },
-  ]
+  const settings = seedData.settings || []
 
   for (const setting of settings) {
-    await prisma.setting.upsert({
-      where: { key: setting.key },
-      update: { value: setting.value },
-      create: setting,
-    })
-    console.log(`  ✓ Created setting: ${setting.key}`)
+    try {
+      await prisma.setting.upsert({
+        where: { key: setting.key },
+        update: { value: setting.value },
+        create: setting,
+      })
+      console.log(`  ✓ Created setting: ${setting.key}`)
+    } catch (error) {
+      console.warn(`  ⚠️ Warning: Could not create setting ${setting.key}:`, error)
+    }
   }
 }
 
 async function seedRooms() {
   console.log('📚 Creating library rooms...')
 
-  const rooms = [
-    {
-      name: '図書室A',
-      capacity: 4,
-    },
-    {
-      name: '図書室B',
-      capacity: 3,
-    },
-    {
-      name: '読み聞かせコーナー',
-      capacity: 2,
-    },
-  ]
+  const rooms = seedData.rooms || []
 
   for (const room of rooms) {
-    await prisma.room.upsert({
-      where: { name: room.name },
-      update: {},
-      create: room,
-    })
-    console.log(`  ✓ Created room: ${room.name} (capacity: ${room.capacity})`)
+    try {
+      await prisma.room.upsert({
+        where: { name: room.name },
+        update: {},
+        create: room,
+      })
+      console.log(`  ✓ Created room: ${room.name} (capacity: ${room.capacity})`)
+    } catch (error) {
+      console.warn(`  ⚠️ Warning: Could not create room ${room.name}:`, error)
+    }
   }
 }
 
 async function seedClasses() {
   console.log('🏫 Creating classes...')
 
-  const classes = [
-    // 5年生
-    { name: '5年1組', year: 5 },
-    { name: '5年2組', year: 5 },
-    { name: '5年3組', year: 5 },
-    // 6年生
-    { name: '6年1組', year: 6 },
-    { name: '6年2組', year: 6 },
-    { name: '6年3組', year: 6 },
-  ]
+  const classes = seedData.classes || []
 
   for (const classData of classes) {
-    await prisma.class.upsert({
-      where: { name_year: { name: classData.name, year: classData.year } },
-      update: {},
-      create: classData,
-    })
-    console.log(`  ✓ Created class: ${classData.name}`)
+    try {
+      await prisma.class.upsert({
+        where: { name_year: { name: classData.name, year: classData.year } },
+        update: {},
+        create: classData,
+      })
+      console.log(`  ✓ Created class: ${classData.name}`)
+    } catch (error) {
+      console.warn(`  ⚠️ Warning: Could not create class ${classData.name}:`, error)
+    }
   }
 }
 
 async function seedStudents() {
   console.log('👥 Creating students...')
 
-  // クラスデータを取得
-  const classes = await prisma.class.findMany()
+  try {
+    // クラスデータを取得
+    const classes = await prisma.class.findMany()
+    const studentNames = seedData.studentNames || []
 
-  const studentNames = [
-    '田中太郎',
-    '山田花子',
-    '佐藤次郎',
-    '鈴木美咲',
-    '高橋健太',
-    '伊藤涼子',
-    '渡辺俊介',
-    '中村千春',
-    '小林大輔',
-    '加藤結衣',
-    '吉田翔太',
-    '森本彩香',
-    '清水拓海',
-    '斎藤七海',
-    '松本航平',
-    '井上優奈',
-    '藤田裕太',
-    '木村さくら',
-    '中島悠人',
-    '橋本美優',
-    '岡田拓也',
-    '村田愛子',
-    '石井翔太',
-    '宮本結菜',
-  ]
-
-  let studentIndex = 0
-
-  for (const classData of classes) {
-    // 各クラスに4名の図書委員を作成
-    const studentsInClass = studentNames.slice(studentIndex, studentIndex + 4)
-
-    for (const name of studentsInClass) {
-      await prisma.student.create({
-        data: {
-          name,
-          grade: classData.year,
-          classId: classData.id,
-        },
-      })
-      console.log(`  ✓ Created student: ${name} (${classData.name})`)
+    if (classes.length === 0) {
+      console.warn('  ⚠️ Warning: No classes found, skipping student creation')
+      return
     }
 
-    studentIndex += 4
+    if (studentNames.length === 0) {
+      console.warn('  ⚠️ Warning: No student names found in configuration')
+      return
+    }
+
+    let studentIndex = 0
+    const studentsPerClass = 4
+
+    for (const classData of classes) {
+      // 境界チェック：利用可能な学生名があるかチェック
+      if (studentIndex >= studentNames.length) {
+        console.warn(`  ⚠️ Warning: Not enough student names for class ${classData.name}`)
+        break
+      }
+
+      // 各クラスに4名の図書委員を作成（利用可能な名前の範囲内で）
+      const availableNames = Math.min(studentsPerClass, studentNames.length - studentIndex)
+      const studentsInClass = studentNames.slice(studentIndex, studentIndex + availableNames)
+
+      for (const name of studentsInClass) {
+        try {
+          await prisma.student.create({
+            data: {
+              name,
+              grade: classData.year,
+              classId: classData.id,
+            },
+          })
+          console.log(`  ✓ Created student: ${name} (${classData.name})`)
+        } catch (error) {
+          console.warn(`  ⚠️ Warning: Could not create student ${name}:`, error)
+        }
+      }
+
+      studentIndex += availableNames
+    }
+
+    console.log(`  ✓ Created students for ${classes.length} classes using ${Math.min(studentIndex, studentNames.length)} names`)
+  } catch (error) {
+    console.error('  ❌ Error in seedStudents:', error)
+    throw error
   }
 }
 

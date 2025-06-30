@@ -1,15 +1,32 @@
 import { PrismaClient } from '@prisma/client'
-import { execSync } from 'child_process'
+import { spawn } from 'child_process'
+import fs from 'fs'
+import path from 'path'
 
 const prisma = new PrismaClient()
+
+// シードデータを設定ファイルから読み込み
+const seedDataPath = path.join(__dirname, 'seed-data.json')
+let seedData: any = {}
+
+try {
+  const seedDataContent = fs.readFileSync(seedDataPath, 'utf8')
+  seedData = JSON.parse(seedDataContent)
+} catch (error) {
+  console.error('⚠️ Warning: Could not load seed-data.json, using default values')
+  seedData = {
+    testStudentNames: ['テスト太郎', 'テスト花子'],
+    developmentSettings: []
+  }
+}
 
 async function main() {
   console.log('🌱 Seeding development database...')
 
   try {
-    // 基本シードを実行
+    // 基本シードを安全に実行
     console.log('📄 Running base seed first...')
-    execSync('npm run db:seed', { stdio: 'inherit' })
+    await safelyExecuteNpmScript('db:seed')
 
     // 開発用追加データ
     await seedDevelopmentAssignments()
@@ -19,8 +36,31 @@ async function main() {
     console.log('✅ Development seeding completed!')
   } catch (error) {
     console.error('❌ Error during development seeding:', error)
-    process.exit(1)
+    throw error
   }
+}
+
+/**
+ * npmスクリプトを安全に実行
+ */
+function safelyExecuteNpmScript(script: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const child = spawn('npm', ['run', script], {
+      stdio: 'inherit'
+    })
+
+    child.on('close', (code) => {
+      if (code === 0) {
+        resolve()
+      } else {
+        reject(new Error(`npm run ${script} exited with code ${code}`))
+      }
+    })
+
+    child.on('error', (error) => {
+      reject(new Error(`npm run ${script} failed to start: ${error.message}`))
+    })
+  })
 }
 
 async function seedDevelopmentAssignments() {
@@ -90,84 +130,80 @@ async function seedDevelopmentAssignments() {
 async function seedMoreTestData() {
   console.log('🧪 Creating additional test data...')
 
-  // 追加のテストクラス
-  const testClass = await prisma.class.upsert({
-    where: { name_year: { name: 'テスト組', year: 5 } },
-    update: {},
-    create: {
-      name: 'テスト組',
-      year: 5,
-    },
-  })
-
-  // テストクラス用の学生
-  const testStudents = [
-    'テスト太郎',
-    'テスト花子',
-    'サンプル次郎',
-    'サンプル美咲',
-    'デモ健太',
-    'デモ涼子',
-  ]
-
-  for (const name of testStudents) {
-    await prisma.student.create({
-      data: {
-        name,
-        grade: 5,
-        classId: testClass.id,
+  try {
+    // 追加のテストクラス
+    const testClass = await prisma.class.upsert({
+      where: { name_year: { name: 'テスト組', year: 5 } },
+      update: {},
+      create: {
+        name: 'テスト組',
+        year: 5,
       },
     })
+
+    // テストクラス用の学生（設定ファイルから読み込み）
+    const testStudents = seedData.testStudentNames || ['テスト太郎', 'テスト花子']
+
+    let createdStudents = 0
+    for (const name of testStudents) {
+      try {
+        await prisma.student.create({
+          data: {
+            name,
+            grade: 5,
+            classId: testClass.id,
+          },
+        })
+        createdStudents++
+      } catch (error) {
+        console.warn(`  ⚠️ Warning: Could not create test student ${name}:`, error)
+      }
+    }
+
+    console.log(`  ✓ Created test class and ${createdStudents} test students`)
+
+    // 追加のテスト図書室
+    const testRoom = await prisma.room.upsert({
+      where: { name: 'テスト図書室' },
+      update: {},
+      create: {
+        name: 'テスト図書室',
+        capacity: 1,
+      },
+    })
+
+    console.log(`  ✓ Created test room: ${testRoom.name}`)
+  } catch (error) {
+    console.error('  ❌ Error in seedMoreTestData:', error)
+    throw error
   }
-
-  console.log(`  ✓ Created test class and ${testStudents.length} test students`)
-
-  // 追加のテスト図書室
-  const testRoom = await prisma.room.upsert({
-    where: { name: 'テスト図書室' },
-    update: {},
-    create: {
-      name: 'テスト図書室',
-      capacity: 1,
-    },
-  })
-
-  console.log(`  ✓ Created test room: ${testRoom.name}`)
 }
 
 async function seedDevelopmentSettings() {
   console.log('⚙️ Creating development-specific settings...')
 
-  const devSettings = [
-    {
-      key: 'dev_mode',
-      value: 'true',
-      description: '開発モードフラグ',
-    },
-    {
-      key: 'debug_logs',
-      value: 'true',
-      description: 'デバッグログの有効化',
-    },
-    {
-      key: 'test_data_visible',
-      value: 'true',
-      description: 'テストデータの表示',
-    },
-    {
-      key: 'auto_assign_enabled',
-      value: 'true',
-      description: '自動割り当て機能',
-    },
-  ]
+  try {
+    const devSettings = seedData.developmentSettings || []
 
-  for (const setting of devSettings) {
-    await prisma.setting.upsert({
-      where: { key: setting.key },
-      update: { value: setting.value },
-      create: setting,
-    })
-    console.log(`  ✓ Created dev setting: ${setting.key}`)
+    let createdSettings = 0
+    for (const setting of devSettings) {
+      try {
+        await prisma.setting.upsert({
+          where: { key: setting.key },
+          update: { value: setting.value },
+          create: setting,
+        })
+        console.log(`  ✓ Created dev setting: ${setting.key}`)
+        createdSettings++
+      } catch (error) {
+        console.warn(`  ⚠️ Warning: Could not create dev setting ${setting.key}:`, error)
+      }
+    }
+
+    console.log(`  ✓ Created ${createdSettings} development settings`)
+  } catch (error) {
+    console.error('  ❌ Error in seedDevelopmentSettings:', error)
+    throw error
   }
 }
 

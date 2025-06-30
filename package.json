@@ -24,8 +24,8 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:dev": "tsx prisma/seed-dev.ts",
     "db:seed:admin": "tsx scripts/create-admin.ts",
-    "db:reset": "prisma migrate reset --force && npm run db:seed",
-    "db:reset:dev": "prisma migrate reset --force && npm run db:seed:dev",
+    "db:reset": "tsx scripts/safe-reset.ts",
+    "db:reset:dev": "tsx scripts/safe-reset.ts --dev",
     "db:backup": "tsx scripts/backup-db.ts",
     "db:restore": "tsx scripts/restore-db.ts"
   },
