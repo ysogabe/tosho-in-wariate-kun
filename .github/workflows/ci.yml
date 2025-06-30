@@ -9,6 +9,8 @@ on:
 jobs:
   test:
     name: Test & Build
+    # REQUIRED: Must use self-hosted runner exclusively
+    # DO NOT change to ubuntu-latest, windows-latest, or any GitHub-hosted runner
     runs-on: self-hosted
     permissions:
       contents: read
@@ -17,7 +19,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [20.x]
 
     steps:
       - name: Checkout code
@@ -157,6 +159,8 @@ jobs:
 
   build-check:
     name: Build Check (Production)
+    # REQUIRED: Must use self-hosted runner exclusively
+    # DO NOT change to ubuntu-latest, windows-latest, or any GitHub-hosted runner
     runs-on: self-hosted
     needs: test
 
