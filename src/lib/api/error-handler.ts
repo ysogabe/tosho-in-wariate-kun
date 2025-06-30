@@ -34,6 +34,50 @@ export function handleApiError(error: unknown): NextResponse {
     )
   }
 
+  // Prismaエラー（PrismaClientKnownRequestError）
+  if (error && typeof error === 'object' && 'code' in error) {
+    const prismaError = error as { code: string; message: string }
+
+    switch (prismaError.code) {
+      case 'P2002':
+        // Unique constraint violation
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: 'DUPLICATE_ERROR',
+              message: '重複するデータが存在します',
+            },
+          } as ApiResponse,
+          { status: 409 }
+        )
+      case 'P2025':
+        // Record not found
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: 'NOT_FOUND',
+              message: '指定されたデータが見つかりません',
+            },
+          } as ApiResponse,
+          { status: 404 }
+        )
+      default:
+        // その他のPrismaエラー
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: 'DATABASE_ERROR',
+              message: 'データベースエラーが発生しました',
+            },
+          } as ApiResponse,
+          { status: 500 }
+        )
+    }
+  }
+
   // 認証エラー
   if (error instanceof Error) {
     if (error.message === '認証が必要です') {
@@ -59,21 +103,6 @@ export function handleApiError(error: unknown): NextResponse {
           },
         } as ApiResponse,
         { status: 403 }
-      )
-    }
-
-    // その他のエラー
-    if (error.message.startsWith('P2002')) {
-      // Prisma unique constraint error
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'DUPLICATE_ERROR',
-            message: '重複するデータが存在します',
-          },
-        } as ApiResponse,
-        { status: 409 }
       )
     }
   }

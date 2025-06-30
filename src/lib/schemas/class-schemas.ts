@@ -9,9 +9,12 @@ export const CreateClassSchema = z.object({
     .min(1, 'クラス名は必須です')
     .max(20, 'クラス名は20文字以内で入力してください')
     .regex(
-      /^[A-Za-z0-9\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]+$/,
-      'クラス名は英数字、ひらがな、カタカナ、漢字のみ使用できます'
-    ),
+      /^[A-Za-z0-9\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF\s]+$/,
+      'クラス名は英数字、ひらがな、カタカナ、漢字、スペースのみ使用できます'
+    )
+    .refine((name) => name.trim().length > 0, {
+      message: 'クラス名に有効な文字が含まれている必要があります',
+    }),
   year: z
     .number()
     .int('学年は整数で入力してください')
@@ -28,9 +31,12 @@ export const UpdateClassSchema = z.object({
     .min(1, 'クラス名は必須です')
     .max(20, 'クラス名は20文字以内で入力してください')
     .regex(
-      /^[A-Za-z0-9\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]+$/,
-      'クラス名は英数字、ひらがな、カタカナ、漢字のみ使用できます'
+      /^[A-Za-z0-9\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF\s]+$/,
+      'クラス名は英数字、ひらがな、カタカナ、漢字、スペースのみ使用できます'
     )
+    .refine((name) => name.trim().length > 0, {
+      message: 'クラス名に有効な文字が含まれている必要があります',
+    })
     .optional(),
   year: z
     .number()
