@@ -12,6 +12,11 @@ import {
 } from '@/lib/schemas/student-schemas'
 
 /**
+ * 曜日名のマッピング定数
+ */
+const DAY_NAMES = ['日', '月', '火', '水', '木', '金', '土'] as const
+
+/**
  * GET /api/students/[id]/schedule
  * 図書委員の当番スケジュール取得（認証必須）
  */
@@ -59,14 +64,11 @@ export async function GET(
       orderBy: [{ dayOfWeek: 'asc' }, { createdAt: 'asc' }],
     })
 
-    // 曜日名のマッピング
-    const dayNames = ['日', '月', '火', '水', '木', '金', '土']
-
     // レスポンス用データ変換
     const scheduleData = assignments.map((assignment) => ({
       id: assignment.id,
       dayOfWeek: assignment.dayOfWeek,
-      dayName: dayNames[assignment.dayOfWeek] || '不明',
+      dayName: DAY_NAMES[assignment.dayOfWeek] || '不明',
       room: {
         name: assignment.room.name,
         capacity: assignment.room.capacity,

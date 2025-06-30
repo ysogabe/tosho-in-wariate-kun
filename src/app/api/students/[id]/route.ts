@@ -165,7 +165,7 @@ export async function PUT(
       if (duplicateStudent) {
         const duplicateMessage = createStudentDuplicateMessage(
           checkName,
-          classData?.name || '',
+          classData?.name || '不明なクラス',
           classData?.year || 0
         )
         return createErrorResponse(
@@ -196,7 +196,7 @@ export async function PUT(
     // 成功メッセージ生成（サービス層）
     const successMessage = createStudentUpdateMessage(
       updatedStudent.name,
-      updatedStudent.class?.name || '',
+      updatedStudent.class?.name || '不明なクラス',
       updatedStudent.class?.year || 0
     )
 
@@ -264,7 +264,7 @@ export async function DELETE(
     // 成功メッセージ生成（サービス層）
     const successMessage = createStudentDeleteMessage(
       existingStudent.name,
-      existingStudent.class?.name || '',
+      existingStudent.class?.name || '不明なクラス',
       existingStudent.class?.year || 0
     )
 
