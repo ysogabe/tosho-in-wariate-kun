@@ -36,6 +36,18 @@ const mockTeacherUser = {
   email: 'teacher@example.com',
   role: 'teacher',
   created_at: '2023-01-01T00:00:00.000Z',
+  updated_at: '2023-01-01T00:00:00.000Z',
+  app_metadata: {},
+  user_metadata: {},
+  aud: 'authenticated',
+  confirmation_sent_at: null,
+  confirmed_at: '2023-01-01T00:00:00.000Z',
+  email_confirmed_at: '2023-01-01T00:00:00.000Z',
+  invited_at: null,
+  last_sign_in_at: '2023-01-01T00:00:00.000Z',
+  phone: null,
+  phone_confirmed_at: null,
+  recovery_sent_at: null,
 }
 
 const mockAdminUser = {
@@ -43,6 +55,18 @@ const mockAdminUser = {
   email: 'admin@example.com',
   role: 'admin',
   created_at: '2023-01-01T00:00:00.000Z',
+  updated_at: '2023-01-01T00:00:00.000Z',
+  app_metadata: {},
+  user_metadata: {},
+  aud: 'authenticated',
+  confirmation_sent_at: null,
+  confirmed_at: '2023-01-01T00:00:00.000Z',
+  email_confirmed_at: '2023-01-01T00:00:00.000Z',
+  invited_at: null,
+  last_sign_in_at: '2023-01-01T00:00:00.000Z',
+  phone: null,
+  phone_confirmed_at: null,
+  recovery_sent_at: null,
 }
 
 describe('Auth Helpers', () => {
