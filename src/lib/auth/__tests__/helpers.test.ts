@@ -6,10 +6,9 @@ import {
   setClientSession,
   clearClientSession,
   getClientSession,
-  isAdmin,
-  isTeacher,
-  createAuthErrorResponse,
-} from '../helpers'
+} from '../client-helpers'
+import { isAdmin, isTeacher, createAuthErrorResponse } from '../helpers'
+// import { MVPUser } from '../types' - type not used in tests
 
 // Mock Response for Node environment
 global.Response = class Response {
