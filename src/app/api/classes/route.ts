@@ -10,7 +10,6 @@ import {
 import {
   ClassesQuerySchema,
   CreateClassSchema,
-  type ClassResponse,
 } from '@/lib/schemas/class-schemas'
 import {
   transformClassesToResponse,
@@ -40,7 +39,10 @@ export async function GET(request: NextRequest) {
     const params = ClassesQuerySchema.parse(Object.fromEntries(searchParams))
 
     // ページネーションバリデーション（サービス層）
-    const paginationValidation = validatePaginationParams(params.page, params.limit)
+    const paginationValidation = validatePaginationParams(
+      params.page,
+      params.limit
+    )
     if (!paginationValidation.isValid) {
       return createErrorResponse(
         'VALIDATION_ERROR',
@@ -104,13 +106,9 @@ export async function POST(request: NextRequest) {
 
     // 入力データの正規化と追加バリデーション（サービス層）
     const normalizedName = normalizeClassName(name)
-    
+
     if (!isValidClassName(normalizedName)) {
-      return createErrorResponse(
-        'VALIDATION_ERROR',
-        'クラス名が無効です',
-        400
-      )
+      return createErrorResponse('VALIDATION_ERROR', 'クラス名が無効です', 400)
     }
 
     if (!isValidYear(year)) {
@@ -130,11 +128,7 @@ export async function POST(request: NextRequest) {
     if (existingClass) {
       // 重複エラーメッセージ生成（サービス層）
       const duplicateMessage = createClassDuplicateMessage(normalizedName, year)
-      return createErrorResponse(
-        'CLASS_ALREADY_EXISTS',
-        duplicateMessage,
-        409
-      )
+      return createErrorResponse('CLASS_ALREADY_EXISTS', duplicateMessage, 409)
     }
 
     // 新規クラス作成

@@ -81,14 +81,20 @@ export function createClassSuccessMessage(name: string, year: number): string {
 /**
  * クラス重複エラーメッセージを生成
  */
-export function createClassDuplicateMessage(name: string, year: number): string {
+export function createClassDuplicateMessage(
+  name: string,
+  year: number
+): string {
   return `${year}年${name}は既に存在します`
 }
 
 /**
  * ページネーション計算のバリデーション
  */
-export function validatePaginationParams(page: number, limit: number): {
+export function validatePaginationParams(
+  page: number,
+  limit: number
+): {
   isValid: boolean
   errors: string[]
 } {

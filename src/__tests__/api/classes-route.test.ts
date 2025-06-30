@@ -8,6 +8,8 @@
 
 import { NextRequest } from 'next/server'
 import { GET, POST } from '@/app/api/classes/route'
+import { prisma } from '@/lib/database/client'
+import { authenticate, authenticateAdmin } from '@/lib/auth/helpers'
 
 // データベースクライアントをモック
 jest.mock('@/lib/database/client', () => ({
@@ -33,19 +35,20 @@ jest.mock('next-auth/next', () => ({
 }))
 
 describe('/api/classes Route Tests', () => {
-  const mockPrisma = require('@/lib/database/client').prisma
+  const mockPrisma = jest.mocked(prisma)
 
   beforeEach(() => {
     jest.clearAllMocks()
-    
+
     // デフォルトの認証モック
-    const { authenticate, authenticateAdmin } = require('@/lib/auth/helpers')
-    authenticate.mockResolvedValue({
+    const mockAuthenticate = jest.mocked(authenticate)
+    const mockAuthenticateAdmin = jest.mocked(authenticateAdmin)
+    mockAuthenticate.mockResolvedValue({
       id: 'user-1',
       email: 'admin@test.com',
       role: 'admin',
     })
-    authenticateAdmin.mockResolvedValue({
+    mockAuthenticateAdmin.mockResolvedValue({
       id: 'user-1',
       email: 'admin@test.com',
       role: 'admin',
@@ -130,8 +133,8 @@ describe('/api/classes Route Tests', () => {
     })
 
     it('認証エラーの場合401を返す', async () => {
-      const { authenticate } = require('@/lib/auth/helpers')
-      authenticate.mockRejectedValue(new Error('認証が必要です'))
+      const mockAuthenticate = jest.mocked(authenticate)
+      mockAuthenticate.mockRejectedValue(new Error('認証が必要です'))
 
       const request = new NextRequest('http://localhost:3000/api/classes')
       const response = await GET(request)
@@ -254,8 +257,8 @@ describe('/api/classes Route Tests', () => {
     })
 
     it('管理者権限が必要なエラーの場合403を返す', async () => {
-      const { authenticateAdmin } = require('@/lib/auth/helpers')
-      authenticateAdmin.mockRejectedValue(new Error('管理者権限が必要です'))
+      const mockAuthenticateAdmin = jest.mocked(authenticateAdmin)
+      mockAuthenticateAdmin.mockRejectedValue(new Error('管理者権限が必要です'))
 
       const requestBody = {
         name: '5年2組',
@@ -278,21 +281,27 @@ describe('/api/classes Route Tests', () => {
 
     it('年度の境界値をテストする', async () => {
       // 4年生（範囲外）
-      const invalidYearRequest = new NextRequest('http://localhost:3000/api/classes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: 'テスト', year: 4 }),
-      })
+      const invalidYearRequest = new NextRequest(
+        'http://localhost:3000/api/classes',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: 'テスト', year: 4 }),
+        }
+      )
 
       const invalidResponse = await POST(invalidYearRequest)
       expect(invalidResponse.status).toBe(400)
 
       // 7年生（範囲外）
-      const invalidHighYearRequest = new NextRequest('http://localhost:3000/api/classes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: 'テスト', year: 7 }),
-      })
+      const invalidHighYearRequest = new NextRequest(
+        'http://localhost:3000/api/classes',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: 'テスト', year: 7 }),
+        }
+      )
 
       const invalidHighResponse = await POST(invalidHighYearRequest)
       expect(invalidHighResponse.status).toBe(400)
