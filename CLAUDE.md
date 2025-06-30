@@ -283,9 +283,73 @@ npm run type-check       # TypeScript validation
 npm run build            # Production build
 ```
 
+### Testing Philosophy and Quality Focus
+
+**IMPORTANT**: カバレッジの向上より、根本的なテスト品質向上を目標とする
+
+#### Core Principles
+
+- **質 > 量**: カバレッジは目的ではなく手段である
+- **Business Logic First**: ビジネスロジックを純粋関数として分離し、確実にテストする
+- **Layer Separation**: インフラストラクチャとビジネスロジックを分離したテスト戦略
+
+#### Testing Architecture
+
+```
+src/
+├── lib/services/           # ビジネスロジック（純粋関数）
+│   ├── *.ts               # テスト可能な業務処理
+│   └── __tests__/         # 100%カバレッジを目指す高品質テスト
+├── app/api/               # APIルート（薄いレイヤー）
+│   └── __tests__/         # インテグレーションテスト
+└── components/            # UIコンポーネント
+    └── __tests__/         # コンポーネントテスト
+```
+
+#### Quality-Focused Testing Strategy
+
+1. **Service Layer (Business Logic)**
+   - 純粋関数としてロジックを実装
+   - 外部依存を排除し、確実にテストできる設計
+   - データ変換、バリデーション、計算ロジックなどの核心機能をテスト
+   - 境界値テスト、エラーケース、統合シナリオを網羅
+
+2. **API Layer (Infrastructure)**
+   - サービス層を使用した薄いレイヤー
+   - 認証、リクエスト処理、レスポンス形成のテスト
+   - モックを使用したインテグレーションテスト
+
+3. **Component Layer (UI)**
+   - ユーザーインタラクション、レンダリング、状態管理のテスト
+   - Testing Library + Jestを使用
+
+#### Testing Best Practices
+
+- **TDD Implementation**: t_wada手法に基づくRed-Green-Refactor
+- **Pure Functions**: 副作用のない関数を優先し、テスタビリティを向上
+- **Meaningful Tests**: 実際にコードの品質を保証するテストケースを作成
+- **Bug Detection**: テストが実際にバグを発見し、修正に導くことを重視
+
+#### Example: Service Layer Testing
+
+```typescript
+// Good: Pure function, easily testable
+export function createClassSuccessMessage(name: string, year: number): string {
+  return `${year}年${name}を作成しました`
+}
+
+// Test: Verifies exact business logic
+it('成功メッセージを正しく生成する', () => {
+  const result = createClassSuccessMessage('1組', 5)
+  expect(result).toBe('5年1組を作成しました')
+})
+```
+
 ### Coverage Requirements
 
-- **MVP Target**: 30% minimum coverage
+- **MVP Target**: 30% minimum coverage (baseline)
+- **Quality Target**: 根本的なテスト品質向上を優先
+- **Service Layer**: 95%+ coverage with high-quality tests
 - **Reporting**: Automatic coverage reports on PRs
 - **Integration**: Codecov for trend tracking
 - **Enforcement**: CI fails if coverage drops below threshold
