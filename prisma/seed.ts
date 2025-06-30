@@ -133,6 +133,13 @@ async function seedStudents() {
     let studentIndex = 0
     const studentsPerClass = 4
 
+    // すべての学生データを準備してからバッチで作成
+    const studentsToCreate: Array<{
+      name: string
+      grade: number
+      classId: string
+    }> = []
+
     for (const classData of classes) {
       // 境界チェック：利用可能な学生名があるかチェック
       if (studentIndex >= studentNames.length) {
@@ -140,26 +147,41 @@ async function seedStudents() {
         break
       }
 
-      // 各クラスに4名の図書委員を作成（利用可能な名前の範囲内で）
+      // 各クラスに4名の図書委員を準備（利用可能な名前の範囲内で）
       const availableNames = Math.min(studentsPerClass, studentNames.length - studentIndex)
       const studentsInClass = studentNames.slice(studentIndex, studentIndex + availableNames)
 
       for (const name of studentsInClass) {
-        try {
-          await prisma.student.create({
-            data: {
-              name,
-              grade: classData.year,
-              classId: classData.id,
-            },
-          })
-          console.log(`  ✓ Created student: ${name} (${classData.name})`)
-        } catch (error) {
-          console.warn(`  ⚠️ Warning: Could not create student ${name}:`, error)
-        }
+        studentsToCreate.push({
+          name,
+          grade: classData.year,
+          classId: classData.id,
+        })
       }
 
       studentIndex += availableNames
+    }
+
+    // バッチで学生を作成（パフォーマンス向上）
+    if (studentsToCreate.length > 0) {
+      try {
+        const result = await prisma.student.createMany({
+          data: studentsToCreate,
+          skipDuplicates: true, // 重複データの防止
+        })
+        console.log(`  ✓ Created ${result.count} students in batch operation`)
+        
+        // 作成された学生の詳細をログ出力
+        studentsToCreate.forEach((student, index) => {
+          const classData = classes.find(c => c.id === student.classId)
+          console.log(`    - ${student.name} (${classData?.name || 'Unknown class'})`)
+        })
+      } catch (error) {
+        console.error('  ❌ Error creating students in batch:', error)
+        // フォールバック：一つずつ作成
+        console.log('  🔄 Falling back to individual creation...')
+        await createStudentsIndividually(studentsToCreate, classes)
+      }
     }
 
     console.log(`  ✓ Created students for ${classes.length} classes using ${Math.min(studentIndex, studentNames.length)} names`)
@@ -167,6 +189,35 @@ async function seedStudents() {
     console.error('  ❌ Error in seedStudents:', error)
     throw error
   }
+}
+
+/**
+ * フォールバック：学生を一つずつ作成
+ */
+async function createStudentsIndividually(
+  studentsToCreate: Array<{
+    name: string
+    grade: number
+    classId: string
+  }>,
+  classes: Array<{ id: string; name: string }>
+): Promise<void> {
+  let createdCount = 0
+  
+  for (const student of studentsToCreate) {
+    try {
+      await prisma.student.create({
+        data: student,
+      })
+      const classData = classes.find(c => c.id === student.classId)
+      console.log(`    - ${student.name} (${classData?.name || 'Unknown class'})`)
+      createdCount++
+    } catch (error) {
+      console.warn(`  ⚠️ Warning: Could not create student ${student.name}:`, error)
+    }
+  }
+  
+  console.log(`  ✓ Created ${createdCount} students individually`)
 }
 
 main()
