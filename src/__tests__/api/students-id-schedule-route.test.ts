@@ -46,6 +46,18 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       email: 'user@test.com',
       role: 'student',
       created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
+      app_metadata: {},
+      user_metadata: {},
+      aud: 'authenticated',
+      confirmation_sent_at: null,
+      confirmed_at: '2024-01-01T00:00:00Z',
+      email_confirmed_at: '2024-01-01T00:00:00Z',
+      invited_at: null,
+      last_sign_in_at: '2024-01-01T00:00:00Z',
+      phone: null,
+      phone_confirmed_at: null,
+      recovery_sent_at: null,
     })
   })
 
@@ -54,6 +66,11 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       const mockStudent = {
         id: 'student-1',
         name: '田中太郎',
+        classId: 'class-1',
+        grade: 5,
+        isActive: true,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
       }
 
       const mockAssignments = [
@@ -64,6 +81,7 @@ describe('/api/students/[id]/schedule Route Tests', () => {
           dayOfWeek: 1,
           term: 'FIRST_TERM',
           createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-01'),
           room: {
             name: '図書室',
             capacity: 2,
@@ -76,6 +94,7 @@ describe('/api/students/[id]/schedule Route Tests', () => {
           dayOfWeek: 3,
           term: 'FIRST_TERM',
           createdAt: new Date('2024-01-02'),
+          updatedAt: new Date('2024-01-02'),
           room: {
             name: '図書室',
             capacity: 2,
@@ -86,7 +105,9 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       mockPrisma.student.findUnique.mockResolvedValue(mockStudent)
       mockPrisma.assignment.findMany.mockResolvedValue(mockAssignments)
 
-      const request = new NextRequest('http://localhost/api/students/student-1/schedule')
+      const request = new NextRequest(
+        'http://localhost/api/students/student-1/schedule'
+      )
       const props = { params: Promise.resolve({ id: 'student-1' }) }
 
       const response = await GET(request, props)
@@ -130,6 +151,11 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       const mockStudent = {
         id: 'student-1',
         name: '田中太郎',
+        classId: 'class-1',
+        grade: 5,
+        isActive: true,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
       }
 
       const mockAssignments = [
@@ -140,6 +166,7 @@ describe('/api/students/[id]/schedule Route Tests', () => {
           dayOfWeek: 1,
           term: 'FIRST_TERM',
           createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-01'),
           room: {
             name: '図書室',
             capacity: 2,
@@ -150,7 +177,9 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       mockPrisma.student.findUnique.mockResolvedValue(mockStudent)
       mockPrisma.assignment.findMany.mockResolvedValue(mockAssignments)
 
-      const request = new NextRequest('http://localhost/api/students/student-1/schedule?term=FIRST_TERM')
+      const request = new NextRequest(
+        'http://localhost/api/students/student-1/schedule?term=FIRST_TERM'
+      )
       const props = { params: Promise.resolve({ id: 'student-1' }) }
 
       const response = await GET(request, props)
@@ -178,6 +207,11 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       const mockStudent = {
         id: 'student-1',
         name: '田中太郎',
+        classId: 'class-1',
+        grade: 5,
+        isActive: true,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
       }
 
       const mockAssignments = [
@@ -188,6 +222,7 @@ describe('/api/students/[id]/schedule Route Tests', () => {
           dayOfWeek: 2,
           term: 'SECOND_TERM',
           createdAt: new Date('2024-01-03'),
+          updatedAt: new Date('2024-01-03'),
           room: {
             name: '図書室',
             capacity: 2,
@@ -198,7 +233,9 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       mockPrisma.student.findUnique.mockResolvedValue(mockStudent)
       mockPrisma.assignment.findMany.mockResolvedValue(mockAssignments)
 
-      const request = new NextRequest('http://localhost/api/students/student-1/schedule?term=SECOND_TERM')
+      const request = new NextRequest(
+        'http://localhost/api/students/student-1/schedule?term=SECOND_TERM'
+      )
       const props = { params: Promise.resolve({ id: 'student-1' }) }
 
       const response = await GET(request, props)
@@ -213,7 +250,9 @@ describe('/api/students/[id]/schedule Route Tests', () => {
     it('存在しない図書委員の場合は404を返す', async () => {
       mockPrisma.student.findUnique.mockResolvedValue(null)
 
-      const request = new NextRequest('http://localhost/api/students/nonexistent/schedule')
+      const request = new NextRequest(
+        'http://localhost/api/students/nonexistent/schedule'
+      )
       const props = { params: Promise.resolve({ id: 'nonexistent' }) }
 
       const response = await GET(request, props)
@@ -229,7 +268,9 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       const mockAuthenticate = jest.mocked(authenticate)
       mockAuthenticate.mockRejectedValue(new Error('認証が必要です'))
 
-      const request = new NextRequest('http://localhost/api/students/student-1/schedule')
+      const request = new NextRequest(
+        'http://localhost/api/students/student-1/schedule'
+      )
       const props = { params: Promise.resolve({ id: 'student-1' }) }
 
       const response = await GET(request, props)
@@ -241,12 +282,19 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       const mockStudent = {
         id: 'student-1',
         name: '田中太郎',
+        classId: 'class-1',
+        grade: 5,
+        isActive: true,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
       }
 
       mockPrisma.student.findUnique.mockResolvedValue(mockStudent)
       mockPrisma.assignment.findMany.mockResolvedValue([])
 
-      const request = new NextRequest('http://localhost/api/students/student-1/schedule')
+      const request = new NextRequest(
+        'http://localhost/api/students/student-1/schedule'
+      )
       const props = { params: Promise.resolve({ id: 'student-1' }) }
 
       const response = await GET(request, props)
@@ -262,6 +310,11 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       const mockStudent = {
         id: 'student-1',
         name: '田中太郎',
+        classId: 'class-1',
+        grade: 5,
+        isActive: true,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
       }
 
       const mockAssignments = [
@@ -272,6 +325,7 @@ describe('/api/students/[id]/schedule Route Tests', () => {
           dayOfWeek: 0,
           term: 'FIRST_TERM',
           createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-01'),
           room: { name: '図書室', capacity: 2 },
         },
         {
@@ -281,6 +335,7 @@ describe('/api/students/[id]/schedule Route Tests', () => {
           dayOfWeek: 6,
           term: 'FIRST_TERM',
           createdAt: new Date('2024-01-02'),
+          updatedAt: new Date('2024-01-02'),
           room: { name: '図書室', capacity: 2 },
         },
       ]
@@ -288,7 +343,9 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       mockPrisma.student.findUnique.mockResolvedValue(mockStudent)
       mockPrisma.assignment.findMany.mockResolvedValue(mockAssignments)
 
-      const request = new NextRequest('http://localhost/api/students/student-1/schedule')
+      const request = new NextRequest(
+        'http://localhost/api/students/student-1/schedule'
+      )
       const props = { params: Promise.resolve({ id: 'student-1' }) }
 
       const response = await GET(request, props)
@@ -300,7 +357,9 @@ describe('/api/students/[id]/schedule Route Tests', () => {
     })
 
     it('無効な学期パラメータの場合は400を返す', async () => {
-      const request = new NextRequest('http://localhost/api/students/student-1/schedule?term=INVALID_TERM')
+      const request = new NextRequest(
+        'http://localhost/api/students/student-1/schedule?term=INVALID_TERM'
+      )
       const props = { params: Promise.resolve({ id: 'student-1' }) }
 
       const response = await GET(request, props)

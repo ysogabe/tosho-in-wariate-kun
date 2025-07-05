@@ -51,12 +51,36 @@ describe('/api/students Route Tests', () => {
       email: 'admin@test.com',
       role: 'admin',
       created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
+      app_metadata: {},
+      user_metadata: {},
+      aud: 'authenticated',
+      confirmation_sent_at: null,
+      confirmed_at: '2024-01-01T00:00:00Z',
+      email_confirmed_at: '2024-01-01T00:00:00Z',
+      invited_at: null,
+      last_sign_in_at: '2024-01-01T00:00:00Z',
+      phone: null,
+      phone_confirmed_at: null,
+      recovery_sent_at: null,
     })
     mockAuthenticateAdmin.mockResolvedValue({
       id: 'admin-1',
       email: 'admin@test.com',
       role: 'admin',
       created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
+      app_metadata: {},
+      user_metadata: {},
+      aud: 'authenticated',
+      confirmation_sent_at: null,
+      confirmed_at: '2024-01-01T00:00:00Z',
+      email_confirmed_at: '2024-01-01T00:00:00Z',
+      invited_at: null,
+      last_sign_in_at: '2024-01-01T00:00:00Z',
+      phone: null,
+      phone_confirmed_at: null,
+      recovery_sent_at: null,
     })
   })
 
@@ -116,7 +140,9 @@ describe('/api/students Route Tests', () => {
       mockPrisma.student.findMany.mockResolvedValue(mockStudents)
       mockPrisma.student.count.mockResolvedValue(1)
 
-      const request = new NextRequest('http://localhost/api/students?search=田中&grade=5')
+      const request = new NextRequest(
+        'http://localhost/api/students?search=田中&grade=5'
+      )
       const response = await GET(request)
       const data = await response.json()
 
@@ -143,7 +169,9 @@ describe('/api/students Route Tests', () => {
     })
 
     it('無効なページネーションパラメータは400を返す', async () => {
-      const request = new NextRequest('http://localhost/api/students?page=0&limit=101')
+      const request = new NextRequest(
+        'http://localhost/api/students?page=0&limit=101'
+      )
       const response = await GET(request)
       const data = await response.json()
 
@@ -159,6 +187,8 @@ describe('/api/students Route Tests', () => {
         id: 'class-1',
         name: '1組',
         year: 5,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
       }
 
       const mockCreatedStudent = {
@@ -194,7 +224,9 @@ describe('/api/students Route Tests', () => {
       expect(response.status).toBe(201)
       expect(data.success).toBe(true)
       expect(data.data.student.name).toBe('田中太郎')
-      expect(data.data.message).toBe('5年1組の田中太郎さんを図書委員として登録しました')
+      expect(data.data.message).toBe(
+        '5年1組の田中太郎さんを図書委員として登録しました'
+      )
     })
 
     it('存在しないクラスIDの場合は400を返す', async () => {
@@ -224,12 +256,18 @@ describe('/api/students Route Tests', () => {
         id: 'class-1',
         name: '1組',
         year: 5,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
       }
 
       const mockExistingStudent = {
         id: 'existing-student',
         name: '田中太郎',
         classId: 'class-1',
+        grade: 5,
+        isActive: true,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
       }
 
       mockPrisma.class.findUnique.mockResolvedValue(mockClass)
@@ -251,7 +289,9 @@ describe('/api/students Route Tests', () => {
 
       expect(response.status).toBe(409)
       expect(data.error).toBe('STUDENT_ALREADY_EXISTS')
-      expect(data.message).toBe('5年1組には既に田中太郎さんが図書委員として登録されています')
+      expect(data.message).toBe(
+        '5年1組には既に田中太郎さんが図書委員として登録されています'
+      )
     })
 
     it('無効な名前の場合は400を返す', async () => {
@@ -259,6 +299,8 @@ describe('/api/students Route Tests', () => {
         id: 'class-1',
         name: '1組',
         year: 5,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
       }
 
       mockPrisma.class.findUnique.mockResolvedValue(mockClass)
@@ -287,6 +329,8 @@ describe('/api/students Route Tests', () => {
         id: 'class-1',
         name: '1組',
         year: 5,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
       }
 
       mockPrisma.class.findUnique.mockResolvedValue(mockClass)

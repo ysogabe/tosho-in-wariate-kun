@@ -4,7 +4,7 @@ import { confirmDestructiveOperation } from './db-helpers'
 async function safeReset() {
   const isDev = process.argv.includes('--dev')
   const operation = isDev ? 'Development Database Reset' : 'Database Reset'
-  const details = isDev 
+  const details = isDev
     ? 'This will reset the database and populate it with development test data'
     : 'This will reset the database and populate it with production master data'
 
@@ -21,7 +21,7 @@ async function safeReset() {
 
     // データベースリセットを実行
     await safelyExecuteCommand('npm', ['run', 'db:migrate:reset', '--force'])
-    
+
     // 適切なシードスクリプトを実行
     if (isDev) {
       await safelyExecuteCommand('npm', ['run', 'db:seed:dev'])
@@ -30,7 +30,6 @@ async function safeReset() {
     }
 
     console.log('✅ Database reset completed successfully!')
-    
   } catch (error) {
     console.error('❌ Reset failed:', error)
     process.exit(1)
@@ -43,14 +42,16 @@ async function safeReset() {
 function safelyExecuteCommand(command: string, args: string[]): Promise<void> {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
-      stdio: 'inherit'
+      stdio: 'inherit',
     })
 
     child.on('close', (code) => {
       if (code === 0) {
         resolve()
       } else {
-        reject(new Error(`${command} ${args.join(' ')} exited with code ${code}`))
+        reject(
+          new Error(`${command} ${args.join(' ')} exited with code ${code}`)
+        )
       }
     })
 

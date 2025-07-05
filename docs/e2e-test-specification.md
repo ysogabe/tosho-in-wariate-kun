@@ -19,6 +19,7 @@
 ### 0.1 インフラストラクチャ準備
 
 #### データベース環境
+
 - **テスト専用データベースの設定**
 
   ```bash
@@ -61,9 +62,9 @@
       id: 'test-credentials',
       credentials: {
         email: { type: 'email' },
-        password: { type: 'password' }
-      }
-    })
+        password: { type: 'password' },
+      },
+    }),
   ]
   ```
 
@@ -82,6 +83,7 @@
 ### 0.2 E2Eテストツール導入
 
 #### Playwright セットアップ
+
 - **インストール**
 
   ```bash
@@ -94,24 +96,25 @@
   ```typescript
   // playwright.config.ts
   import { defineConfig } from '@playwright/test'
-  
+
   export default defineConfig({
     testDir: './e2e',
     timeout: 30000,
     use: {
       baseURL: 'http://localhost:3000',
       trace: 'on-first-retry',
-      screenshot: 'only-on-failure'
+      screenshot: 'only-on-failure',
     },
     projects: [
       { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
       { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
-      { name: 'webkit', use: { ...devices['Desktop Safari'] } }
-    ]
+      { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+    ],
   })
   ```
 
 #### CI/CD パイプライン設定
+
 - **GitHub Actions設定**
 
   ```yaml
@@ -133,6 +136,7 @@
 ### 0.3 モックサービス設定
 
 #### 外部API モック
+
 - **MSW (Mock Service Worker) 導入**
 
   ```bash
@@ -144,15 +148,16 @@
   ```typescript
   // e2e/mocks/handlers.ts
   import { rest } from 'msw'
-  
+
   export const handlers = [
     rest.get('/api/classes', (req, res, ctx) => {
       return res(ctx.json(mockClassesData))
-    })
+    }),
   ]
   ```
 
 #### メール送信モック
+
 - **メール送信機能のモック設定**
 
   ```typescript
@@ -165,6 +170,7 @@
 ### 0.4 パフォーマンス・監視設定
 
 #### ログ収集
+
 - **テスト実行時のログ設定**
 
   ```typescript
@@ -177,6 +183,7 @@
   ```
 
 #### エラー追跡
+
 - **未処理エラーの検出**
 
   ```typescript
@@ -189,13 +196,16 @@
 ### 0.5 セキュリティ設定
 
 #### HTTPS設定（本番環境）
+
 - **SSL証明書の設定確認**
 - **リダイレクト設定の確認**
 
 #### Content Security Policy
+
 - **CSP設定の確認とテスト環境での調整**
 
 #### レート制限
+
 - **テスト環境でのレート制限無効化**
 
   ```typescript
@@ -208,6 +218,7 @@
 ### 0.6 データ管理
 
 #### テストデータ準備
+
 - **サンプルデータの自動生成**
 
   ```bash
@@ -226,6 +237,7 @@
   ```
 
 #### データクリーンアップ
+
 - **テスト後のデータ削除**
 
   ```typescript
@@ -238,19 +250,21 @@
 ### 0.7 パフォーマンステスト設定
 
 #### Core Web Vitals 測定
+
 - **LCP, FID, CLS の測定設定**
 
   ```typescript
   // Lighthouseを使用したパフォーマンステスト
   import lighthouse from 'lighthouse'
-  
+
   const result = await lighthouse(url, {
     onlyCategories: ['performance'],
-    output: 'json'
+    output: 'json',
   })
   ```
 
 #### リソース監視
+
 - **メモリ使用量の監視**
 - **ネットワーク使用量の監視**
 

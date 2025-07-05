@@ -16,9 +16,20 @@ describe('student-schemas', () => {
       const validQueries = [
         { page: '1', limit: '20' },
         { page: '2', limit: '10', search: '田中' },
-        { page: '1', limit: '50', classId: '123e4567-e89b-12d3-a456-426614174000', grade: '5' },
+        {
+          page: '1',
+          limit: '50',
+          classId: '123e4567-e89b-12d3-a456-426614174000',
+          grade: '5',
+        },
         { page: '1', limit: '20', isActive: 'true' },
-        { page: '3', limit: '25', search: '太郎', grade: '6', isActive: 'false' },
+        {
+          page: '3',
+          limit: '25',
+          search: '太郎',
+          grade: '6',
+          isActive: 'false',
+        },
       ]
 
       validQueries.forEach((query) => {
@@ -56,7 +67,9 @@ describe('student-schemas', () => {
     })
 
     it('無効なUUIDは拒否される', () => {
-      expect(() => StudentsQuerySchema.parse({ classId: 'invalid-uuid' })).toThrow()
+      expect(() =>
+        StudentsQuerySchema.parse({ classId: 'invalid-uuid' })
+      ).toThrow()
     })
 
     it('無効な学年は拒否される', () => {
@@ -152,11 +165,15 @@ describe('student-schemas', () => {
 
     it('無効な名前は拒否される', () => {
       expect(() => UpdateStudentSchema.parse({ name: '' })).toThrow()
-      expect(() => UpdateStudentSchema.parse({ name: 'a'.repeat(51) })).toThrow()
+      expect(() =>
+        UpdateStudentSchema.parse({ name: 'a'.repeat(51) })
+      ).toThrow()
     })
 
     it('無効なクラスIDは拒否される', () => {
-      expect(() => UpdateStudentSchema.parse({ classId: 'invalid-uuid' })).toThrow()
+      expect(() =>
+        UpdateStudentSchema.parse({ classId: 'invalid-uuid' })
+      ).toThrow()
     })
 
     it('無効な学年は拒否される', () => {
@@ -172,12 +189,7 @@ describe('student-schemas', () => {
     })
 
     it('無効なUUIDは拒否される', () => {
-      const invalidIds = [
-        { id: 'invalid-uuid' },
-        { id: '123' },
-        { id: '' },
-        {},
-      ]
+      const invalidIds = [{ id: 'invalid-uuid' }, { id: '123' }, { id: '' }, {}]
 
       invalidIds.forEach((invalidId) => {
         expect(() => StudentIdParamSchema.parse(invalidId)).toThrow()
@@ -187,11 +199,7 @@ describe('student-schemas', () => {
 
   describe('ScheduleQuerySchema', () => {
     it('有効な学期パラメータを正しく解析する', () => {
-      const validTerms = [
-        { term: 'FIRST_TERM' },
-        { term: 'SECOND_TERM' },
-        {},
-      ]
+      const validTerms = [{ term: 'FIRST_TERM' }, { term: 'SECOND_TERM' }, {}]
 
       validTerms.forEach((term) => {
         expect(() => ScheduleQuerySchema.parse(term)).not.toThrow()

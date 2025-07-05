@@ -21,12 +21,14 @@ All endpoints require authentication. For testing, ensure you have valid authent
 **Auth**: Required (any authenticated user)
 
 **Query Parameters**:
+
 - `page` (optional): Page number (default: 1)
 - `limit` (optional): Items per page (default: 20, max: 100)
 - `search` (optional): Search by class name
 - `year` (optional): Filter by year (5 or 6)
 
 **Example Requests**:
+
 ```bash
 # Get all classes
 GET /api/classes
@@ -42,6 +44,7 @@ GET /api/classes?year=5
 ```
 
 **Expected Response**:
+
 ```json
 {
   "success": true,
@@ -73,6 +76,7 @@ GET /api/classes?year=5
 **Auth**: Admin required
 
 **Request Body**:
+
 ```json
 {
   "name": "D",
@@ -81,6 +85,7 @@ GET /api/classes?year=5
 ```
 
 **Example Request**:
+
 ```bash
 curl -X POST http://localhost:3000/api/classes \
   -H "Content-Type: application/json" \
@@ -88,6 +93,7 @@ curl -X POST http://localhost:3000/api/classes \
 ```
 
 **Expected Response** (201 Created):
+
 ```json
 {
   "success": true,
@@ -112,6 +118,7 @@ curl -X POST http://localhost:3000/api/classes \
 **Auth**: Admin required
 
 **Request Body**:
+
 ```json
 {
   "name": "E",
@@ -120,6 +127,7 @@ curl -X POST http://localhost:3000/api/classes \
 ```
 
 **Expected Response**:
+
 ```json
 {
   "success": true,
@@ -144,6 +152,7 @@ curl -X POST http://localhost:3000/api/classes \
 **Auth**: Admin required
 
 **Expected Response**:
+
 ```json
 {
   "success": true,
@@ -161,6 +170,7 @@ curl -X POST http://localhost:3000/api/classes \
 ## Error Responses
 
 ### Validation Error (400)
+
 ```json
 {
   "success": false,
@@ -181,6 +191,7 @@ curl -X POST http://localhost:3000/api/classes \
 ```
 
 ### Authentication Error (401)
+
 ```json
 {
   "success": false,
@@ -192,6 +203,7 @@ curl -X POST http://localhost:3000/api/classes \
 ```
 
 ### Permission Error (403)
+
 ```json
 {
   "success": false,
@@ -203,6 +215,7 @@ curl -X POST http://localhost:3000/api/classes \
 ```
 
 ### Not Found Error (404)
+
 ```json
 {
   "success": false,
@@ -214,6 +227,7 @@ curl -X POST http://localhost:3000/api/classes \
 ```
 
 ### Duplicate Error (409)
+
 ```json
 {
   "success": false,
@@ -225,6 +239,7 @@ curl -X POST http://localhost:3000/api/classes \
 ```
 
 ### Class with Students Error (409)
+
 ```json
 {
   "success": false,
@@ -238,6 +253,7 @@ curl -X POST http://localhost:3000/api/classes \
 ## Test Scenarios
 
 ### Positive Tests
+
 1. ✅ List all classes successfully
 2. ✅ Create a new class with valid data
 3. ✅ Update an existing class
@@ -247,6 +263,7 @@ curl -X POST http://localhost:3000/api/classes \
 7. ✅ Year filtering works
 
 ### Negative Tests
+
 1. ✅ Reject unauthenticated requests
 2. ✅ Reject non-admin requests for write operations
 3. ✅ Reject invalid class names (empty, too long, special characters)
