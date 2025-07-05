@@ -514,7 +514,7 @@ NODE_ENV="development"
 ### Testing Results
 
 - [x] Prisma client生成確認 (db:generate実行成功)
-- [x] TypeScript型チェック確認 (type-check実行成功)  
+- [x] TypeScript型チェック確認 (type-check実行成功)
 - [x] スクリプト構文確認 (tsx依存関係追加済み)
 - [x] 環境設定ファイル作成確認 (.env.example作成)
 - [x] パッケージスクリプト設定確認 (npm run scriptsすべて追加)

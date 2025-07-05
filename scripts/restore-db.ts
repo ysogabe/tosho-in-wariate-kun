@@ -1,7 +1,11 @@
 import { spawn } from 'child_process'
 import fs from 'fs'
 import path from 'path'
-import { confirmDestructiveOperation, getRequiredEnvVar, getBackupDir } from './db-helpers'
+import {
+  confirmDestructiveOperation,
+  getRequiredEnvVar,
+  getBackupDir,
+} from './db-helpers'
 
 async function restoreDatabase() {
   const backupFile = process.argv[2]
@@ -9,7 +13,9 @@ async function restoreDatabase() {
   if (!backupFile) {
     console.error('❌ Backup file path is required')
     console.log('Usage: npm run db:restore <backup-file-path>')
-    console.log('Example: npm run db:restore backups/backup-2025-06-30T10-30-00-000Z.sql')
+    console.log(
+      'Example: npm run db:restore backups/backup-2025-06-30T10-30-00-000Z.sql'
+    )
     process.exit(1)
   }
 
@@ -20,18 +26,19 @@ async function restoreDatabase() {
 
   if (!fs.existsSync(absoluteBackupFile)) {
     console.error(`❌ Backup file not found: ${absoluteBackupFile}`)
-    
+
     // バックアップディレクトリ内のファイル一覧を表示
     const backupDir = getBackupDir()
     if (fs.existsSync(backupDir)) {
       console.log('\n📁 Available backup files:')
-      const files = fs.readdirSync(backupDir)
-        .filter(file => file.startsWith('backup-') && file.endsWith('.sql'))
+      const files = fs
+        .readdirSync(backupDir)
+        .filter((file) => file.startsWith('backup-') && file.endsWith('.sql'))
         .sort()
         .reverse() // 新しいファイルから表示
-      
+
       if (files.length > 0) {
-        files.slice(0, 10).forEach(file => {
+        files.slice(0, 10).forEach((file) => {
           const filePath = path.join(backupDir, file)
           const stats = fs.statSync(filePath)
           console.log(`  - ${file} (${stats.mtime.toISOString()})`)
@@ -43,7 +50,7 @@ async function restoreDatabase() {
         console.log('  No backup files found')
       }
     }
-    
+
     process.exit(1)
   }
 
@@ -69,7 +76,10 @@ async function restoreDatabase() {
     }
 
     // 本番環境での追加安全チェック
-    if (process.env.NODE_ENV === 'production' && process.env.FORCE_RESTORE !== 'true') {
+    if (
+      process.env.NODE_ENV === 'production' &&
+      process.env.FORCE_RESTORE !== 'true'
+    ) {
       console.log('')
       console.log('🛑 PRODUCTION ENVIRONMENT DETECTED!')
       console.log('   Run with FORCE_RESTORE=true to bypass this check.')
@@ -91,7 +101,6 @@ async function restoreDatabase() {
     console.log('')
     console.log('🎉 Database restore completed successfully!')
     console.log('   The database has been restored from the backup file.')
-    
   } catch (error) {
     console.error('❌ Restore failed:', error)
     console.log('')
@@ -107,10 +116,13 @@ async function restoreDatabase() {
 /**
  * psqlを安全に実行してデータベースを復元
  */
-function safelyExecutePsqlRestore(databaseUrl: string, backupFile: string): Promise<void> {
+function safelyExecutePsqlRestore(
+  databaseUrl: string,
+  backupFile: string
+): Promise<void> {
   return new Promise((resolve, reject) => {
     const child = spawn('psql', [databaseUrl], {
-      stdio: ['pipe', 'inherit', 'inherit']
+      stdio: ['pipe', 'inherit', 'inherit'],
     })
 
     const inputStream = fs.createReadStream(backupFile)
@@ -136,7 +148,7 @@ function safelyExecutePsqlRestore(databaseUrl: string, backupFile: string): Prom
 function safelyExecuteNpmScript(script: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const child = spawn('npm', ['run', script], {
-      stdio: 'inherit'
+      stdio: 'inherit',
     })
 
     child.on('close', (code) => {
@@ -154,13 +166,19 @@ function safelyExecuteNpmScript(script: string): Promise<void> {
 }
 
 // バックアップファイルのバリデーション
-function validateBackupFile(filePath: string): { isValid: boolean; reason?: string } {
+function validateBackupFile(filePath: string): {
+  isValid: boolean
+  reason?: string
+} {
   try {
     const stats = fs.statSync(filePath)
-    
+
     // ファイルサイズチェック（空ファイルや極端に小さいファイルを除外）
     if (stats.size < 100) {
-      return { isValid: false, reason: 'File is too small to be a valid backup' }
+      return {
+        isValid: false,
+        reason: 'File is too small to be a valid backup',
+      }
     }
 
     // ファイル拡張子チェック
@@ -171,16 +189,21 @@ function validateBackupFile(filePath: string): { isValid: boolean; reason?: stri
     // ファイル内容の基本チェック
     const content = fs.readFileSync(filePath, 'utf8', { flag: 'r' })
     const contentSample = content.substring(0, 1000) // 最初の1000文字をチェック
-    
+
     // PostgreSQLダンプファイルの基本的なチェック
-    const hasPostgreSQLHeader = contentSample.includes('PostgreSQL database dump') ||
-                               contentSample.includes('-- Dumped from database version')
-    const hasSQLCommands = contentSample.includes('CREATE TABLE') || 
-                          contentSample.includes('INSERT INTO') ||
-                          contentSample.includes('COPY ')
-    
+    const hasPostgreSQLHeader =
+      contentSample.includes('PostgreSQL database dump') ||
+      contentSample.includes('-- Dumped from database version')
+    const hasSQLCommands =
+      contentSample.includes('CREATE TABLE') ||
+      contentSample.includes('INSERT INTO') ||
+      contentSample.includes('COPY ')
+
     if (!hasPostgreSQLHeader && !hasSQLCommands) {
-      return { isValid: false, reason: 'File does not appear to be a valid PostgreSQL dump' }
+      return {
+        isValid: false,
+        reason: 'File does not appear to be a valid PostgreSQL dump',
+      }
     }
 
     return { isValid: true }
@@ -192,14 +215,15 @@ function validateBackupFile(filePath: string): { isValid: boolean; reason?: stri
 // 利用可能なバックアップファイル一覧を表示
 function listAvailableBackups(): void {
   const backupDir = getBackupDir()
-  
+
   if (!fs.existsSync(backupDir)) {
     console.log('📁 No backup directory found')
     return
   }
 
-  const files = fs.readdirSync(backupDir)
-    .filter(file => file.startsWith('backup-') && file.endsWith('.sql'))
+  const files = fs
+    .readdirSync(backupDir)
+    .filter((file) => file.startsWith('backup-') && file.endsWith('.sql'))
     .sort()
     .reverse()
 
@@ -214,7 +238,9 @@ function listAvailableBackups(): void {
     try {
       const stats = fs.statSync(filePath)
       const size = (stats.size / 1024).toFixed(1) + ' KB'
-      console.log(`  ${index + 1}. ${file} (${stats.mtime.toLocaleDateString()} ${stats.mtime.toLocaleTimeString()}, ${size})`)
+      console.log(
+        `  ${index + 1}. ${file} (${stats.mtime.toLocaleDateString()} ${stats.mtime.toLocaleTimeString()}, ${size})`
+      )
     } catch (error) {
       console.log(`  ${index + 1}. ${file} (error reading file info)`)
     }

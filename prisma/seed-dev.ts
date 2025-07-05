@@ -13,10 +13,12 @@ try {
   const seedDataContent = fs.readFileSync(seedDataPath, 'utf8')
   seedData = JSON.parse(seedDataContent)
 } catch (error) {
-  console.error('⚠️ Warning: Could not load seed-data.json, using default values')
+  console.error(
+    '⚠️ Warning: Could not load seed-data.json, using default values'
+  )
   seedData = {
     testStudentNames: ['テスト太郎', 'テスト花子'],
-    developmentSettings: []
+    developmentSettings: [],
   }
 }
 
@@ -46,7 +48,7 @@ async function main() {
 function safelyExecuteNpmScript(script: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const child = spawn('npm', ['run', script], {
-      stdio: 'inherit'
+      stdio: 'inherit',
     })
 
     child.on('close', (code) => {
@@ -108,7 +110,7 @@ async function seedDevelopmentAssignments() {
 
   // 両学期の割り当てをまとめてバッチ作成
   const allAssignments = [...firstTermAssignments, ...secondTermAssignments]
-  
+
   if (allAssignments.length > 0) {
     try {
       const result = await prisma.assignment.createMany({
@@ -116,11 +118,17 @@ async function seedDevelopmentAssignments() {
         skipDuplicates: true, // 重複データの防止
       })
       console.log(`  ✓ Created ${result.count} assignments in batch operation`)
-      console.log(`    - First term: ${firstTermAssignments.length} assignments`)
-      console.log(`    - Second term: ${secondTermAssignments.length} assignments`)
+      console.log(
+        `    - First term: ${firstTermAssignments.length} assignments`
+      )
+      console.log(
+        `    - Second term: ${secondTermAssignments.length} assignments`
+      )
     } catch (error) {
-      console.warn('  ⚠️ Warning: Batch assignment creation failed, falling back to individual creation')
-      
+      console.warn(
+        '  ⚠️ Warning: Batch assignment creation failed, falling back to individual creation'
+      )
+
       // フォールバック：一つずつ作成
       let createdAssignments = 0
       for (const assignment of allAssignments) {
@@ -153,10 +161,13 @@ async function seedMoreTestData() {
     })
 
     // テストクラス用の学生（設定ファイルから読み込み）
-    const testStudentNames = seedData.testStudentNames || ['テスト太郎', 'テスト花子']
+    const testStudentNames = seedData.testStudentNames || [
+      'テスト太郎',
+      'テスト花子',
+    ]
 
     // バッチで学生を作成
-    const testStudentsData = testStudentNames.map(name => ({
+    const testStudentsData = testStudentNames.map((name) => ({
       name,
       grade: 5,
       classId: testClass.id,
@@ -167,15 +178,19 @@ async function seedMoreTestData() {
         data: testStudentsData,
         skipDuplicates: true, // 重複データの防止
       })
-      console.log(`  ✓ Created test class and ${result.count} test students in batch operation`)
-      
+      console.log(
+        `  ✓ Created test class and ${result.count} test students in batch operation`
+      )
+
       // 作成された学生名をログ出力
-      testStudentNames.forEach(name => {
+      testStudentNames.forEach((name) => {
         console.log(`    - ${name}`)
       })
     } catch (error) {
-      console.warn('  ⚠️ Warning: Batch creation failed, falling back to individual creation')
-      
+      console.warn(
+        '  ⚠️ Warning: Batch creation failed, falling back to individual creation'
+      )
+
       // フォールバック：一つずつ作成
       let createdStudents = 0
       for (const studentData of testStudentsData) {
@@ -186,10 +201,15 @@ async function seedMoreTestData() {
           console.log(`    - ${studentData.name}`)
           createdStudents++
         } catch (error) {
-          console.warn(`  ⚠️ Warning: Could not create test student ${studentData.name}:`, error)
+          console.warn(
+            `  ⚠️ Warning: Could not create test student ${studentData.name}:`,
+            error
+          )
         }
       }
-      console.log(`  ✓ Created test class and ${createdStudents} test students individually`)
+      console.log(
+        `  ✓ Created test class and ${createdStudents} test students individually`
+      )
     }
 
     // 追加のテスト図書室
@@ -226,7 +246,10 @@ async function seedDevelopmentSettings() {
         console.log(`  ✓ Created dev setting: ${setting.key}`)
         createdSettings++
       } catch (error) {
-        console.warn(`  ⚠️ Warning: Could not create dev setting ${setting.key}:`, error)
+        console.warn(
+          `  ⚠️ Warning: Could not create dev setting ${setting.key}:`,
+          error
+        )
       }
     }
 
