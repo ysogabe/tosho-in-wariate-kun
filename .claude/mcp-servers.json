@@ -1,22 +1,19 @@
 {
   "mcpServers": {
-      "firecrawl-mcp": {
-        "command": "npx",
-        "args": [
-          "-y",
-          "firecrawl-mcp"
-        ],
-        "env": {
-          "FIRECRAWL_API_URL": "http://192.168.0.131:3002",
-          "FIRECRAWL_RETRY_MAX_ATTEMPTS": "5",
-          "FIRECRAWL_RETRY_INITIAL_DELAY": "2000",
-          "FIRECRAWL_RETRY_MAX_DELAY": "30000",
-          "FIRECRAWL_RETRY_BACKOFF_FACTOR": "3",
-          "FIRECRAWL_CREDIT_WARNING_THRESHOLD": "2000",
-          "FIRECRAWL_CREDIT_CRITICAL_THRESHOLD": "500"
-        }
-      },
-          "t2i-google-imagen3": {
+    "firecrawl-mcp": {
+      "command": "npx",
+      "args": ["-y", "firecrawl-mcp"],
+      "env": {
+        "FIRECRAWL_API_URL": "http://192.168.0.131:3002",
+        "FIRECRAWL_RETRY_MAX_ATTEMPTS": "5",
+        "FIRECRAWL_RETRY_INITIAL_DELAY": "2000",
+        "FIRECRAWL_RETRY_MAX_DELAY": "30000",
+        "FIRECRAWL_RETRY_BACKOFF_FACTOR": "3",
+        "FIRECRAWL_CREDIT_WARNING_THRESHOLD": "2000",
+        "FIRECRAWL_CREDIT_CRITICAL_THRESHOLD": "500"
+      }
+    },
+    "t2i-google-imagen3": {
       "type": "http",
       "url": "https://mcp-unified-server-zl3xx5lsaq-uc.a.run.app/t2i/google/imagen/3/generate-002",
       "description": "Google Imagen 3 Text-to-Image"
