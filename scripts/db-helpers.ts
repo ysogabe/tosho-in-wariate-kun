@@ -20,15 +20,15 @@ export async function confirmDestructiveOperation(
       console.log(`Details: ${details}`)
     }
     console.log('')
-    
+
     rl.question('Are you sure you want to continue? (yes/no): ', (answer) => {
       rl.close()
-      const confirmed = answer.toLowerCase() === 'yes' || answer.toLowerCase() === 'y'
+      const confirmed =
+        answer.toLowerCase() === 'yes' || answer.toLowerCase() === 'y'
       resolve(confirmed)
     })
   })
 }
-
 
 /**
  * 環境変数の安全な取得
@@ -49,7 +49,9 @@ export function getBackupRetentionDays(): number {
   if (envValue) {
     const days = parseInt(envValue, 10)
     if (isNaN(days) || days < 1) {
-      console.warn(`Invalid BACKUP_RETENTION_DAYS value: ${envValue}. Using default: 7`)
+      console.warn(
+        `Invalid BACKUP_RETENTION_DAYS value: ${envValue}. Using default: 7`
+      )
       return 7
     }
     return days

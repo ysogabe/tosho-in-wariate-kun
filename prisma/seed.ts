@@ -12,13 +12,15 @@ try {
   const seedDataContent = fs.readFileSync(seedDataPath, 'utf8')
   seedData = JSON.parse(seedDataContent)
 } catch (error) {
-  console.error('⚠️ Warning: Could not load seed-data.json, using default values')
+  console.error(
+    '⚠️ Warning: Could not load seed-data.json, using default values'
+  )
   // フォールバック用のデフォルトデータ
   seedData = {
     studentNames: ['田中太郎', '山田花子', '佐藤次郎', '鈴木美咲'],
     rooms: [{ name: '図書室A', capacity: 4 }],
     classes: [{ name: '5年1組', year: 5 }],
-    settings: []
+    settings: [],
   }
 }
 
@@ -69,7 +71,10 @@ async function seedSettings() {
       })
       console.log(`  ✓ Created setting: ${setting.key}`)
     } catch (error) {
-      console.warn(`  ⚠️ Warning: Could not create setting ${setting.key}:`, error)
+      console.warn(
+        `  ⚠️ Warning: Could not create setting ${setting.key}:`,
+        error
+      )
     }
   }
 }
@@ -107,7 +112,10 @@ async function seedClasses() {
       })
       console.log(`  ✓ Created class: ${classData.name}`)
     } catch (error) {
-      console.warn(`  ⚠️ Warning: Could not create class ${classData.name}:`, error)
+      console.warn(
+        `  ⚠️ Warning: Could not create class ${classData.name}:`,
+        error
+      )
     }
   }
 }
@@ -143,13 +151,21 @@ async function seedStudents() {
     for (const classData of classes) {
       // 境界チェック：利用可能な学生名があるかチェック
       if (studentIndex >= studentNames.length) {
-        console.warn(`  ⚠️ Warning: Not enough student names for class ${classData.name}`)
+        console.warn(
+          `  ⚠️ Warning: Not enough student names for class ${classData.name}`
+        )
         break
       }
 
       // 各クラスに4名の図書委員を準備（利用可能な名前の範囲内で）
-      const availableNames = Math.min(studentsPerClass, studentNames.length - studentIndex)
-      const studentsInClass = studentNames.slice(studentIndex, studentIndex + availableNames)
+      const availableNames = Math.min(
+        studentsPerClass,
+        studentNames.length - studentIndex
+      )
+      const studentsInClass = studentNames.slice(
+        studentIndex,
+        studentIndex + availableNames
+      )
 
       for (const name of studentsInClass) {
         studentsToCreate.push({
@@ -170,11 +186,13 @@ async function seedStudents() {
           skipDuplicates: true, // 重複データの防止
         })
         console.log(`  ✓ Created ${result.count} students in batch operation`)
-        
+
         // 作成された学生の詳細をログ出力
         studentsToCreate.forEach((student, index) => {
-          const classData = classes.find(c => c.id === student.classId)
-          console.log(`    - ${student.name} (${classData?.name || 'Unknown class'})`)
+          const classData = classes.find((c) => c.id === student.classId)
+          console.log(
+            `    - ${student.name} (${classData?.name || 'Unknown class'})`
+          )
         })
       } catch (error) {
         console.error('  ❌ Error creating students in batch:', error)
@@ -184,7 +202,9 @@ async function seedStudents() {
       }
     }
 
-    console.log(`  ✓ Created students for ${classes.length} classes using ${Math.min(studentIndex, studentNames.length)} names`)
+    console.log(
+      `  ✓ Created students for ${classes.length} classes using ${Math.min(studentIndex, studentNames.length)} names`
+    )
   } catch (error) {
     console.error('  ❌ Error in seedStudents:', error)
     throw error
@@ -203,20 +223,25 @@ async function createStudentsIndividually(
   classes: Array<{ id: string; name: string }>
 ): Promise<void> {
   let createdCount = 0
-  
+
   for (const student of studentsToCreate) {
     try {
       await prisma.student.create({
         data: student,
       })
-      const classData = classes.find(c => c.id === student.classId)
-      console.log(`    - ${student.name} (${classData?.name || 'Unknown class'})`)
+      const classData = classes.find((c) => c.id === student.classId)
+      console.log(
+        `    - ${student.name} (${classData?.name || 'Unknown class'})`
+      )
       createdCount++
     } catch (error) {
-      console.warn(`  ⚠️ Warning: Could not create student ${student.name}:`, error)
+      console.warn(
+        `  ⚠️ Warning: Could not create student ${student.name}:`,
+        error
+      )
     }
   }
-  
+
   console.log(`  ✓ Created ${createdCount} students individually`)
 }
 

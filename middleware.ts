@@ -12,15 +12,25 @@ const protectedRoutes = [
 ]
 
 // 管理者専用ルートパス (MVP: 実装予定)
-const adminRoutes = [
-  '/admin',
-]
+const adminRoutes = ['/admin']
 
 // 認証済みユーザーがアクセスできないルート
 const authRestrictedRoutes = ['/auth/login']
 
 // パブリックルート（認証不要）
-const publicRoutes = ['/', '/about', '/contact', '/privacy', '/terms', '/components-test', '/table-test', '/test-ui', '/test-db', '/login-test', '/auth-test']
+const publicRoutes = [
+  '/',
+  '/about',
+  '/contact',
+  '/privacy',
+  '/terms',
+  '/components-test',
+  '/table-test',
+  '/test-ui',
+  '/test-db',
+  '/login-test',
+  '/auth-test',
+]
 
 export async function middleware(req: NextRequest) {
   try {
@@ -89,7 +99,7 @@ export async function middleware(req: NextRequest) {
       // Cookie解析エラーや認証情報の破損など
       if (error.message.includes('cookie') || error.message.includes('JSON')) {
         console.warn('認証情報の解析エラー、セッションをクリア')
-        
+
         // APIルートの場合は適切なエラーレスポンスを返す
         if (req.nextUrl.pathname.startsWith('/api/')) {
           return new NextResponse(

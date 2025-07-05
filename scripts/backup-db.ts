@@ -1,14 +1,18 @@
 import { spawn } from 'child_process'
 import fs from 'fs'
 import path from 'path'
-import { getRequiredEnvVar, getBackupRetentionDays, getBackupDir } from './db-helpers'
+import {
+  getRequiredEnvVar,
+  getBackupRetentionDays,
+  getBackupDir,
+} from './db-helpers'
 
 async function backupDatabase() {
   console.log('💾 Starting database backup...')
 
   try {
     const BACKUP_DIR = getBackupDir()
-    
+
     // バックアップディレクトリの作成
     if (!fs.existsSync(BACKUP_DIR)) {
       fs.mkdirSync(BACKUP_DIR, { recursive: true })
@@ -30,7 +34,7 @@ async function backupDatabase() {
 
     // 古いバックアップファイルの削除
     cleanOldBackups(BACKUP_DIR)
-    
+
     return backupFile
   } catch (error) {
     console.error('❌ Backup failed:', error)
@@ -41,16 +45,19 @@ async function backupDatabase() {
 /**
  * pg_dumpを安全に実行（コマンドインジェクション対策）
  */
-function safelyExecutePgDump(databaseUrl: string, outputFile: string): Promise<void> {
+function safelyExecutePgDump(
+  databaseUrl: string,
+  outputFile: string
+): Promise<void> {
   return new Promise((resolve, reject) => {
     // pg_dumpコマンドを安全に実行
     const child = spawn('pg_dump', [databaseUrl], {
-      stdio: ['inherit', 'pipe', 'inherit']
+      stdio: ['inherit', 'pipe', 'inherit'],
     })
 
     // 出力ファイルストリームの作成
     const outputStream = fs.createWriteStream(outputFile)
-    
+
     child.stdout.pipe(outputStream)
 
     child.on('close', (code) => {
@@ -86,24 +93,29 @@ function cleanOldBackups(backupDir: string) {
       }
 
       const filePath = path.join(backupDir, file)
-      
+
       try {
         const stats = fs.statSync(filePath)
-        
+
         if (stats.mtime < cutoffDate) {
           fs.unlinkSync(filePath)
           console.log(`  ✓ Deleted old backup: ${file}`)
           deletedCount++
         }
       } catch (fileError) {
-        console.warn(`  ⚠️ Warning: Could not process backup file ${file}:`, fileError)
+        console.warn(
+          `  ⚠️ Warning: Could not process backup file ${file}:`,
+          fileError
+        )
       }
     })
 
     if (deletedCount === 0) {
       console.log('  ✓ No old backups to delete')
     } else {
-      console.log(`  ✓ Deleted ${deletedCount} old backup(s) (retention: ${retentionDays} days)`)
+      console.log(
+        `  ✓ Deleted ${deletedCount} old backup(s) (retention: ${retentionDays} days)`
+      )
     }
   } catch (error) {
     console.warn('⚠️ Warning: Failed to clean old backups:', error)

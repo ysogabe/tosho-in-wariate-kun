@@ -340,6 +340,7 @@ export async function DELETE(
 ### Implementation Details
 
 #### Files Created/Modified
+
 - **src/lib/api/error-handler.ts**: 共通APIエラーハンドリング
 - **src/lib/api/index.ts**: APIユーティリティエクスポート
 - **src/lib/schemas/class-schemas.ts**: Zodバリデーションスキーマ
@@ -347,6 +348,7 @@ export async function DELETE(
 - **src/app/api/classes/[id]/route.ts**: PUT/DELETEエンドポイント
 
 #### Technical Features Implemented
+
 - ページネーション対応 (page, limit, total, totalPages)
 - 検索機能 (name部分一致検索)
 - フィルタリング機能 (year指定)
@@ -366,6 +368,7 @@ export async function DELETE(
 ### Architecture Decisions
 
 **エラーハンドリング**: 統一されたAPIレスポンス形式
+
 ```typescript
 interface ApiResponse<T> {
   success: boolean
@@ -375,10 +378,12 @@ interface ApiResponse<T> {
 ```
 
 **認証統合**: 既存のMVPクッキーベース認証システムを活用
+
 - `authenticate()`: 一般ユーザー認証
 - `authenticateAdmin()`: 管理者権限確認
 
 **バリデーション**: Zodスキーマによる厳密なデータ検証
+
 - 日本語エラーメッセージ
 - Unicode文字対応 (ひらがな、カタカナ、漢字)
 - 学年制限 (5-6年生のみ)
