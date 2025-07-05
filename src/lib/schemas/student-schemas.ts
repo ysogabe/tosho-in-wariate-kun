@@ -45,6 +45,7 @@ export const CreateStudentSchema = z.object({
     .max(50, '名前は50文字以内で入力してください'),
   classId: z.string().uuid('有効なクラスIDを指定してください'),
   grade: z.number().int().min(5).max(6, '学年は5年または6年を指定してください'),
+  isActive: z.boolean().default(true),
 })
 
 /**
@@ -75,6 +76,7 @@ export const ScheduleQuerySchema = z.object({
  * 型エクスポート
  */
 export type StudentsQueryInput = z.infer<typeof StudentsQuerySchema>
+export type CreateStudentRequest = z.infer<typeof CreateStudentSchema>
 export type CreateStudentInput = z.infer<typeof CreateStudentSchema>
 export type UpdateStudentInput = z.infer<typeof UpdateStudentSchema>
 export type StudentIdParamInput = z.infer<typeof StudentIdParamSchema>
