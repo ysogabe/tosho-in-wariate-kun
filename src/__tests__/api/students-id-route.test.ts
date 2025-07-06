@@ -87,7 +87,7 @@ describe('/api/students/[id] Route Tests', () => {
   describe('GET /api/students/[id]', () => {
     it('図書委員詳細を正常に取得できる', async () => {
       const mockStudent = {
-        id: 'student-1',
+        id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
         classId: 'class-1',
         grade: 5,
@@ -106,8 +106,8 @@ describe('/api/students/[id] Route Tests', () => {
 
       mockPrisma.student.findUnique.mockResolvedValue(mockStudent)
 
-      const request = new NextRequest('http://localhost/api/students/student-1')
-      const props = { params: Promise.resolve({ id: 'student-1' }) }
+      const request = new NextRequest('http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c')
+      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
 
       const response = await GET(request, props)
       const data = await response.json()
@@ -131,15 +131,15 @@ describe('/api/students/[id] Route Tests', () => {
 
       expect(response.status).toBe(404)
       expect(data.success).toBe(false)
-      expect(data.error).toBe('STUDENT_NOT_FOUND')
+      expect(data.error.code).toBe('STUDENT_NOT_FOUND')
     })
 
     it('認証されていない場合は401を返す', async () => {
       const mockAuthenticate = jest.mocked(authenticate)
       mockAuthenticate.mockRejectedValue(new Error('認証が必要です'))
 
-      const request = new NextRequest('http://localhost/api/students/student-1')
-      const props = { params: Promise.resolve({ id: 'student-1' }) }
+      const request = new NextRequest('http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c')
+      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
 
       const response = await GET(request, props)
 
@@ -150,7 +150,7 @@ describe('/api/students/[id] Route Tests', () => {
   describe('PUT /api/students/[id]', () => {
     it('図書委員情報を正常に更新できる', async () => {
       const mockExistingStudent = {
-        id: 'student-1',
+        id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
         classId: 'class-1',
         grade: 5,
@@ -180,13 +180,13 @@ describe('/api/students/[id] Route Tests', () => {
       const requestBody = { name: '田中次郎' }
 
       const request = new NextRequest(
-        'http://localhost/api/students/student-1',
+        'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         {
           method: 'PUT',
           body: JSON.stringify(requestBody),
         }
       )
-      const props = { params: Promise.resolve({ id: 'student-1' }) }
+      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
 
       const response = await PUT(request, props)
       const data = await response.json()
@@ -199,7 +199,7 @@ describe('/api/students/[id] Route Tests', () => {
 
     it('クラス変更時に新しいクラスの存在確認を行う', async () => {
       const mockExistingStudent = {
-        id: 'student-1',
+        id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
         classId: 'class-1',
         grade: 5,
@@ -238,13 +238,13 @@ describe('/api/students/[id] Route Tests', () => {
       const requestBody = { classId: 'class-2' }
 
       const request = new NextRequest(
-        'http://localhost/api/students/student-1',
+        'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         {
           method: 'PUT',
           body: JSON.stringify(requestBody),
         }
       )
-      const props = { params: Promise.resolve({ id: 'student-1' }) }
+      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
 
       const response = await PUT(request, props)
       const data = await response.json()
@@ -260,7 +260,7 @@ describe('/api/students/[id] Route Tests', () => {
 
     it('存在しないクラスへの変更は400を返す', async () => {
       const mockExistingStudent = {
-        id: 'student-1',
+        id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
         classId: 'class-1',
         grade: 5,
@@ -282,24 +282,24 @@ describe('/api/students/[id] Route Tests', () => {
       const requestBody = { classId: 'nonexistent-class' }
 
       const request = new NextRequest(
-        'http://localhost/api/students/student-1',
+        'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         {
           method: 'PUT',
           body: JSON.stringify(requestBody),
         }
       )
-      const props = { params: Promise.resolve({ id: 'student-1' }) }
+      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
 
       const response = await PUT(request, props)
       const data = await response.json()
 
       expect(response.status).toBe(400)
-      expect(data.error).toBe('CLASS_NOT_FOUND')
+      expect(data.error.code).toBe('CLASS_NOT_FOUND')
     })
 
     it('重複する図書委員への更新は409を返す', async () => {
       const mockExistingStudent = {
-        id: 'student-1',
+        id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
         classId: 'class-1',
         grade: 5,
@@ -331,19 +331,19 @@ describe('/api/students/[id] Route Tests', () => {
       const requestBody = { name: '佐藤花子' }
 
       const request = new NextRequest(
-        'http://localhost/api/students/student-1',
+        'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         {
           method: 'PUT',
           body: JSON.stringify(requestBody),
         }
       )
-      const props = { params: Promise.resolve({ id: 'student-1' }) }
+      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
 
       const response = await PUT(request, props)
       const data = await response.json()
 
       expect(response.status).toBe(409)
-      expect(data.error).toBe('STUDENT_ALREADY_EXISTS')
+      expect(data.error.code).toBe('STUDENT_ALREADY_EXISTS')
     })
 
     it('存在しない図書委員の更新は404を返す', async () => {
@@ -364,7 +364,7 @@ describe('/api/students/[id] Route Tests', () => {
       const data = await response.json()
 
       expect(response.status).toBe(404)
-      expect(data.error).toBe('STUDENT_NOT_FOUND')
+      expect(data.error.code).toBe('STUDENT_NOT_FOUND')
     })
 
     it('管理者権限がない場合は401を返す', async () => {
@@ -374,13 +374,13 @@ describe('/api/students/[id] Route Tests', () => {
       const requestBody = { name: '新しい名前' }
 
       const request = new NextRequest(
-        'http://localhost/api/students/student-1',
+        'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         {
           method: 'PUT',
           body: JSON.stringify(requestBody),
         }
       )
-      const props = { params: Promise.resolve({ id: 'student-1' }) }
+      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
 
       const response = await PUT(request, props)
 
@@ -391,7 +391,7 @@ describe('/api/students/[id] Route Tests', () => {
   describe('DELETE /api/students/[id]', () => {
     it('図書委員を正常に削除できる', async () => {
       const mockStudent = {
-        id: 'student-1',
+        id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
         classId: 'class-1',
         grade: 5,
@@ -412,12 +412,12 @@ describe('/api/students/[id] Route Tests', () => {
       mockPrisma.student.delete.mockResolvedValue(mockStudent)
 
       const request = new NextRequest(
-        'http://localhost/api/students/student-1',
+        'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         {
           method: 'DELETE',
         }
       )
-      const props = { params: Promise.resolve({ id: 'student-1' }) }
+      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
 
       const response = await DELETE(request, props)
       const data = await response.json()
@@ -428,13 +428,13 @@ describe('/api/students/[id] Route Tests', () => {
         '5年1組の田中太郎さんを図書委員から削除しました'
       )
       expect(mockPrisma.student.delete).toHaveBeenCalledWith({
-        where: { id: 'student-1' },
+        where: { id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' },
       })
     })
 
     it('当番が割り当てられている図書委員の削除は400を返す', async () => {
       const mockStudent = {
-        id: 'student-1',
+        id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
         classId: 'class-1',
         grade: 5,
@@ -454,18 +454,18 @@ describe('/api/students/[id] Route Tests', () => {
       mockPrisma.student.findUnique.mockResolvedValue(mockStudent)
 
       const request = new NextRequest(
-        'http://localhost/api/students/student-1',
+        'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         {
           method: 'DELETE',
         }
       )
-      const props = { params: Promise.resolve({ id: 'student-1' }) }
+      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
 
       const response = await DELETE(request, props)
       const data = await response.json()
 
       expect(response.status).toBe(400)
-      expect(data.error).toBe('STUDENT_CANNOT_DELETE')
+      expect(data.error.code).toBe('STUDENT_CANNOT_DELETE')
       expect(data.message).toContain(
         '3件の当番が割り当てられているため削除できません'
       )
@@ -487,7 +487,7 @@ describe('/api/students/[id] Route Tests', () => {
       const data = await response.json()
 
       expect(response.status).toBe(404)
-      expect(data.error).toBe('STUDENT_NOT_FOUND')
+      expect(data.error.code).toBe('STUDENT_NOT_FOUND')
     })
 
     it('管理者権限がない場合は401を返す', async () => {
@@ -495,12 +495,12 @@ describe('/api/students/[id] Route Tests', () => {
       mockAuthenticateAdmin.mockRejectedValue(new Error('管理者権限が必要です'))
 
       const request = new NextRequest(
-        'http://localhost/api/students/student-1',
+        'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         {
           method: 'DELETE',
         }
       )
-      const props = { params: Promise.resolve({ id: 'student-1' }) }
+      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
 
       const response = await DELETE(request, props)
 
