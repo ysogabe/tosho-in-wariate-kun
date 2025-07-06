@@ -32,7 +32,7 @@ export function PageLayout({
             },
             title
           )}
-          {description && (
+          {description && description.trim() && (
             <p className="text-muted-foreground">{description}</p>
           )}
         </div>
