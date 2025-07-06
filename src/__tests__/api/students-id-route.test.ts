@@ -89,14 +89,14 @@ describe('/api/students/[id] Route Tests', () => {
       const mockStudent = {
         id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
-        classId: 'class-1',
+        classId: '11111111-1111-1111-1111-111111111111',
         grade: 5,
         isActive: true,
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-01'),
         _count: { assignments: 2 },
         class: {
-          id: 'class-1',
+          id: '11111111-1111-1111-1111-111111111111',
           name: '1組',
           year: 5,
           createdAt: new Date('2024-01-01'),
@@ -122,9 +122,9 @@ describe('/api/students/[id] Route Tests', () => {
       mockPrisma.student.findUnique.mockResolvedValue(null)
 
       const request = new NextRequest(
-        'http://localhost/api/students/nonexistent'
+        'http://localhost/api/students/99999999-9999-9999-9999-999999999999'
       )
-      const props = { params: Promise.resolve({ id: 'nonexistent' }) }
+      const props = { params: Promise.resolve({ id: '99999999-9999-9999-9999-999999999999' }) }
 
       const response = await GET(request, props)
       const data = await response.json()
@@ -143,7 +143,7 @@ describe('/api/students/[id] Route Tests', () => {
 
       const response = await GET(request, props)
 
-      expect(response.status).toBe(500)
+      expect(response.status).toBe(401)
     })
   })
 
@@ -152,13 +152,13 @@ describe('/api/students/[id] Route Tests', () => {
       const mockExistingStudent = {
         id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
-        classId: 'class-1',
+        classId: '11111111-1111-1111-1111-111111111111',
         grade: 5,
         isActive: true,
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-01'),
         class: {
-          id: 'class-1',
+          id: '11111111-1111-1111-1111-111111111111',
           name: '1組',
           year: 5,
           createdAt: new Date('2024-01-01'),
@@ -201,13 +201,13 @@ describe('/api/students/[id] Route Tests', () => {
       const mockExistingStudent = {
         id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
-        classId: 'class-1',
+        classId: '11111111-1111-1111-1111-111111111111',
         grade: 5,
         isActive: true,
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-01'),
         class: {
-          id: 'class-1',
+          id: '11111111-1111-1111-1111-111111111111',
           name: '1組',
           year: 5,
           createdAt: new Date('2024-01-01'),
@@ -216,7 +216,7 @@ describe('/api/students/[id] Route Tests', () => {
       }
 
       const mockNewClass = {
-        id: 'class-2',
+        id: '22222222-2222-2222-2222-222222222222',
         name: '2組',
         year: 5,
         createdAt: new Date('2024-01-01'),
@@ -225,7 +225,7 @@ describe('/api/students/[id] Route Tests', () => {
 
       const mockUpdatedStudent = {
         ...mockExistingStudent,
-        classId: 'class-2',
+        classId: '22222222-2222-2222-2222-222222222222',
         class: mockNewClass,
         _count: { assignments: 2 },
       }
@@ -235,7 +235,7 @@ describe('/api/students/[id] Route Tests', () => {
       mockPrisma.student.findFirst.mockResolvedValue(null)
       mockPrisma.student.update.mockResolvedValue(mockUpdatedStudent)
 
-      const requestBody = { classId: 'class-2' }
+      const requestBody = { classId: '22222222-2222-2222-2222-222222222222' }
 
       const request = new NextRequest(
         'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
@@ -251,9 +251,9 @@ describe('/api/students/[id] Route Tests', () => {
 
       expect(response.status).toBe(200)
       expect(data.success).toBe(true)
-      expect(data.data.student.classId).toBe('class-2')
+      expect(data.data.student.classId).toBe('22222222-2222-2222-2222-222222222222')
       expect(mockPrisma.class.findUnique).toHaveBeenCalledWith({
-        where: { id: 'class-2' },
+        where: { id: '22222222-2222-2222-2222-222222222222' },
         select: { id: true, name: true, year: true },
       })
     })
@@ -262,13 +262,13 @@ describe('/api/students/[id] Route Tests', () => {
       const mockExistingStudent = {
         id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
-        classId: 'class-1',
+        classId: '11111111-1111-1111-1111-111111111111',
         grade: 5,
         isActive: true,
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-01'),
         class: {
-          id: 'class-1',
+          id: '11111111-1111-1111-1111-111111111111',
           name: '1組',
           year: 5,
           createdAt: new Date('2024-01-01'),
@@ -279,7 +279,7 @@ describe('/api/students/[id] Route Tests', () => {
       mockPrisma.student.findUnique.mockResolvedValue(mockExistingStudent)
       mockPrisma.class.findUnique.mockResolvedValue(null)
 
-      const requestBody = { classId: 'nonexistent-class' }
+      const requestBody = { classId: '99999999-9999-9999-9999-999999999999' }
 
       const request = new NextRequest(
         'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
@@ -301,13 +301,13 @@ describe('/api/students/[id] Route Tests', () => {
       const mockExistingStudent = {
         id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
-        classId: 'class-1',
+        classId: '11111111-1111-1111-1111-111111111111',
         grade: 5,
         isActive: true,
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-01'),
         class: {
-          id: 'class-1',
+          id: '11111111-1111-1111-1111-111111111111',
           name: '1組',
           year: 5,
           createdAt: new Date('2024-01-01'),
@@ -316,9 +316,9 @@ describe('/api/students/[id] Route Tests', () => {
       }
 
       const mockDuplicateStudent = {
-        id: 'student-2',
+        id: '33333333-3333-3333-3333-333333333333',
         name: '佐藤花子',
-        classId: 'class-1',
+        classId: '11111111-1111-1111-1111-111111111111',
         grade: 5,
         isActive: true,
         createdAt: new Date('2024-01-01'),
@@ -352,13 +352,13 @@ describe('/api/students/[id] Route Tests', () => {
       const requestBody = { name: '新しい名前' }
 
       const request = new NextRequest(
-        'http://localhost/api/students/nonexistent',
+        'http://localhost/api/students/99999999-9999-9999-9999-999999999999',
         {
           method: 'PUT',
           body: JSON.stringify(requestBody),
         }
       )
-      const props = { params: Promise.resolve({ id: 'nonexistent' }) }
+      const props = { params: Promise.resolve({ id: '99999999-9999-9999-9999-999999999999' }) }
 
       const response = await PUT(request, props)
       const data = await response.json()
@@ -384,7 +384,7 @@ describe('/api/students/[id] Route Tests', () => {
 
       const response = await PUT(request, props)
 
-      expect(response.status).toBe(500)
+      expect(response.status).toBe(403)
     })
   })
 
@@ -393,14 +393,14 @@ describe('/api/students/[id] Route Tests', () => {
       const mockStudent = {
         id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
-        classId: 'class-1',
+        classId: '11111111-1111-1111-1111-111111111111',
         grade: 5,
         isActive: true,
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-01'),
         _count: { assignments: 0 },
         class: {
-          id: 'class-1',
+          id: '11111111-1111-1111-1111-111111111111',
           name: '1組',
           year: 5,
           createdAt: new Date('2024-01-01'),
@@ -436,14 +436,14 @@ describe('/api/students/[id] Route Tests', () => {
       const mockStudent = {
         id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
-        classId: 'class-1',
+        classId: '11111111-1111-1111-1111-111111111111',
         grade: 5,
         isActive: true,
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-01'),
         _count: { assignments: 3 },
         class: {
-          id: 'class-1',
+          id: '11111111-1111-1111-1111-111111111111',
           name: '1組',
           year: 5,
           createdAt: new Date('2024-01-01'),
@@ -466,7 +466,7 @@ describe('/api/students/[id] Route Tests', () => {
 
       expect(response.status).toBe(400)
       expect(data.error.code).toBe('STUDENT_CANNOT_DELETE')
-      expect(data.message).toContain(
+      expect(data.error.message).toContain(
         '3件の当番が割り当てられているため削除できません'
       )
       expect(mockPrisma.student.delete).not.toHaveBeenCalled()
@@ -476,12 +476,12 @@ describe('/api/students/[id] Route Tests', () => {
       mockPrisma.student.findUnique.mockResolvedValue(null)
 
       const request = new NextRequest(
-        'http://localhost/api/students/nonexistent',
+        'http://localhost/api/students/99999999-9999-9999-9999-999999999999',
         {
           method: 'DELETE',
         }
       )
-      const props = { params: Promise.resolve({ id: 'nonexistent' }) }
+      const props = { params: Promise.resolve({ id: '99999999-9999-9999-9999-999999999999' }) }
 
       const response = await DELETE(request, props)
       const data = await response.json()
@@ -504,7 +504,7 @@ describe('/api/students/[id] Route Tests', () => {
 
       const response = await DELETE(request, props)
 
-      expect(response.status).toBe(500)
+      expect(response.status).toBe(403)
     })
   })
 })

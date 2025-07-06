@@ -66,7 +66,7 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       const mockStudent = {
         id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
-        classId: 'class-1',
+        classId: '11111111-1111-1111-1111-111111111111',
         grade: 5,
         isActive: true,
         createdAt: new Date('2024-01-01'),
@@ -151,7 +151,7 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       const mockStudent = {
         id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
-        classId: 'class-1',
+        classId: '11111111-1111-1111-1111-111111111111',
         grade: 5,
         isActive: true,
         createdAt: new Date('2024-01-01'),
@@ -207,7 +207,7 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       const mockStudent = {
         id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
-        classId: 'class-1',
+        classId: '11111111-1111-1111-1111-111111111111',
         grade: 5,
         isActive: true,
         createdAt: new Date('2024-01-01'),
@@ -216,7 +216,7 @@ describe('/api/students/[id]/schedule Route Tests', () => {
 
       const mockAssignments = [
         {
-          id: 'assignment-3',
+          id: 'a1b2c3d4-5678-90ab-cdef-123456789012',
           studentId: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
           roomId: 'room-1',
           dayOfWeek: 2,
@@ -282,7 +282,7 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       const mockStudent = {
         id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
-        classId: 'class-1',
+        classId: '11111111-1111-1111-1111-111111111111',
         grade: 5,
         isActive: true,
         createdAt: new Date('2024-01-01'),
@@ -310,7 +310,7 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       const mockStudent = {
         id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
-        classId: 'class-1',
+        classId: '11111111-1111-1111-1111-111111111111',
         grade: 5,
         isActive: true,
         createdAt: new Date('2024-01-01'),
