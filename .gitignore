@@ -108,3 +108,4 @@ docs/kamui-creative-*/
 *.tsbuildinfo
 
 /generated/prisma
+.mcp.json
