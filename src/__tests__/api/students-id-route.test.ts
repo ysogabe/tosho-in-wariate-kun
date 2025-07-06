@@ -106,8 +106,12 @@ describe('/api/students/[id] Route Tests', () => {
 
       mockPrisma.student.findUnique.mockResolvedValue(mockStudent)
 
-      const request = new NextRequest('http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c')
-      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
+      const request = new NextRequest(
+        'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c'
+      )
+      const props = {
+        params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }),
+      }
 
       const response = await GET(request, props)
       const data = await response.json()
@@ -124,7 +128,9 @@ describe('/api/students/[id] Route Tests', () => {
       const request = new NextRequest(
         'http://localhost/api/students/99999999-9999-9999-9999-999999999999'
       )
-      const props = { params: Promise.resolve({ id: '99999999-9999-9999-9999-999999999999' }) }
+      const props = {
+        params: Promise.resolve({ id: '99999999-9999-9999-9999-999999999999' }),
+      }
 
       const response = await GET(request, props)
       const data = await response.json()
@@ -138,8 +144,12 @@ describe('/api/students/[id] Route Tests', () => {
       const mockAuthenticate = jest.mocked(authenticate)
       mockAuthenticate.mockRejectedValue(new Error('認証が必要です'))
 
-      const request = new NextRequest('http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c')
-      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
+      const request = new NextRequest(
+        'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c'
+      )
+      const props = {
+        params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }),
+      }
 
       const response = await GET(request, props)
 
@@ -186,7 +196,9 @@ describe('/api/students/[id] Route Tests', () => {
           body: JSON.stringify(requestBody),
         }
       )
-      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
+      const props = {
+        params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }),
+      }
 
       const response = await PUT(request, props)
       const data = await response.json()
@@ -244,14 +256,18 @@ describe('/api/students/[id] Route Tests', () => {
           body: JSON.stringify(requestBody),
         }
       )
-      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
+      const props = {
+        params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }),
+      }
 
       const response = await PUT(request, props)
       const data = await response.json()
 
       expect(response.status).toBe(200)
       expect(data.success).toBe(true)
-      expect(data.data.student.classId).toBe('22222222-2222-2222-2222-222222222222')
+      expect(data.data.student.classId).toBe(
+        '22222222-2222-2222-2222-222222222222'
+      )
       expect(mockPrisma.class.findUnique).toHaveBeenCalledWith({
         where: { id: '22222222-2222-2222-2222-222222222222' },
         select: { id: true, name: true, year: true },
@@ -288,7 +304,9 @@ describe('/api/students/[id] Route Tests', () => {
           body: JSON.stringify(requestBody),
         }
       )
-      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
+      const props = {
+        params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }),
+      }
 
       const response = await PUT(request, props)
       const data = await response.json()
@@ -337,7 +355,9 @@ describe('/api/students/[id] Route Tests', () => {
           body: JSON.stringify(requestBody),
         }
       )
-      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
+      const props = {
+        params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }),
+      }
 
       const response = await PUT(request, props)
       const data = await response.json()
@@ -358,7 +378,9 @@ describe('/api/students/[id] Route Tests', () => {
           body: JSON.stringify(requestBody),
         }
       )
-      const props = { params: Promise.resolve({ id: '99999999-9999-9999-9999-999999999999' }) }
+      const props = {
+        params: Promise.resolve({ id: '99999999-9999-9999-9999-999999999999' }),
+      }
 
       const response = await PUT(request, props)
       const data = await response.json()
@@ -380,7 +402,9 @@ describe('/api/students/[id] Route Tests', () => {
           body: JSON.stringify(requestBody),
         }
       )
-      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
+      const props = {
+        params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }),
+      }
 
       const response = await PUT(request, props)
 
@@ -417,7 +441,9 @@ describe('/api/students/[id] Route Tests', () => {
           method: 'DELETE',
         }
       )
-      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
+      const props = {
+        params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }),
+      }
 
       const response = await DELETE(request, props)
       const data = await response.json()
@@ -459,7 +485,9 @@ describe('/api/students/[id] Route Tests', () => {
           method: 'DELETE',
         }
       )
-      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
+      const props = {
+        params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }),
+      }
 
       const response = await DELETE(request, props)
       const data = await response.json()
@@ -481,7 +509,9 @@ describe('/api/students/[id] Route Tests', () => {
           method: 'DELETE',
         }
       )
-      const props = { params: Promise.resolve({ id: '99999999-9999-9999-9999-999999999999' }) }
+      const props = {
+        params: Promise.resolve({ id: '99999999-9999-9999-9999-999999999999' }),
+      }
 
       const response = await DELETE(request, props)
       const data = await response.json()
@@ -500,7 +530,9 @@ describe('/api/students/[id] Route Tests', () => {
           method: 'DELETE',
         }
       )
-      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
+      const props = {
+        params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }),
+      }
 
       const response = await DELETE(request, props)
 

@@ -108,7 +108,9 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       const request = new NextRequest(
         'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c/schedule'
       )
-      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
+      const props = {
+        params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }),
+      }
 
       const response = await GET(request, props)
       const data = await response.json()
@@ -180,7 +182,9 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       const request = new NextRequest(
         'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c/schedule?term=FIRST_TERM'
       )
-      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
+      const props = {
+        params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }),
+      }
 
       const response = await GET(request, props)
       const data = await response.json()
@@ -236,7 +240,9 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       const request = new NextRequest(
         'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c/schedule?term=SECOND_TERM'
       )
-      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
+      const props = {
+        params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }),
+      }
 
       const response = await GET(request, props)
       const data = await response.json()
@@ -253,7 +259,9 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       const request = new NextRequest(
         'http://localhost/api/students/12345678-1234-1234-1234-123456789012/schedule'
       )
-      const props = { params: Promise.resolve({ id: '12345678-1234-1234-1234-123456789012' }) }
+      const props = {
+        params: Promise.resolve({ id: '12345678-1234-1234-1234-123456789012' }),
+      }
 
       const response = await GET(request, props)
       const data = await response.json()
@@ -271,7 +279,9 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       const request = new NextRequest(
         'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c/schedule'
       )
-      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
+      const props = {
+        params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }),
+      }
 
       const response = await GET(request, props)
 
@@ -295,7 +305,9 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       const request = new NextRequest(
         'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c/schedule'
       )
-      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
+      const props = {
+        params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }),
+      }
 
       const response = await GET(request, props)
       const data = await response.json()
@@ -346,7 +358,9 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       const request = new NextRequest(
         'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c/schedule'
       )
-      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
+      const props = {
+        params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }),
+      }
 
       const response = await GET(request, props)
       const data = await response.json()
@@ -360,7 +374,9 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       const request = new NextRequest(
         'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c/schedule?term=INVALID_TERM'
       )
-      const props = { params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }) }
+      const props = {
+        params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }),
+      }
 
       const response = await GET(request, props)
       const data = await response.json()
