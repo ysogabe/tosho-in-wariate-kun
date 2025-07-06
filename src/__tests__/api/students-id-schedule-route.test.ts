@@ -64,9 +64,9 @@ describe('/api/students/[id]/schedule Route Tests', () => {
   describe('GET /api/students/[id]/schedule', () => {
     it('図書委員のスケジュールを正常に取得できる', async () => {
       const mockStudent = {
-        id: 'student-1',
+        id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
-        classId: 'class-1',
+        classId: '11111111-1111-1111-1111-111111111111',
         grade: 5,
         isActive: true,
         createdAt: new Date('2024-01-01'),
@@ -75,8 +75,8 @@ describe('/api/students/[id]/schedule Route Tests', () => {
 
       const mockAssignments = [
         {
-          id: 'assignment-1',
-          studentId: 'student-1',
+          id: 'ffb7eb73-5128-4a50-986a-438c20b6f274',
+          studentId: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
           roomId: 'room-1',
           dayOfWeek: 1,
           term: 'FIRST_TERM',
@@ -88,8 +88,8 @@ describe('/api/students/[id]/schedule Route Tests', () => {
           },
         },
         {
-          id: 'assignment-2',
-          studentId: 'student-1',
+          id: 'e1875134-697b-47dd-bd1d-24068f4af4c6',
+          studentId: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
           roomId: 'room-1',
           dayOfWeek: 3,
           term: 'FIRST_TERM',
@@ -106,9 +106,11 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       mockPrisma.assignment.findMany.mockResolvedValue(mockAssignments)
 
       const request = new NextRequest(
-        'http://localhost/api/students/student-1/schedule'
+        'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c/schedule'
       )
-      const props = { params: Promise.resolve({ id: 'student-1' }) }
+      const props = {
+        params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }),
+      }
 
       const response = await GET(request, props)
       const data = await response.json()
@@ -116,14 +118,14 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       expect(response.status).toBe(200)
       expect(data.success).toBe(true)
       expect(data.data.student).toEqual({
-        id: 'student-1',
+        id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
       })
       expect(data.data.schedule).toHaveLength(2)
       expect(data.data.totalAssignments).toBe(2)
 
       expect(data.data.schedule[0]).toEqual({
-        id: 'assignment-1',
+        id: 'ffb7eb73-5128-4a50-986a-438c20b6f274',
         dayOfWeek: 1,
         dayName: '月',
         room: {
@@ -131,12 +133,12 @@ describe('/api/students/[id]/schedule Route Tests', () => {
           capacity: 2,
         },
         term: 'FIRST_TERM',
-        createdAt: new Date('2024-01-01'),
+        createdAt: '2024-01-01T00:00:00.000Z',
       })
 
       expect(mockPrisma.assignment.findMany).toHaveBeenCalledWith({
         where: {
-          studentId: 'student-1',
+          studentId: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         },
         include: {
           room: {
@@ -149,9 +151,9 @@ describe('/api/students/[id]/schedule Route Tests', () => {
 
     it('学期フィルターでスケジュールを絞り込める', async () => {
       const mockStudent = {
-        id: 'student-1',
+        id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
-        classId: 'class-1',
+        classId: '11111111-1111-1111-1111-111111111111',
         grade: 5,
         isActive: true,
         createdAt: new Date('2024-01-01'),
@@ -160,8 +162,8 @@ describe('/api/students/[id]/schedule Route Tests', () => {
 
       const mockAssignments = [
         {
-          id: 'assignment-1',
-          studentId: 'student-1',
+          id: 'ffb7eb73-5128-4a50-986a-438c20b6f274',
+          studentId: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
           roomId: 'room-1',
           dayOfWeek: 1,
           term: 'FIRST_TERM',
@@ -178,9 +180,11 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       mockPrisma.assignment.findMany.mockResolvedValue(mockAssignments)
 
       const request = new NextRequest(
-        'http://localhost/api/students/student-1/schedule?term=FIRST_TERM'
+        'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c/schedule?term=FIRST_TERM'
       )
-      const props = { params: Promise.resolve({ id: 'student-1' }) }
+      const props = {
+        params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }),
+      }
 
       const response = await GET(request, props)
       const data = await response.json()
@@ -191,7 +195,7 @@ describe('/api/students/[id]/schedule Route Tests', () => {
 
       expect(mockPrisma.assignment.findMany).toHaveBeenCalledWith({
         where: {
-          studentId: 'student-1',
+          studentId: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
           term: 'FIRST_TERM',
         },
         include: {
@@ -205,9 +209,9 @@ describe('/api/students/[id]/schedule Route Tests', () => {
 
     it('2学期のスケジュールも正しく絞り込める', async () => {
       const mockStudent = {
-        id: 'student-1',
+        id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
-        classId: 'class-1',
+        classId: '11111111-1111-1111-1111-111111111111',
         grade: 5,
         isActive: true,
         createdAt: new Date('2024-01-01'),
@@ -216,8 +220,8 @@ describe('/api/students/[id]/schedule Route Tests', () => {
 
       const mockAssignments = [
         {
-          id: 'assignment-3',
-          studentId: 'student-1',
+          id: 'a1b2c3d4-5678-90ab-cdef-123456789012',
+          studentId: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
           roomId: 'room-1',
           dayOfWeek: 2,
           term: 'SECOND_TERM',
@@ -234,9 +238,11 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       mockPrisma.assignment.findMany.mockResolvedValue(mockAssignments)
 
       const request = new NextRequest(
-        'http://localhost/api/students/student-1/schedule?term=SECOND_TERM'
+        'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c/schedule?term=SECOND_TERM'
       )
-      const props = { params: Promise.resolve({ id: 'student-1' }) }
+      const props = {
+        params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }),
+      }
 
       const response = await GET(request, props)
       const data = await response.json()
@@ -251,17 +257,19 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       mockPrisma.student.findUnique.mockResolvedValue(null)
 
       const request = new NextRequest(
-        'http://localhost/api/students/nonexistent/schedule'
+        'http://localhost/api/students/12345678-1234-1234-1234-123456789012/schedule'
       )
-      const props = { params: Promise.resolve({ id: 'nonexistent' }) }
+      const props = {
+        params: Promise.resolve({ id: '12345678-1234-1234-1234-123456789012' }),
+      }
 
       const response = await GET(request, props)
       const data = await response.json()
 
       expect(response.status).toBe(404)
       expect(data.success).toBe(false)
-      expect(data.error).toBe('STUDENT_NOT_FOUND')
-      expect(data.message).toBe('指定された図書委員が見つかりません')
+      expect(data.error.code).toBe('STUDENT_NOT_FOUND')
+      expect(data.error.message).toBe('指定された図書委員が見つかりません')
     })
 
     it('認証されていない場合は401を返す', async () => {
@@ -269,20 +277,22 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       mockAuthenticate.mockRejectedValue(new Error('認証が必要です'))
 
       const request = new NextRequest(
-        'http://localhost/api/students/student-1/schedule'
+        'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c/schedule'
       )
-      const props = { params: Promise.resolve({ id: 'student-1' }) }
+      const props = {
+        params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }),
+      }
 
       const response = await GET(request, props)
 
-      expect(response.status).toBe(500)
+      expect(response.status).toBe(401)
     })
 
     it('スケジュールが空の場合も正しくレスポンスを返す', async () => {
       const mockStudent = {
-        id: 'student-1',
+        id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
-        classId: 'class-1',
+        classId: '11111111-1111-1111-1111-111111111111',
         grade: 5,
         isActive: true,
         createdAt: new Date('2024-01-01'),
@@ -293,9 +303,11 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       mockPrisma.assignment.findMany.mockResolvedValue([])
 
       const request = new NextRequest(
-        'http://localhost/api/students/student-1/schedule'
+        'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c/schedule'
       )
-      const props = { params: Promise.resolve({ id: 'student-1' }) }
+      const props = {
+        params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }),
+      }
 
       const response = await GET(request, props)
       const data = await response.json()
@@ -308,9 +320,9 @@ describe('/api/students/[id]/schedule Route Tests', () => {
 
     it('曜日名のマッピングが正しく動作する', async () => {
       const mockStudent = {
-        id: 'student-1',
+        id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
         name: '田中太郎',
-        classId: 'class-1',
+        classId: '11111111-1111-1111-1111-111111111111',
         grade: 5,
         isActive: true,
         createdAt: new Date('2024-01-01'),
@@ -319,8 +331,8 @@ describe('/api/students/[id]/schedule Route Tests', () => {
 
       const mockAssignments = [
         {
-          id: 'assignment-1',
-          studentId: 'student-1',
+          id: 'ffb7eb73-5128-4a50-986a-438c20b6f274',
+          studentId: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
           roomId: 'room-1',
           dayOfWeek: 0,
           term: 'FIRST_TERM',
@@ -329,8 +341,8 @@ describe('/api/students/[id]/schedule Route Tests', () => {
           room: { name: '図書室', capacity: 2 },
         },
         {
-          id: 'assignment-2',
-          studentId: 'student-1',
+          id: 'e1875134-697b-47dd-bd1d-24068f4af4c6',
+          studentId: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c',
           roomId: 'room-1',
           dayOfWeek: 6,
           term: 'FIRST_TERM',
@@ -344,9 +356,11 @@ describe('/api/students/[id]/schedule Route Tests', () => {
       mockPrisma.assignment.findMany.mockResolvedValue(mockAssignments)
 
       const request = new NextRequest(
-        'http://localhost/api/students/student-1/schedule'
+        'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c/schedule'
       )
-      const props = { params: Promise.resolve({ id: 'student-1' }) }
+      const props = {
+        params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }),
+      }
 
       const response = await GET(request, props)
       const data = await response.json()
@@ -358,9 +372,11 @@ describe('/api/students/[id]/schedule Route Tests', () => {
 
     it('無効な学期パラメータの場合は400を返す', async () => {
       const request = new NextRequest(
-        'http://localhost/api/students/student-1/schedule?term=INVALID_TERM'
+        'http://localhost/api/students/07c1d4ca-851b-4a33-9097-cecc3ebaf70c/schedule?term=INVALID_TERM'
       )
-      const props = { params: Promise.resolve({ id: 'student-1' }) }
+      const props = {
+        params: Promise.resolve({ id: '07c1d4ca-851b-4a33-9097-cecc3ebaf70c' }),
+      }
 
       const response = await GET(request, props)
       const data = await response.json()

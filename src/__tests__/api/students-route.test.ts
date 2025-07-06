@@ -88,16 +88,16 @@ describe('/api/students Route Tests', () => {
     it('図書委員一覧を正常に取得できる', async () => {
       const mockStudents = [
         {
-          id: 'student-1',
+          id: '11111111-1111-1111-1111-111111111111',
           name: '田中太郎',
-          classId: 'class-1',
+          classId: '22222222-2222-2222-2222-222222222222',
           grade: 5,
           isActive: true,
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
           _count: { assignments: 2 },
           class: {
-            id: 'class-1',
+            id: '22222222-2222-2222-2222-222222222222',
             name: '1組',
             year: 5,
           },
@@ -121,16 +121,16 @@ describe('/api/students Route Tests', () => {
     it('検索パラメータで図書委員を絞り込める', async () => {
       const mockStudents = [
         {
-          id: 'student-1',
+          id: '11111111-1111-1111-1111-111111111111',
           name: '田中太郎',
-          classId: 'class-1',
+          classId: '22222222-2222-2222-2222-222222222222',
           grade: 5,
           isActive: true,
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
           _count: { assignments: 2 },
           class: {
-            id: 'class-1',
+            id: '22222222-2222-2222-2222-222222222222',
             name: '1組',
             year: 5,
           },
@@ -165,7 +165,7 @@ describe('/api/students Route Tests', () => {
       const request = new NextRequest('http://localhost/api/students')
       const response = await GET(request)
 
-      expect(response.status).toBe(500)
+      expect(response.status).toBe(401)
     })
 
     it('無効なページネーションパラメータは400を返す', async () => {
@@ -177,14 +177,14 @@ describe('/api/students Route Tests', () => {
 
       expect(response.status).toBe(400)
       expect(data.success).toBe(false)
-      expect(data.error).toBe('VALIDATION_ERROR')
+      expect(data.error.code).toBe('VALIDATION_ERROR')
     })
   })
 
   describe('POST /api/students', () => {
     it('図書委員を正常に作成できる', async () => {
       const mockClass = {
-        id: 'class-1',
+        id: '22222222-2222-2222-2222-222222222222',
         name: '1組',
         year: 5,
         createdAt: new Date('2024-01-01'),
@@ -194,7 +194,7 @@ describe('/api/students Route Tests', () => {
       const mockCreatedStudent = {
         id: 'student-1',
         name: '田中太郎',
-        classId: 'class-1',
+        classId: '22222222-2222-2222-2222-222222222222',
         grade: 5,
         isActive: true,
         createdAt: new Date('2024-01-01'),
@@ -209,7 +209,7 @@ describe('/api/students Route Tests', () => {
 
       const requestBody = {
         name: '田中太郎',
-        classId: 'class-1',
+        classId: '22222222-2222-2222-2222-222222222222',
         grade: 5,
       }
 
@@ -234,7 +234,7 @@ describe('/api/students Route Tests', () => {
 
       const requestBody = {
         name: '田中太郎',
-        classId: 'nonexistent-class',
+        classId: '99999999-9999-9999-9999-999999999999',
         grade: 5,
       }
 
@@ -247,13 +247,13 @@ describe('/api/students Route Tests', () => {
       const data = await response.json()
 
       expect(response.status).toBe(400)
-      expect(data.error).toBe('CLASS_NOT_FOUND')
-      expect(data.message).toBe('指定されたクラスが見つかりません')
+      expect(data.error.code).toBe('CLASS_NOT_FOUND')
+      expect(data.error.message).toBe('指定されたクラスが見つかりません')
     })
 
     it('重複する図書委員の作成は409を返す', async () => {
       const mockClass = {
-        id: 'class-1',
+        id: '22222222-2222-2222-2222-222222222222',
         name: '1組',
         year: 5,
         createdAt: new Date('2024-01-01'),
@@ -261,9 +261,9 @@ describe('/api/students Route Tests', () => {
       }
 
       const mockExistingStudent = {
-        id: 'existing-student',
+        id: '33333333-3333-3333-3333-333333333333',
         name: '田中太郎',
-        classId: 'class-1',
+        classId: '22222222-2222-2222-2222-222222222222',
         grade: 5,
         isActive: true,
         createdAt: new Date('2024-01-01'),
@@ -275,7 +275,7 @@ describe('/api/students Route Tests', () => {
 
       const requestBody = {
         name: '田中太郎',
-        classId: 'class-1',
+        classId: '22222222-2222-2222-2222-222222222222',
         grade: 5,
       }
 
@@ -288,15 +288,15 @@ describe('/api/students Route Tests', () => {
       const data = await response.json()
 
       expect(response.status).toBe(409)
-      expect(data.error).toBe('STUDENT_ALREADY_EXISTS')
-      expect(data.message).toBe(
+      expect(data.error.code).toBe('STUDENT_ALREADY_EXISTS')
+      expect(data.error.message).toBe(
         '5年1組には既に田中太郎さんが図書委員として登録されています'
       )
     })
 
     it('無効な名前の場合は400を返す', async () => {
       const mockClass = {
-        id: 'class-1',
+        id: '22222222-2222-2222-2222-222222222222',
         name: '1組',
         year: 5,
         createdAt: new Date('2024-01-01'),
@@ -307,7 +307,7 @@ describe('/api/students Route Tests', () => {
 
       const requestBody = {
         name: '',
-        classId: 'class-1',
+        classId: '22222222-2222-2222-2222-222222222222',
         grade: 5,
       }
 
@@ -320,13 +320,13 @@ describe('/api/students Route Tests', () => {
       const data = await response.json()
 
       expect(response.status).toBe(400)
-      expect(data.error).toBe('VALIDATION_ERROR')
-      expect(data.message).toBe('名前が無効です')
+      expect(data.error.code).toBe('VALIDATION_ERROR')
+      expect(data.error.message).toBe('バリデーションエラーが発生しました')
     })
 
     it('無効な学年の場合は400を返す', async () => {
       const mockClass = {
-        id: 'class-1',
+        id: '22222222-2222-2222-2222-222222222222',
         name: '1組',
         year: 5,
         createdAt: new Date('2024-01-01'),
@@ -337,7 +337,7 @@ describe('/api/students Route Tests', () => {
 
       const requestBody = {
         name: '田中太郎',
-        classId: 'class-1',
+        classId: '22222222-2222-2222-2222-222222222222',
         grade: 4,
       }
 
@@ -350,8 +350,8 @@ describe('/api/students Route Tests', () => {
       const data = await response.json()
 
       expect(response.status).toBe(400)
-      expect(data.error).toBe('VALIDATION_ERROR')
-      expect(data.message).toBe('学年は5年または6年である必要があります')
+      expect(data.error.code).toBe('VALIDATION_ERROR')
+      expect(data.error.message).toBe('バリデーションエラーが発生しました')
     })
 
     it('管理者権限がない場合は401を返す', async () => {
@@ -360,7 +360,7 @@ describe('/api/students Route Tests', () => {
 
       const requestBody = {
         name: '田中太郎',
-        classId: 'class-1',
+        classId: '22222222-2222-2222-2222-222222222222',
         grade: 5,
       }
 
@@ -371,7 +371,7 @@ describe('/api/students Route Tests', () => {
 
       const response = await POST(request)
 
-      expect(response.status).toBe(500)
+      expect(response.status).toBe(403)
     })
   })
 })
