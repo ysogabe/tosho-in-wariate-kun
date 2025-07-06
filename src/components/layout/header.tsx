@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback, memo } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import {
@@ -23,11 +23,34 @@ import {
   Building,
 } from 'lucide-react'
 
-export function Header() {
+function HeaderComponent() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   // TODO: 認証コンテキストから取得
   const user = { displayName: '山田先生', email: 'yamada@school.jp' }
+
+  const handleLogout = useCallback(async () => {
+    try {
+      // TODO: 認証コンテキストのlogout関数を呼び出す
+      // await authContext.logout()
+
+      // 仮実装: ログアウト処理
+      console.log('ログアウト処理を実行')
+      // window.location.href = '/auth/login'
+    } catch (error) {
+      console.error('ログアウトエラー:', error)
+    }
+  }, [])
+
+  const handleMobileMenuClose = useCallback(() => {
+    setIsMobileMenuOpen(false)
+  }, [])
+
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      setIsMobileMenuOpen(false)
+    }
+  }, [])
 
   const navigationItems = [
     { href: '/dashboard', label: 'ダッシュボード', icon: Home },
@@ -101,7 +124,7 @@ export function Header() {
                     プロフィール
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
                     ログアウト
                   </DropdownMenuItem>
@@ -117,14 +140,24 @@ export function Header() {
                   <span className="sr-only">メニューを開く</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+              <SheetContent
+                side="right"
+                className="w-[300px] sm:w-[400px]"
+                onKeyDown={handleKeyDown}
+              >
                 <nav className="grid gap-2 py-4">
                   {navigationItems.map((item) => (
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium hover:bg-accent"
-                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium hover:bg-accent focus:bg-accent focus:outline-none"
+                      onClick={handleMobileMenuClose}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          handleMobileMenuClose()
+                        }
+                      }}
+                      tabIndex={0}
                     >
                       <item.icon className="h-4 w-4" />
                       {item.label}
@@ -138,6 +171,7 @@ export function Header() {
                       variant="ghost"
                       size="sm"
                       className="w-full justify-start"
+                      onClick={handleLogout}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       ログアウト
@@ -152,3 +186,5 @@ export function Header() {
     </header>
   )
 }
+
+export const Header = memo(HeaderComponent)
