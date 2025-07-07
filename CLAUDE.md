@@ -330,6 +330,52 @@ src/
 - **Meaningful Tests**: 実際にコードの品質を保証するテストケースを作成
 - **Bug Detection**: テストが実際にバグを発見し、修正に導くことを重視
 
+##### TDD実装の必須ルール
+
+**重要**: 新しいコンポーネントや機能を実装する際は、必ずTDDサイクルに従うこと
+
+1. **Red Phase (失敗するテストを書く)**
+   - 実装前に完全なテストスイートを作成
+   - ユーザーインタラクション、エッジケース、アクセシビリティを網羅
+   - テストファーストで設計を明確化
+
+2. **Green Phase (テストを通す)**
+   - 最小限のコードでテストを通す
+   - 過度な実装を避ける
+   - テストが求める要件のみ実装
+
+3. **Refactor Phase (リファクタリング)**  
+   - テストが通る状態を維持しながらコード品質を向上
+   - パフォーマンス最適化やコードの整理
+   - テストカバレッジの確認と改善
+
+##### コンポーネントテストの作成パターン
+
+```typescript
+// UIコンポーネントのテスト例
+describe('ComponentName', () => {
+  // 基本的なレンダリング
+  describe('Basic Rendering', () => {
+    it('正常にレンダリングされる', () => {})
+  })
+  
+  // Props の検証
+  describe('Props', () => {
+    it('各propsが正しく機能する', () => {})
+  })
+  
+  // ユーザーインタラクション
+  describe('User Interactions', () => {
+    it('クリックイベントが正しく処理される', () => {})
+  })
+  
+  // アクセシビリティ
+  describe('Accessibility', () => {
+    it('適切なARIA属性が設定されている', () => {})
+  })
+})
+```
+
 #### Example: Service Layer Testing
 
 ```typescript
@@ -430,3 +476,74 @@ import { formatJapaneseDate, isValidEmail } from '@tosho/utils'
 ```
 
 For detailed implementation guidance, refer to the design documents in the `/docs` directory.
+
+## Critical Implementation Guidelines
+
+### Component Development Process
+
+**MANDATORY**: Always follow TDD (Test-Driven Development) when creating new components
+
+1. **Before Writing Any Component Code**:
+   ```bash
+   # Create test file first
+   mkdir -p src/components/[component-name]/__tests__
+   touch src/components/[component-name]/__tests__/[component-name].test.tsx
+   ```
+
+2. **Write Comprehensive Tests First**:
+   - Minimum 80% coverage target
+   - Test all user interactions
+   - Test all props variations
+   - Test accessibility features
+   - Test error states and edge cases
+
+3. **Run Tests in Watch Mode**:
+   ```bash
+   npm test -- --watch --testPathPattern=[component-name]
+   ```
+
+4. **Only After Tests Are Written**:
+   - Implement the component
+   - Make tests pass one by one
+   - Refactor for quality
+
+### Common Testing Patterns
+
+```typescript
+// Mock Next.js components
+jest.mock('next/link', () => {
+  return function MockLink({ children, href, ...props }: any) {
+    return <a href={href} {...props}>{children}</a>
+  }
+})
+
+// Mock shadcn-ui components  
+jest.mock('@/components/ui/button', () => ({
+  Button: ({ children, onClick, ...props }: any) => (
+    <button onClick={onClick} {...props}>{children}</button>
+  ),
+}))
+
+// Handle duplicate elements in tests
+const elements = screen.getAllByText('Text')
+expect(elements.length).toBeGreaterThan(0)
+
+// Test keyboard navigation
+fireEvent.keyDown(element, { key: 'Escape' })
+
+// Test async interactions
+await waitFor(() => {
+  expect(mockFunction).toHaveBeenCalled()
+})
+```
+
+### Code Quality Checks Before Committing
+
+Always run these commands before committing:
+
+```bash
+npm run test:ci    # Run all tests with coverage
+npm run lint       # Check linting
+npm run type-check # Check TypeScript types
+npm run build      # Verify production build
+```
