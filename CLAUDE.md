@@ -344,7 +344,7 @@ src/
    - 過度な実装を避ける
    - テストが求める要件のみ実装
 
-3. **Refactor Phase (リファクタリング)**  
+3. **Refactor Phase (リファクタリング)**
    - テストが通る状態を維持しながらコード品質を向上
    - パフォーマンス最適化やコードの整理
    - テストカバレッジの確認と改善
@@ -358,17 +358,17 @@ describe('ComponentName', () => {
   describe('Basic Rendering', () => {
     it('正常にレンダリングされる', () => {})
   })
-  
+
   // Props の検証
   describe('Props', () => {
     it('各propsが正しく機能する', () => {})
   })
-  
+
   // ユーザーインタラクション
   describe('User Interactions', () => {
     it('クリックイベントが正しく処理される', () => {})
   })
-  
+
   // アクセシビリティ
   describe('Accessibility', () => {
     it('適切なARIA属性が設定されている', () => {})
@@ -484,6 +484,7 @@ For detailed implementation guidance, refer to the design documents in the `/doc
 **MANDATORY**: Always follow TDD (Test-Driven Development) when creating new components
 
 1. **Before Writing Any Component Code**:
+
    ```bash
    # Create test file first
    mkdir -p src/components/[component-name]/__tests__
@@ -498,6 +499,7 @@ For detailed implementation guidance, refer to the design documents in the `/doc
    - Test error states and edge cases
 
 3. **Run Tests in Watch Mode**:
+
    ```bash
    npm test -- --watch --testPathPattern=[component-name]
    ```
@@ -517,7 +519,7 @@ jest.mock('next/link', () => {
   }
 })
 
-// Mock shadcn-ui components  
+// Mock shadcn-ui components
 jest.mock('@/components/ui/button', () => ({
   Button: ({ children, onClick, ...props }: any) => (
     <button onClick={onClick} {...props}>{children}</button>
