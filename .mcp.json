@@ -18,6 +18,7 @@
         "args": [
           "-y",
           "--headless",
+          "--browser: chromium",
           "@playwright/mcp@latest"
         ]
     },
