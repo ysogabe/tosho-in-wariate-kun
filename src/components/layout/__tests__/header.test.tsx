@@ -38,7 +38,7 @@ jest.mock('@/components/ui/dropdown-menu', () => ({
 }))
 
 jest.mock('@/components/ui/sheet', () => ({
-  Sheet: ({ children, open, onOpenChange }: any) => (
+  Sheet: ({ children, open }: any) => (
     <div data-testid="sheet" data-open={open}>
       {children}
     </div>
@@ -66,7 +66,7 @@ describe('Header Component', () => {
   describe('Basic Rendering', () => {
     it('ヘッダーが正常にレンダリングされる', () => {
       render(<Header />)
-      
+
       // ロゴとタイトルの存在確認
       expect(screen.getByText('📚')).toBeInTheDocument()
       expect(screen.getByText('図書委員当番システム')).toBeInTheDocument()
@@ -74,7 +74,7 @@ describe('Header Component', () => {
 
     it('ユーザー情報が表示される', () => {
       render(<Header />)
-      
+
       // ユーザー名の表示確認（2つ：デスクトップとモバイル）
       const userDisplays = screen.getAllByText('👤 山田先生')
       expect(userDisplays).toHaveLength(2)
@@ -82,7 +82,7 @@ describe('Header Component', () => {
 
     it('ナビゲーションリンクが存在する', () => {
       render(<Header />)
-      
+
       // デスクトップナビゲーション
       const dashboardLinks = screen.getAllByText('ダッシュボード')
       expect(dashboardLinks.length).toBeGreaterThan(0)
@@ -93,7 +93,7 @@ describe('Header Component', () => {
   describe('Logout Functionality', () => {
     it('デスクトップのログアウトボタンが存在する', () => {
       render(<Header />)
-      
+
       const logoutButtons = screen.getAllByText('ログアウト')
       expect(logoutButtons.length).toBeGreaterThan(0)
     })
@@ -101,10 +101,10 @@ describe('Header Component', () => {
     it('ログアウトボタンクリックでhandleLogout関数が呼ばれる', async () => {
       const user = userEvent.setup()
       render(<Header />)
-      
+
       const logoutButtons = screen.getAllByText('ログアウト')
       await user.click(logoutButtons[0])
-      
+
       // console.logが呼ばれることを確認
       await waitFor(() => {
         expect(consoleSpy).toHaveBeenCalledWith('ログアウト処理を実行')
@@ -115,14 +115,14 @@ describe('Header Component', () => {
   describe('Mobile Menu', () => {
     it('モバイルメニューボタンが存在する', () => {
       render(<Header />)
-      
+
       const menuButton = screen.getByText('メニューを開く')
       expect(menuButton).toBeInTheDocument()
     })
 
     it('モバイルメニューにナビゲーション項目が表示される', () => {
       render(<Header />)
-      
+
       // モバイルメニュー内のナビゲーション項目（複数存在する可能性があるため getAllByText を使用）
       expect(screen.getAllByText('ダッシュボード').length).toBeGreaterThan(0)
       expect(screen.getAllByText('クラス管理').length).toBeGreaterThan(0)
@@ -134,13 +134,13 @@ describe('Header Component', () => {
     it('モバイルメニューのログアウトボタンが機能する', async () => {
       const user = userEvent.setup()
       render(<Header />)
-      
+
       // モバイルメニューのログアウトボタンをクリック
       const logoutButtons = screen.getAllByText('ログアウト')
       const mobileLogoutButton = logoutButtons[logoutButtons.length - 1]
-      
+
       await user.click(mobileLogoutButton)
-      
+
       await waitFor(() => {
         expect(consoleSpy).toHaveBeenCalledWith('ログアウト処理を実行')
       })
@@ -150,19 +150,19 @@ describe('Header Component', () => {
   describe('Keyboard Navigation', () => {
     it('Escapeキーでモバイルメニューが閉じる', () => {
       render(<Header />)
-      
+
       const sheetContent = screen.getByTestId('sheet-content')
-      
+
       // Escapeキーを押下
       fireEvent.keyDown(sheetContent, { key: 'Escape' })
-      
+
       // onOpenChangeが呼ばれることを期待（実際のテストではモックで確認）
       expect(sheetContent).toBeInTheDocument()
     })
 
     it('モバイルメニューリンクでEnter/Spaceキーが機能する', () => {
       render(<Header />)
-      
+
       // キーボードナビゲーションのテスト
       // 実際の実装ではfocus管理をテストする
       const dashboardLinks = screen.getAllByText('ダッシュボード')
@@ -174,10 +174,10 @@ describe('Header Component', () => {
     it('React.memo()でラップされている', () => {
       // React.memoでラップされたコンポーネントのテスト
       const { rerender } = render(<Header />)
-      
+
       // 同じpropsで再レンダリング
       rerender(<Header />)
-      
+
       // コンポーネントが存在することを確認
       expect(screen.getByText('📚')).toBeInTheDocument()
     })
@@ -186,14 +186,14 @@ describe('Header Component', () => {
   describe('Accessibility', () => {
     it('適切なARIA属性が設定されている', () => {
       render(<Header />)
-      
+
       // スクリーンリーダー用のテキストが存在
       expect(screen.getByText('メニューを開く')).toBeInTheDocument()
     })
 
     it('キーボードナビゲーションに必要な属性が設定されている', () => {
       render(<Header />)
-      
+
       // tabIndex等の属性は実装で確認される
       const dashboardLinks = screen.getAllByText('ダッシュボード')
       expect(dashboardLinks.length).toBeGreaterThan(0)
@@ -203,19 +203,19 @@ describe('Header Component', () => {
   describe('Navigation Items', () => {
     it('正しいナビゲーション項目が表示される', () => {
       render(<Header />)
-      
+
       const expectedItems = [
-        'クラス管理', 
+        'クラス管理',
         '図書委員管理',
         '当番表管理',
-        'システム設定'
+        'システム設定',
       ]
-      
+
       // ダッシュボードは複数箇所に存在するため別途チェック
       const dashboardLinks = screen.getAllByText('ダッシュボード')
       expect(dashboardLinks.length).toBeGreaterThan(0)
-      
-      expectedItems.forEach(item => {
+
+      expectedItems.forEach((item) => {
         const items = screen.getAllByText(item)
         expect(items.length).toBeGreaterThan(0)
       })
@@ -223,10 +223,12 @@ describe('Header Component', () => {
 
     it('ナビゲーションリンクに正しいhrefが設定されている', () => {
       render(<Header />)
-      
+
       // Link componentのhref属性をテスト
       const dashboardLinks = screen.getAllByText('ダッシュボード')
-      const dashboardLink = dashboardLinks.find(link => link.closest('a')?.getAttribute('href') === '/dashboard')
+      const dashboardLink = dashboardLinks.find(
+        (link) => link.closest('a')?.getAttribute('href') === '/dashboard'
+      )
       expect(dashboardLink).toBeTruthy()
     })
   })

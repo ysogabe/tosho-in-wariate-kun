@@ -19,7 +19,7 @@ describe('MainLayout Component', () => {
           <div>テストコンテンツ</div>
         </MainLayout>
       )
-      
+
       // Headerとコンテンツの存在確認
       expect(screen.getByTestId('header')).toBeInTheDocument()
       expect(screen.getByText('テストコンテンツ')).toBeInTheDocument()
@@ -31,7 +31,7 @@ describe('MainLayout Component', () => {
           <div>コンテンツ</div>
         </MainLayout>
       )
-      
+
       const header = screen.getByTestId('header')
       expect(header).toBeInTheDocument()
       expect(header).toHaveTextContent('Mocked Header')
@@ -45,7 +45,7 @@ describe('MainLayout Component', () => {
           <div>単一のコンテンツ</div>
         </MainLayout>
       )
-      
+
       expect(screen.getByText('単一のコンテンツ')).toBeInTheDocument()
     })
 
@@ -57,7 +57,7 @@ describe('MainLayout Component', () => {
           <p>段落</p>
         </MainLayout>
       )
-      
+
       expect(screen.getByText('コンテンツ1')).toBeInTheDocument()
       expect(screen.getByText('コンテンツ2')).toBeInTheDocument()
       expect(screen.getByText('段落')).toBeInTheDocument()
@@ -70,27 +70,27 @@ describe('MainLayout Component', () => {
           <p>カスタムコンテンツ</p>
         </div>
       )
-      
+
       render(
         <MainLayout>
           <CustomComponent />
         </MainLayout>
       )
-      
+
       expect(screen.getByText('カスタムコンポーネント')).toBeInTheDocument()
       expect(screen.getByText('カスタムコンテンツ')).toBeInTheDocument()
     })
 
     it('空の子要素でもエラーが発生しない', () => {
       render(<MainLayout>{null}</MainLayout>)
-      
+
       // Headerは存在するが、コンテンツは空
       expect(screen.getByTestId('header')).toBeInTheDocument()
     })
 
     it('文字列の子要素が正しくレンダリングされる', () => {
       render(<MainLayout>テキストコンテンツ</MainLayout>)
-      
+
       expect(screen.getByText('テキストコンテンツ')).toBeInTheDocument()
     })
   })
@@ -102,11 +102,11 @@ describe('MainLayout Component', () => {
           <main>メインコンテンツ</main>
         </MainLayout>
       )
-      
+
       // div要素でラップされていることを確認
       const container = screen.getByTestId('header').parentElement
       expect(container?.tagName.toLowerCase()).toBe('div')
-      
+
       // HeaderとmainがContainerの子要素として存在
       expect(container).toContainElement(screen.getByTestId('header'))
       expect(container).toContainElement(screen.getByText('メインコンテンツ'))
@@ -118,10 +118,10 @@ describe('MainLayout Component', () => {
           <div>後のコンテンツ</div>
         </MainLayout>
       )
-      
+
       const container = screen.getByTestId('header').parentElement
       const children = Array.from(container?.children || [])
-      
+
       // 最初の子要素がHeaderであることを確認
       expect(children[0]).toEqual(screen.getByTestId('header'))
     })
@@ -136,7 +136,7 @@ describe('MainLayout Component', () => {
           {children}
         </div>
       )
-      
+
       render(
         <MainLayout>
           <MockPageLayout title="テストページ">
@@ -144,7 +144,7 @@ describe('MainLayout Component', () => {
           </MockPageLayout>
         </MainLayout>
       )
-      
+
       expect(screen.getByTestId('header')).toBeInTheDocument()
       expect(screen.getByText('テストページ')).toBeInTheDocument()
       expect(screen.getByText('ページコンテンツ')).toBeInTheDocument()
@@ -167,7 +167,7 @@ describe('MainLayout Component', () => {
           <footer>フッター</footer>
         </MainLayout>
       )
-      
+
       // すべての要素が正しくレンダリングされることを確認
       expect(screen.getByTestId('header')).toBeInTheDocument()
       expect(screen.getByText('ナビゲーション')).toBeInTheDocument()
@@ -186,15 +186,15 @@ describe('MainLayout Component', () => {
           <div>初期コンテンツ</div>
         </MainLayout>
       )
-      
+
       expect(screen.getByText('初期コンテンツ')).toBeInTheDocument()
-      
+
       rerender(
         <MainLayout>
           <div>更新されたコンテンツ</div>
         </MainLayout>
       )
-      
+
       expect(screen.getByText('更新されたコンテンツ')).toBeInTheDocument()
       expect(screen.queryByText('初期コンテンツ')).not.toBeInTheDocument()
     })

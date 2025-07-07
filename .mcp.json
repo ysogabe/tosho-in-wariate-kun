@@ -13,6 +13,14 @@
         "FIRECRAWL_CREDIT_CRITICAL_THRESHOLD": "500"
       }
     },
+    "playwright": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "--headless",
+          "@playwright/mcp@latest"
+        ]
+    },
     "t2i-google-imagen3": {
       "type": "http",
       "url": "https://mcp-unified-server-zl3xx5lsaq-uc.a.run.app/t2i/google/imagen/3/generate-002",

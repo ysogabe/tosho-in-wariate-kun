@@ -25,8 +25,8 @@ describe('Layout Components Index', () => {
     it('すべての期待されるcomponentsがexportされている', () => {
       const exportedKeys = Object.keys(LayoutComponents)
       const expectedExports = ['Header', 'PageLayout', 'MainLayout']
-      
-      expectedExports.forEach(exportName => {
+
+      expectedExports.forEach((exportName) => {
         expect(exportedKeys).toContain(exportName)
       })
     })
@@ -34,8 +34,8 @@ describe('Layout Components Index', () => {
     it('意図しないexportsが含まれていない', () => {
       const exportedKeys = Object.keys(LayoutComponents)
       const allowedExports = ['Header', 'PageLayout', 'MainLayout']
-      
-      exportedKeys.forEach(exportName => {
+
+      exportedKeys.forEach((exportName) => {
         expect(allowedExports).toContain(exportName)
       })
     })
