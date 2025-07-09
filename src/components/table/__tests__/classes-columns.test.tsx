@@ -95,7 +95,9 @@ describe('Classes Columns', () => {
       renderCell(createdAtColumn!, testClass)
 
       // The component formats the date as Japanese locale
-      const expectedDate = new Date(testClass.createdAt).toLocaleDateString('ja-JP')
+      const expectedDate = new Date(testClass.createdAt).toLocaleDateString(
+        'ja-JP'
+      )
       expect(screen.getByText(expectedDate)).toBeInTheDocument()
     })
   })

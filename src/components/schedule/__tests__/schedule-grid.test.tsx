@@ -170,7 +170,9 @@ describe('ScheduleGrid', () => {
 
       // 複数のselect-itemがあるので、図書室Aを選択
       const roomOptions = screen.getAllByTestId('select-item')
-      const roomAOption = roomOptions.find(option => option.textContent === '図書室A')
+      const roomAOption = roomOptions.find(
+        (option) => option.textContent === '図書室A'
+      )
       if (roomAOption) {
         await user.click(roomAOption)
       }
@@ -191,7 +193,9 @@ describe('ScheduleGrid', () => {
 
       // 複数のselect-itemがあるので、5年生を選択
       const gradeOptions = screen.getAllByTestId('select-item')
-      const grade5Option = gradeOptions.find(option => option.textContent === '5年生')
+      const grade5Option = gradeOptions.find(
+        (option) => option.textContent === '5年生'
+      )
       if (grade5Option) {
         await user.click(grade5Option)
       }

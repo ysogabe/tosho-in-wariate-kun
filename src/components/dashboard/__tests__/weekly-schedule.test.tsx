@@ -407,7 +407,7 @@ describe('WeeklySchedule', () => {
       const mockMutate = jest.fn()
       setupSWRMock({ 
         error: new Error('Network Error'),
-        data: null
+        data: null,
       })
       // Override the mutate function for this specific test
       mockSWR.mockImplementation((url: string) => {
