@@ -5,8 +5,7 @@
  * DELETE /api/rooms/[id] - 図書室削除
  */
 
-import { NextRequest, NextResponse } from 'next/server'
-import { z } from 'zod'
+import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/database/client'
 import {
   handleApiError,
@@ -59,7 +58,9 @@ export async function GET(
       description: room.description,
       isActive: true, // MVP: 全ての図書室をアクティブとして扱う
       classCount: room._count.assignments,
-      utilizationRate: Math.round((room._count.assignments / Math.max(room.capacity / 10, 1)) * 100),
+      utilizationRate: Math.round(
+        (room._count.assignments / Math.max(room.capacity / 10, 1)) * 100
+      ),
       createdAt: room.createdAt.toISOString(),
       updatedAt: room.updatedAt.toISOString(),
     }
@@ -152,7 +153,11 @@ export async function PUT(
       description: updatedRoom.description,
       isActive: true,
       classCount: updatedRoom._count.assignments,
-      utilizationRate: Math.round((updatedRoom._count.assignments / Math.max(updatedRoom.capacity / 10, 1)) * 100),
+      utilizationRate: Math.round(
+        (updatedRoom._count.assignments /
+          Math.max(updatedRoom.capacity / 10, 1)) *
+          100
+      ),
       createdAt: updatedRoom.createdAt.toISOString(),
       updatedAt: updatedRoom.updatedAt.toISOString(),
     }

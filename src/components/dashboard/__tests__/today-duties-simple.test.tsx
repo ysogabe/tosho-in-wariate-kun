@@ -3,7 +3,7 @@
  */
 
 import React from 'react'
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { TodayDuties } from '../today-duties-simple'
 
 // SWRをモック
@@ -15,27 +15,57 @@ jest.mock('swr', () => ({
 // Next.jsのLinkコンポーネントをモック
 jest.mock('next/link', () => {
   return function MockLink({ children, href, ...props }: any) {
-    return <a href={href} {...props}>{children}</a>
+    return (
+      <a href={href} {...props}>
+        {children}
+      </a>
+    )
   }
 })
 
 // shadcn-ui コンポーネントをモック
 jest.mock('@/components/ui/card', () => ({
-  Card: ({ children, ...props }: any) => <div data-testid="card" {...props}>{children}</div>,
-  CardContent: ({ children, ...props }: any) => <div data-testid="card-content" {...props}>{children}</div>,
-  CardHeader: ({ children, ...props }: any) => <div data-testid="card-header" {...props}>{children}</div>,
-  CardTitle: ({ children, ...props }: any) => <div data-testid="card-title" {...props}>{children}</div>,
+  Card: ({ children, ...props }: any) => (
+    <div data-testid="card" {...props}>
+      {children}
+    </div>
+  ),
+  CardContent: ({ children, ...props }: any) => (
+    <div data-testid="card-content" {...props}>
+      {children}
+    </div>
+  ),
+  CardHeader: ({ children, ...props }: any) => (
+    <div data-testid="card-header" {...props}>
+      {children}
+    </div>
+  ),
+  CardTitle: ({ children, ...props }: any) => (
+    <div data-testid="card-title" {...props}>
+      {children}
+    </div>
+  ),
 }))
 
 jest.mock('@/components/ui/button', () => ({
   Button: ({ children, onClick, ...props }: any) => (
-    <button onClick={onClick} {...props}>{children}</button>
+    <button onClick={onClick} {...props}>
+      {children}
+    </button>
   ),
 }))
 
 jest.mock('@/components/ui/alert', () => ({
-  Alert: ({ children, ...props }: any) => <div data-testid="alert" {...props}>{children}</div>,
-  AlertDescription: ({ children, ...props }: any) => <div data-testid="alert-description" {...props}>{children}</div>,
+  Alert: ({ children, ...props }: any) => (
+    <div data-testid="alert" {...props}>
+      {children}
+    </div>
+  ),
+  AlertDescription: ({ children, ...props }: any) => (
+    <div data-testid="alert-description" {...props}>
+      {children}
+    </div>
+  ),
 }))
 
 // lucide-react アイコンをモック
@@ -45,6 +75,7 @@ jest.mock('lucide-react', () => ({
   Calendar: () => <div data-testid="calendar-icon" />,
 }))
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const mockUseSWR = require('swr').default
 
 describe('TodayDuties', () => {
@@ -82,11 +113,13 @@ describe('TodayDuties', () => {
       render(<TodayDuties />)
 
       expect(screen.getByText('🌟 今日の当番')).toBeInTheDocument()
-      expect(screen.getByText('当番情報の取得に失敗しました')).toBeInTheDocument()
-      
+      expect(
+        screen.getByText('当番情報の取得に失敗しました')
+      ).toBeInTheDocument()
+
       const retryButton = screen.getByText('再試行')
       expect(retryButton).toBeInTheDocument()
-      
+
       fireEvent.click(retryButton)
       expect(mockMutate).toHaveBeenCalled()
     })
@@ -102,7 +135,9 @@ describe('TodayDuties', () => {
 
       render(<TodayDuties />)
 
-      expect(screen.getByText('当番情報の取得に失敗しました')).toBeInTheDocument()
+      expect(
+        screen.getByText('当番情報の取得に失敗しました')
+      ).toBeInTheDocument()
       expect(screen.getByText('再試行')).toBeInTheDocument()
     })
   })
@@ -129,7 +164,9 @@ describe('TodayDuties', () => {
       expect(screen.getByText('🌟 今日の当番')).toBeInTheDocument()
       expect(screen.getByText('📅 今日: 7月5日(土)')).toBeInTheDocument()
       expect(screen.getByText('今日は当番がありません')).toBeInTheDocument()
-      expect(screen.getByText('土曜日・日曜日は図書委員の当番はお休みです')).toBeInTheDocument()
+      expect(
+        screen.getByText('土曜日・日曜日は図書委員の当番はお休みです')
+      ).toBeInTheDocument()
     })
   })
 
@@ -154,11 +191,18 @@ describe('TodayDuties', () => {
 
       expect(screen.getByText('🌟 今日の当番')).toBeInTheDocument()
       expect(screen.getByText('📅 今日: 7月7日(月)')).toBeInTheDocument()
-      expect(screen.getByText('今日の当番は設定されていません')).toBeInTheDocument()
-      expect(screen.getByText('スケジュール管理から当番表を確認してください')).toBeInTheDocument()
-      
+      expect(
+        screen.getByText('今日の当番は設定されていません')
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText('スケジュール管理から当番表を確認してください')
+      ).toBeInTheDocument()
+
       const scheduleLink = screen.getByText('スケジュール管理')
-      expect(scheduleLink.closest('a')).toHaveAttribute('href', '/admin/schedules')
+      expect(scheduleLink.closest('a')).toHaveAttribute(
+        'href',
+        '/admin/schedules'
+      )
     })
   })
 
@@ -206,19 +250,21 @@ describe('TodayDuties', () => {
 
       expect(screen.getByText('🌟 今日の当番')).toBeInTheDocument()
       expect(screen.getByText('📅 今日: 7月7日(月)')).toBeInTheDocument()
-      
+
       // 図書室1の当番
       expect(screen.getByText('図書室1')).toBeInTheDocument()
       expect(screen.getByText('田中花子')).toBeInTheDocument()
       expect(screen.getByText('5年2組')).toBeInTheDocument()
-      
+
       // 図書室2の当番
       expect(screen.getByText('図書室2')).toBeInTheDocument()
       expect(screen.getByText('佐藤太郎')).toBeInTheDocument()
       expect(screen.getByText('6年1組')).toBeInTheDocument()
-      
+
       // 励ましメッセージ
-      expect(screen.getByText('⭐ 今日の図書委員の皆さん、よろしくお願いします！')).toBeInTheDocument()
+      expect(
+        screen.getByText('⭐ 今日の図書委員の皆さん、よろしくお願いします！')
+      ).toBeInTheDocument()
     })
   })
 

@@ -24,9 +24,9 @@ describe('PageLayout Component', () => {
     it('デフォルトでh1要素がレンダリングされる', () => {
       render(<PageLayout {...defaultProps} />)
 
-      const heading = screen.getByRole('heading', { level: 1 })
+      const heading = screen.getByText('テストページ')
       expect(heading).toBeInTheDocument()
-      expect(heading).toHaveTextContent('テストページ')
+      expect(heading.tagName).toBe('H1')
     })
 
     it('mainタグでコンテンツがラップされる', () => {
@@ -56,9 +56,10 @@ describe('PageLayout Component', () => {
         </PageLayout>
       )
 
-      const heading = screen.getByRole('heading', { level: 1 })
-      expect(heading).toBeInTheDocument()
-      expect(heading).toHaveTextContent('')
+      const headings = screen.getAllByRole('heading', { level: 1 })
+      const pageHeading = headings.find((h) => h.textContent === '')
+      expect(pageHeading).toBeInTheDocument()
+      expect(pageHeading).toHaveTextContent('')
     })
   })
 
@@ -121,25 +122,25 @@ describe('PageLayout Component', () => {
     it('headingLevel="h2"でh2要素がレンダリングされる', () => {
       render(<PageLayout {...defaultProps} headingLevel="h2" />)
 
-      const heading = screen.getByRole('heading', { level: 2 })
+      const heading = screen.getByText('テストページ')
       expect(heading).toBeInTheDocument()
-      expect(heading).toHaveTextContent('テストページ')
+      expect(heading.tagName).toBe('H2')
     })
 
     it('headingLevel="h3"でh3要素がレンダリングされる', () => {
       render(<PageLayout {...defaultProps} headingLevel="h3" />)
 
-      const heading = screen.getByRole('heading', { level: 3 })
+      const heading = screen.getByText('テストページ')
       expect(heading).toBeInTheDocument()
-      expect(heading).toHaveTextContent('テストページ')
+      expect(heading.tagName).toBe('H3')
     })
 
     it('headingLevel="h6"でh6要素がレンダリングされる', () => {
       render(<PageLayout {...defaultProps} headingLevel="h6" />)
 
-      const heading = screen.getByRole('heading', { level: 6 })
+      const heading = screen.getByText('テストページ')
       expect(heading).toBeInTheDocument()
-      expect(heading).toHaveTextContent('テストページ')
+      expect(heading.tagName).toBe('H6')
     })
 
     it('見出しレベルが変更されてもCSSクラスは同じ', () => {
@@ -147,12 +148,12 @@ describe('PageLayout Component', () => {
         <PageLayout {...defaultProps} headingLevel="h1" />
       )
 
-      const h1 = screen.getByRole('heading', { level: 1 })
+      const h1 = screen.getByText('テストページ')
       const h1Classes = h1.className
 
       rerender(<PageLayout {...defaultProps} headingLevel="h3" />)
 
-      const h3 = screen.getByRole('heading', { level: 3 })
+      const h3 = screen.getByText('テストページ')
       expect(h3.className).toBe(h1Classes)
     })
   })
@@ -161,20 +162,18 @@ describe('PageLayout Component', () => {
     it('カスタムclassNameが適用される', () => {
       render(<PageLayout {...defaultProps} className="custom-layout-class" />)
 
-      // コンテナ要素（最上位のdiv）にカスタムクラスが適用されることを確認
-      const container = screen.getByText('テストページ').closest('.container')
+      // メインコンテンツ要素にカスタムクラスが適用されることを確認
+      const container = screen.getByText('テストページ').closest('.space-y-6')
       expect(container).toHaveClass('custom-layout-class')
     })
 
     it('デフォルトクラスとカスタムクラスが併用される', () => {
       render(<PageLayout {...defaultProps} className="custom-class" />)
 
-      const container = screen.getByText('テストページ').closest('.container')
+      const container = screen.getByText('テストページ').closest('.space-y-6')
       expect(container).toHaveClass(
-        'container',
-        'mx-auto',
-        'py-6',
         'space-y-6',
+        'animate-fadeIn',
         'custom-class'
       )
     })
@@ -223,15 +222,16 @@ describe('PageLayout Component', () => {
       )
 
       // コンテナ構造の確認
-      const container = screen.getByText('テストページ').closest('.container')
-      expect(container).toHaveClass('container', 'mx-auto', 'py-6', 'space-y-6')
+      const container = screen.getByText('テストページ').closest('.space-y-6')
+      expect(container).toHaveClass('space-y-6', 'animate-fadeIn')
 
       // ヘッダー部分の確認
-      const heading = screen.getByRole('heading', { level: 1 })
+      const heading = screen.getByText('テストページ')
       const description = screen.getByText('説明文')
       const action = screen.getByText('アクション')
 
       expect(heading).toBeInTheDocument()
+      expect(heading.tagName).toBe('H1')
       expect(description).toBeInTheDocument()
       expect(action).toBeInTheDocument()
 
@@ -245,7 +245,7 @@ describe('PageLayout Component', () => {
     it('レスポンシブクラスが適用されている', () => {
       render(<PageLayout {...defaultProps} />)
 
-      const heading = screen.getByRole('heading', { level: 1 })
+      const heading = screen.getByText('テストページ')
       expect(heading).toHaveClass(
         'text-2xl',
         'sm:text-3xl',

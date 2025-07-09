@@ -24,9 +24,7 @@ import { Plus, Download, Settings, FileText } from 'lucide-react'
 
 export default function TableTestPage() {
   const [selectedClasses, setSelectedClasses] = useState<ClassData[]>([])
-  const [selectedStudents, setSelectedStudents] = useState<
-    StudentData[]
-  >([])
+  const [selectedStudents, setSelectedStudents] = useState<StudentData[]>([])
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -68,7 +66,7 @@ export default function TableTestPage() {
                 {sampleClassesData.length}
               </div>
               <p className="text-xs text-muted-foreground">
-                アクティブ: {sampleClassesData.filter((c) => c.isActive).length}
+                アクティブ: {sampleClassesData.length}
               </p>
             </CardContent>
           </Card>

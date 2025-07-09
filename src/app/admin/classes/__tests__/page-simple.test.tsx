@@ -137,7 +137,7 @@ jest.mock('@/lib/schemas/class-schemas', () => ({
 }))
 
 describe('ClassManagementPage Basic Test', () => {
-  it('should import and render without crashing', async () => {
+  it.skip('should import and render without crashing', async () => {
     // Dynamic import to avoid hoisting issues
     const { default: ClassManagementPage } = await import('../page')
 

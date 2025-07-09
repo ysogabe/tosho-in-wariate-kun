@@ -22,9 +22,7 @@ const ScheduleQuerySchema = z.object({
       }
       return val
     })
-    .pipe(
-      z.enum(['FIRST_TERM', 'SECOND_TERM']).optional()
-    ),
+    .pipe(z.enum(['FIRST_TERM', 'SECOND_TERM']).optional()),
   format: z.enum(['list', 'calendar']).optional().default('list'),
 })
 

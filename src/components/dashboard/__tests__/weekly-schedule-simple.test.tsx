@@ -15,16 +15,36 @@ jest.mock('swr', () => ({
 // Next.jsのLinkコンポーネントをモック
 jest.mock('next/link', () => {
   return function MockLink({ children, href, ...props }: any) {
-    return <a href={href} {...props}>{children}</a>
+    return (
+      <a href={href} {...props}>
+        {children}
+      </a>
+    )
   }
 })
 
 // shadcn-ui コンポーネントをモック
 jest.mock('@/components/ui/card', () => ({
-  Card: ({ children, ...props }: any) => <div data-testid="card" {...props}>{children}</div>,
-  CardContent: ({ children, ...props }: any) => <div data-testid="card-content" {...props}>{children}</div>,
-  CardHeader: ({ children, ...props }: any) => <div data-testid="card-header" {...props}>{children}</div>,
-  CardTitle: ({ children, ...props }: any) => <div data-testid="card-title" {...props}>{children}</div>,
+  Card: ({ children, ...props }: any) => (
+    <div data-testid="card" {...props}>
+      {children}
+    </div>
+  ),
+  CardContent: ({ children, ...props }: any) => (
+    <div data-testid="card-content" {...props}>
+      {children}
+    </div>
+  ),
+  CardHeader: ({ children, ...props }: any) => (
+    <div data-testid="card-header" {...props}>
+      {children}
+    </div>
+  ),
+  CardTitle: ({ children, ...props }: any) => (
+    <div data-testid="card-title" {...props}>
+      {children}
+    </div>
+  ),
 }))
 
 jest.mock('@/components/ui/button', () => ({
@@ -41,6 +61,7 @@ jest.mock('lucide-react', () => ({
   AlertCircle: () => <div data-testid="alert-icon" />,
 }))
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const mockUseSWR = require('swr').default
 
 describe('WeeklySchedule', () => {
@@ -55,21 +76,32 @@ describe('WeeklySchedule', () => {
           data: {
             schedules: {
               FIRST_TERM: {
-                '1': [{
-                  id: '1',
-                  room: { id: 'room-1', name: '図書室1' },
-                  student: { id: 'student-1', name: '田中太郎', grade: 5, className: '5年1組' }
-                }],
+                '1': [
+                  {
+                    id: '1',
+                    room: { id: 'room-1', name: '図書室1' },
+                    student: {
+                      id: 'student-1',
+                      name: '田中太郎',
+                      grade: 5,
+                      className: '5年1組',
+                    },
+                  },
+                ],
                 '2': [],
                 '3': [],
                 '4': [],
-                '5': []
+                '5': [],
               },
               SECOND_TERM: {
-                '1': [], '2': [], '3': [], '4': [], '5': []
-              }
-            }
-          }
+                '1': [],
+                '2': [],
+                '3': [],
+                '4': [],
+                '5': [],
+              },
+            },
+          },
         },
         error: undefined,
         isLoading: false,
@@ -93,13 +125,17 @@ describe('WeeklySchedule', () => {
                 '2': [],
                 '3': [],
                 '4': [],
-                '5': []
+                '5': [],
               },
               SECOND_TERM: {
-                '1': [], '2': [], '3': [], '4': [], '5': []
-              }
-            }
-          }
+                '1': [],
+                '2': [],
+                '3': [],
+                '4': [],
+                '5': [],
+              },
+            },
+          },
         },
         error: undefined,
         isLoading: false,
@@ -109,7 +145,10 @@ describe('WeeklySchedule', () => {
       render(<WeeklySchedule />)
 
       const detailLink = screen.getByText('📊詳細表示')
-      expect(detailLink.closest('a')).toHaveAttribute('href', '/admin/schedules?format=grid')
+      expect(detailLink.closest('a')).toHaveAttribute(
+        'href',
+        '/admin/schedules?format=grid'
+      )
     })
   })
 
@@ -121,21 +160,32 @@ describe('WeeklySchedule', () => {
           data: {
             schedules: {
               FIRST_TERM: {
-                '1': [{
-                  id: '1',
-                  room: { id: 'room-1', name: '図書室1' },
-                  student: { id: 'student-1', name: '田中太郎', grade: 5, className: '5年1組' }
-                }],
+                '1': [
+                  {
+                    id: '1',
+                    room: { id: 'room-1', name: '図書室1' },
+                    student: {
+                      id: 'student-1',
+                      name: '田中太郎',
+                      grade: 5,
+                      className: '5年1組',
+                    },
+                  },
+                ],
                 '2': [],
                 '3': [],
                 '4': [],
-                '5': []
+                '5': [],
               },
               SECOND_TERM: {
-                '1': [], '2': [], '3': [], '4': [], '5': []
-              }
-            }
-          }
+                '1': [],
+                '2': [],
+                '3': [],
+                '4': [],
+                '5': [],
+              },
+            },
+          },
         },
         error: undefined,
         isLoading: false,
@@ -145,7 +195,7 @@ describe('WeeklySchedule', () => {
       render(<WeeklySchedule />)
 
       const weekdays = ['月', '火', '水', '木', '金']
-      weekdays.forEach(day => {
+      weekdays.forEach((day) => {
         expect(screen.getByText(day)).toBeInTheDocument()
       })
     })
@@ -157,21 +207,32 @@ describe('WeeklySchedule', () => {
           data: {
             schedules: {
               FIRST_TERM: {
-                '1': [{
-                  id: '1',
-                  room: { id: 'room-1', name: '図書室1' },
-                  student: { id: 'student-1', name: '田中太郎', grade: 5, className: '5年1組' }
-                }],
+                '1': [
+                  {
+                    id: '1',
+                    room: { id: 'room-1', name: '図書室1' },
+                    student: {
+                      id: 'student-1',
+                      name: '田中太郎',
+                      grade: 5,
+                      className: '5年1組',
+                    },
+                  },
+                ],
                 '2': [],
                 '3': [],
                 '4': [],
-                '5': []
+                '5': [],
               },
               SECOND_TERM: {
-                '1': [], '2': [], '3': [], '4': [], '5': []
-              }
-            }
-          }
+                '1': [],
+                '2': [],
+                '3': [],
+                '4': [],
+                '5': [],
+              },
+            },
+          },
         },
         error: undefined,
         isLoading: false,
@@ -191,21 +252,32 @@ describe('WeeklySchedule', () => {
           data: {
             schedules: {
               FIRST_TERM: {
-                '1': [{
-                  id: '1',
-                  room: { id: 'room-1', name: '図書室1' },
-                  student: { id: 'student-1', name: '田中太郎', grade: 5, className: '5年1組' }
-                }],
+                '1': [
+                  {
+                    id: '1',
+                    room: { id: 'room-1', name: '図書室1' },
+                    student: {
+                      id: 'student-1',
+                      name: '田中太郎',
+                      grade: 5,
+                      className: '5年1組',
+                    },
+                  },
+                ],
                 '2': [],
                 '3': [],
                 '4': [],
-                '5': []
+                '5': [],
               },
               SECOND_TERM: {
-                '1': [], '2': [], '3': [], '4': [], '5': []
-              }
-            }
-          }
+                '1': [],
+                '2': [],
+                '3': [],
+                '4': [],
+                '5': [],
+              },
+            },
+          },
         },
         error: undefined,
         isLoading: false,
@@ -239,7 +311,9 @@ describe('WeeklySchedule', () => {
 
       render(<WeeklySchedule />)
 
-      expect(screen.getByText('スケジュールを読み込み中...')).toBeInTheDocument()
+      expect(
+        screen.getByText('スケジュールを読み込み中...')
+      ).toBeInTheDocument()
       expect(screen.getByText('少々お待ちください')).toBeInTheDocument()
     })
   })
@@ -256,11 +330,13 @@ describe('WeeklySchedule', () => {
 
       render(<WeeklySchedule />)
 
-      expect(screen.getByText('スケジュール情報の取得に失敗しました')).toBeInTheDocument()
-      
+      expect(
+        screen.getByText('スケジュール情報の取得に失敗しました')
+      ).toBeInTheDocument()
+
       const retryButton = screen.getByText('再試行')
       expect(retryButton).toBeInTheDocument()
-      
+
       fireEvent.click(retryButton)
       expect(mockMutate).toHaveBeenCalled()
     })
@@ -274,21 +350,32 @@ describe('WeeklySchedule', () => {
           data: {
             schedules: {
               FIRST_TERM: {
-                '1': [{
-                  id: '1',
-                  room: { id: 'room-1', name: '図書室1' },
-                  student: { id: 'student-1', name: '田中太郎', grade: 5, className: '5年1組' }
-                }],
+                '1': [
+                  {
+                    id: '1',
+                    room: { id: 'room-1', name: '図書室1' },
+                    student: {
+                      id: 'student-1',
+                      name: '田中太郎',
+                      grade: 5,
+                      className: '5年1組',
+                    },
+                  },
+                ],
                 '2': [],
                 '3': [],
                 '4': [],
-                '5': []
+                '5': [],
               },
               SECOND_TERM: {
-                '1': [], '2': [], '3': [], '4': [], '5': []
-              }
-            }
-          }
+                '1': [],
+                '2': [],
+                '3': [],
+                '4': [],
+                '5': [],
+              },
+            },
+          },
         },
         error: undefined,
         isLoading: false,
@@ -308,21 +395,32 @@ describe('WeeklySchedule', () => {
           data: {
             schedules: {
               FIRST_TERM: {
-                '1': [{
-                  id: '1',
-                  room: { id: 'room-1', name: '図書室1' },
-                  student: { id: 'student-1', name: '田中太郎', grade: 5, className: '5年1組' }
-                }],
+                '1': [
+                  {
+                    id: '1',
+                    room: { id: 'room-1', name: '図書室1' },
+                    student: {
+                      id: 'student-1',
+                      name: '田中太郎',
+                      grade: 5,
+                      className: '5年1組',
+                    },
+                  },
+                ],
                 '2': [],
                 '3': [],
                 '4': [],
-                '5': []
+                '5': [],
               },
               SECOND_TERM: {
-                '1': [], '2': [], '3': [], '4': [], '5': []
-              }
-            }
-          }
+                '1': [],
+                '2': [],
+                '3': [],
+                '4': [],
+                '5': [],
+              },
+            },
+          },
         },
         error: undefined,
         isLoading: false,
@@ -343,13 +441,21 @@ describe('WeeklySchedule', () => {
           data: {
             schedules: {
               FIRST_TERM: {
-                '1': [], '2': [], '3': [], '4': [], '5': []
+                '1': [],
+                '2': [],
+                '3': [],
+                '4': [],
+                '5': [],
               },
               SECOND_TERM: {
-                '1': [], '2': [], '3': [], '4': [], '5': []
-              }
-            }
-          }
+                '1': [],
+                '2': [],
+                '3': [],
+                '4': [],
+                '5': [],
+              },
+            },
+          },
         },
         error: undefined,
         isLoading: false,
@@ -358,8 +464,12 @@ describe('WeeklySchedule', () => {
 
       render(<WeeklySchedule />)
 
-      expect(screen.getByText('スケジュールが設定されていません')).toBeInTheDocument()
-      expect(screen.getByText('スケジュール管理から当番表を生成してください')).toBeInTheDocument()
+      expect(
+        screen.getByText('スケジュールが設定されていません')
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText('スケジュール管理から当番表を生成してください')
+      ).toBeInTheDocument()
     })
   })
 
@@ -371,21 +481,32 @@ describe('WeeklySchedule', () => {
           data: {
             schedules: {
               FIRST_TERM: {
-                '1': [{
-                  id: '1',
-                  room: { id: 'room-1', name: '図書室1' },
-                  student: { id: 'student-1', name: '田中太郎', grade: 5, className: '5年1組' }
-                }],
+                '1': [
+                  {
+                    id: '1',
+                    room: { id: 'room-1', name: '図書室1' },
+                    student: {
+                      id: 'student-1',
+                      name: '田中太郎',
+                      grade: 5,
+                      className: '5年1組',
+                    },
+                  },
+                ],
                 '2': [],
                 '3': [],
                 '4': [],
-                '5': []
+                '5': [],
               },
               SECOND_TERM: {
-                '1': [], '2': [], '3': [], '4': [], '5': []
-              }
-            }
-          }
+                '1': [],
+                '2': [],
+                '3': [],
+                '4': [],
+                '5': [],
+              },
+            },
+          },
         },
         error: undefined,
         isLoading: false,

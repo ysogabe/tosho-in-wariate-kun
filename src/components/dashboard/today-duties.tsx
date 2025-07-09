@@ -56,7 +56,7 @@ const formatDateJapanese = (dateString: string, dayOfWeek: string): string => {
     const month = date.getMonth() + 1
     const day = date.getDate()
     const dayJp = dayOfWeekJapanese[dayOfWeek] || ''
-    
+
     return `${month}月${day}日(${dayJp})`
   } catch (error) {
     console.error('Date formatting error:', error)
@@ -115,10 +115,7 @@ export function TodayDuties() {
         <CardContent>
           <div className="flex items-center justify-center py-8">
             <div data-testid="loading-spinner">
-              <LoadingSpinner 
-                size="lg" 
-                text="今日の当番を確認中..." 
-              />
+              <LoadingSpinner size="lg" text="今日の当番を確認中..." />
             </div>
           </div>
         </CardContent>
@@ -157,16 +154,15 @@ export function TodayDuties() {
   }
 
   const { date, dayOfWeek, isWeekend, duties } = response.data || {}
-  const formattedDate = date && dayOfWeek ? formatDateJapanese(date, dayOfWeek) : '日付不明'
+  const formattedDate =
+    date && dayOfWeek ? formatDateJapanese(date, dayOfWeek) : '日付不明'
 
   return (
     <section role="region" aria-label="今日の当番">
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <span className="flex items-center gap-2">
-              🌟 今日の当番
-            </span>
+            <span className="flex items-center gap-2">🌟 今日の当番</span>
             <span className="text-sm font-normal text-muted-foreground">
               📅 今日: {formattedDate}
             </span>
@@ -177,7 +173,9 @@ export function TodayDuties() {
             // 土日の場合
             <div className="text-center py-8">
               <div className="text-4xl mb-4">🌱</div>
-              <h3 className="text-lg font-medium mb-2">今日は当番がありません</h3>
+              <h3 className="text-lg font-medium mb-2">
+                今日は当番がありません
+              </h3>
               <p className="text-muted-foreground">
                 土曜日・日曜日は図書委員の当番はお休みです
               </p>
@@ -186,7 +184,9 @@ export function TodayDuties() {
             // 平日だが当番なしの場合
             <div className="text-center py-8">
               <div className="text-4xl mb-4">📚</div>
-              <h3 className="text-lg font-medium mb-2">今日の当番は設定されていません</h3>
+              <h3 className="text-lg font-medium mb-2">
+                今日の当番は設定されていません
+              </h3>
               <p className="text-muted-foreground mb-4">
                 スケジュール管理から当番表を確認してください
               </p>
@@ -208,15 +208,17 @@ export function TodayDuties() {
                 >
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-lg">📚</span>
-                    <h3 className="font-medium text-gray-900">{duty.roomName}</h3>
+                    <h3 className="font-medium text-gray-900">
+                      {duty.roomName}
+                    </h3>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <span className="text-sm">👤</span>
                       <span className="font-medium">{duty.student.name}</span>
                     </div>
-                    
+
                     <div className="text-sm text-gray-600">
                       {duty.student.class.year}年{duty.student.class.name}
                     </div>
@@ -225,7 +227,7 @@ export function TodayDuties() {
               ))}
             </div>
           )}
-          
+
           {/* 説明文 */}
           {!isWeekend && duties.length > 0 && (
             <div className="mt-4 text-xs text-muted-foreground text-center">

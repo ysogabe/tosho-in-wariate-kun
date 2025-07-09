@@ -3,7 +3,7 @@
  * t-wada提唱のTDDメソッドに従った包括的テスト
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import { ScheduleList } from '../schedule-list'
@@ -152,13 +152,13 @@ describe('ScheduleList', () => {
     it('学期が指定された場合、学期バッジが表示される', () => {
       render(<ScheduleList assignments={mockAssignments} term="FIRST_TERM" />)
 
-      expect(screen.getByText('🌸 前期')).toBeInTheDocument()
+      expect(screen.getAllByText('🌸 前期').length).toBeGreaterThan(0)
     })
 
     it('後期の場合、適切なバッジが表示される', () => {
       render(<ScheduleList assignments={mockAssignments} term="SECOND_TERM" />)
 
-      expect(screen.getByText('🍂 後期')).toBeInTheDocument()
+      expect(screen.getAllByText('🍂 後期').length).toBeGreaterThan(0)
     })
 
     it('データが空の場合、適切なメッセージが表示される', () => {
@@ -227,7 +227,7 @@ describe('ScheduleList', () => {
       render(<ScheduleList assignments={mockAssignments} />)
 
       // 月曜日でフィルタリング
-      const daySelect = screen.getByDisplayValue('📅 曜日')
+      const daySelect = screen.getByText('📅 曜日')
       await user.click(daySelect)
 
       const mondayOption = screen.getByText('月曜日')
@@ -248,7 +248,7 @@ describe('ScheduleList', () => {
       render(<ScheduleList assignments={mockAssignments} />)
 
       // 図書室Aでフィルタリング
-      const roomSelect = screen.getByDisplayValue('📚 図書室')
+      const roomSelect = screen.getByText('📚 図書室')
       await user.click(roomSelect)
 
       const roomAOption = screen.getByText('📚 図書室A')
@@ -266,7 +266,7 @@ describe('ScheduleList', () => {
       render(<ScheduleList assignments={mockAssignments} />)
 
       // 5年生でフィルタリング
-      const gradeSelect = screen.getByDisplayValue('🎒 学年')
+      const gradeSelect = screen.getByText('🎒 学年')
       await user.click(gradeSelect)
 
       const grade5Option = screen.getByText('5年生')
@@ -287,11 +287,11 @@ describe('ScheduleList', () => {
       render(<ScheduleList assignments={mockAssignments} />)
 
       // 月曜日 AND 5年生でフィルタリング
-      const daySelect = screen.getByDisplayValue('📅 曜日')
+      const daySelect = screen.getByText('📅 曜日')
       await user.click(daySelect)
       await user.click(screen.getByText('月曜日'))
 
-      const gradeSelect = screen.getByDisplayValue('🎒 学年')
+      const gradeSelect = screen.getByText('🎒 学年')
       await user.click(gradeSelect)
       await user.click(screen.getByText('5年生'))
 
@@ -310,7 +310,7 @@ describe('ScheduleList', () => {
       const user = userEvent.setup()
       render(<ScheduleList assignments={mockAssignments} />)
 
-      const sortSelect = screen.getByDisplayValue('📊 並び順')
+      const sortSelect = screen.getByText('📊 並び順')
       await user.click(sortSelect)
       await user.click(screen.getByText('📅 曜日順'))
 
@@ -324,7 +324,7 @@ describe('ScheduleList', () => {
       const user = userEvent.setup()
       render(<ScheduleList assignments={mockAssignments} />)
 
-      const sortSelect = screen.getByDisplayValue('📊 並び順')
+      const sortSelect = screen.getByText('📊 並び順')
       await user.click(sortSelect)
       await user.click(screen.getByText('👤 名前順'))
 
@@ -342,7 +342,7 @@ describe('ScheduleList', () => {
       const user = userEvent.setup()
       render(<ScheduleList assignments={mockAssignments} />)
 
-      const sortSelect = screen.getByDisplayValue('📊 並び順')
+      const sortSelect = screen.getByText('📊 並び順')
       await user.click(sortSelect)
       await user.click(screen.getByText('📚 図書室順'))
 
@@ -358,7 +358,7 @@ describe('ScheduleList', () => {
       const user = userEvent.setup()
       render(<ScheduleList assignments={mockAssignments} />)
 
-      const sortSelect = screen.getByDisplayValue('📊 並び順')
+      const sortSelect = screen.getByText('📊 並び順')
       await user.click(sortSelect)
       await user.click(screen.getByText('🎒 学年順'))
 
@@ -400,7 +400,7 @@ describe('ScheduleList', () => {
       render(<ScheduleList assignments={mockAssignments} />)
 
       // 5年生でフィルタリング
-      const gradeSelect = screen.getByDisplayValue('🎒 学年')
+      const gradeSelect = screen.getByText('🎒 学年')
       await user.click(gradeSelect)
       await user.click(screen.getByText('5年生'))
 

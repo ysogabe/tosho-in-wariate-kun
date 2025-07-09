@@ -32,8 +32,8 @@ export function transformStudentsToResponse(
     grade: s.grade,
     isActive: s.isActive,
     assignmentCount: s._count.assignments,
-    createdAt: s.createdAt,
-    updatedAt: s.updatedAt,
+    createdAt: s.createdAt.toISOString(),
+    updatedAt: s.updatedAt.toISOString(),
     class: s.class,
   }))
 }
@@ -63,8 +63,8 @@ export function transformStudentToResponse(studentData: {
     grade: studentData.grade,
     isActive: studentData.isActive,
     assignmentCount: studentData._count.assignments,
-    createdAt: studentData.createdAt,
-    updatedAt: studentData.updatedAt,
+    createdAt: studentData.createdAt.toISOString(),
+    updatedAt: studentData.updatedAt.toISOString(),
     class: studentData.class,
   }
 }

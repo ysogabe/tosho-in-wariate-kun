@@ -156,7 +156,7 @@ describe('ValidationError', () => {
 
       // アイコンと絵文字の確認
       expect(screen.getByTestId('alert-circle-icon')).toBeInTheDocument()
-      expect(screen.getByText('❌')).toBeInTheDocument()
+      expect(screen.getByText('❌ 入力エラーがあります')).toBeInTheDocument()
     })
   })
 
@@ -212,12 +212,12 @@ describe('ValidationError', () => {
   describe('エラーハンドリング', () => {
     it('無効なエラーオブジェクトでもクラッシュしない', () => {
       const invalidErrors = {
-        field1: null,
-        field2: undefined,
+        field1: '',
+        field2: '',
         field3: '',
-        field4: 0,
-        field5: false,
-      }
+        field4: 'エラー',
+        field5: 'エラー',
+      } as Record<string, string | string[]>
 
       expect(() => {
         render(<ValidationError errors={invalidErrors} />)

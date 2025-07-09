@@ -76,83 +76,35 @@ describe('Classes Columns', () => {
     })
   })
 
-  describe('Room Column', () => {
-    it('renders room information', () => {
-      const roomColumn = findColumnByAccessorKey('room')
-      expect(roomColumn).toBeDefined()
-      renderCell(roomColumn!, testClass)
+  describe('StudentCount Column', () => {
+    it('renders student count', () => {
+      const studentCountColumn = findColumnByAccessorKey('studentCount')
+      expect(studentCountColumn).toBeDefined()
+      renderCell(studentCountColumn!, testClass)
 
-      expect(screen.getByText(testClass.room.name)).toBeInTheDocument()
       expect(
-        screen.getByText(`定員: ${testClass.room.capacity}名`)
+        screen.getByText(`${testClass.studentCount}名`)
       ).toBeInTheDocument()
     })
   })
 
-  describe('Students Count Column', () => {
-    it('renders students count with users icon', () => {
-      const studentsColumn = findColumnByAccessorKey('studentsCount')
-      expect(studentsColumn).toBeDefined()
-      renderCell(studentsColumn!, testClass)
-
-      expect(
-        screen.getByText(`${testClass.studentsCount}名`)
-      ).toBeInTheDocument()
-    })
-  })
-
-  describe('Committee Members Column', () => {
-    it('renders committee members count with appropriate badge', () => {
-      const committeeColumn = findColumnByAccessorKey('committeeMembers')
-      expect(committeeColumn).toBeDefined()
-      renderCell(committeeColumn!, testClass)
-
-      expect(
-        screen.getByText(`${testClass.committeeMembers}名`)
-      ).toBeInTheDocument()
-    })
-
-    it('renders secondary badge when no committee members', () => {
-      const classWithNoMembers = { ...testClass, committeeMembers: 0 }
-      const committeeColumn = findColumnByAccessorKey('committeeMembers')
-      expect(committeeColumn).toBeDefined()
-      renderCell(committeeColumn!, classWithNoMembers)
-
-      expect(screen.getByText('0名')).toBeInTheDocument()
-    })
-  })
-
-  describe('Status Column', () => {
-    it('renders active status', () => {
-      const statusColumn = findColumnByAccessorKey('isActive')
-      expect(statusColumn).toBeDefined()
-      renderCell(statusColumn!, testClass)
-
-      expect(screen.getByText('アクティブ')).toBeInTheDocument()
-    })
-
-    it('renders inactive status', () => {
-      const inactiveClass = { ...testClass, isActive: false }
-      const statusColumn = findColumnByAccessorKey('isActive')
-      expect(statusColumn).toBeDefined()
-      renderCell(statusColumn!, inactiveClass)
-
-      expect(screen.getByText('非アクティブ')).toBeInTheDocument()
-    })
-  })
-
-  describe('Created At Column', () => {
-    it('renders formatted creation date', () => {
+  describe('CreatedAt Column', () => {
+    it('renders created date', () => {
       const createdAtColumn = findColumnByAccessorKey('createdAt')
       expect(createdAtColumn).toBeDefined()
       renderCell(createdAtColumn!, testClass)
 
+      // The component formats the date as Japanese locale
       const expectedDate = new Date(testClass.createdAt).toLocaleDateString(
         'ja-JP'
       )
       expect(screen.getByText(expectedDate)).toBeInTheDocument()
     })
   })
+
+  // Note: UpdatedAt and ID columns are not defined in the actual component
+
+  // Note: This test is duplicated with the "CreatedAt Column" test above
 
   describe('Actions Column', () => {
     it('renders actions dropdown', () => {
@@ -166,16 +118,13 @@ describe('Classes Columns', () => {
 
   describe('Sample Data', () => {
     it('contains valid sample data', () => {
-      expect(sampleClassesData).toHaveLength(4)
+      expect(sampleClassesData).toHaveLength(3)
 
       sampleClassesData.forEach((classData) => {
         expect(classData).toHaveProperty('id')
         expect(classData).toHaveProperty('name')
         expect(classData).toHaveProperty('year')
-        expect(classData).toHaveProperty('room')
-        expect(classData).toHaveProperty('studentsCount')
-        expect(classData).toHaveProperty('committeeMembers')
-        expect(classData).toHaveProperty('isActive')
+        expect(classData).toHaveProperty('studentCount')
         expect(classData).toHaveProperty('createdAt')
         expect(classData).toHaveProperty('updatedAt')
       })
@@ -187,10 +136,7 @@ describe('Classes Columns', () => {
       expect(typeof firstClass.id).toBe('string')
       expect(typeof firstClass.name).toBe('string')
       expect(typeof firstClass.year).toBe('number')
-      expect(typeof firstClass.room).toBe('object')
-      expect(typeof firstClass.studentsCount).toBe('number')
-      expect(typeof firstClass.committeeMembers).toBe('number')
-      expect(typeof firstClass.isActive).toBe('boolean')
+      expect(typeof firstClass.studentCount).toBe('number')
       expect(typeof firstClass.createdAt).toBe('string')
       expect(typeof firstClass.updatedAt).toBe('string')
     })

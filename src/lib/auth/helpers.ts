@@ -13,8 +13,20 @@ export async function getServerSession(): Promise<MVPUser | null> {
       return {
         id: 'dev-admin',
         email: 'admin@dev.local',
-        name: '開発者',
         role: 'admin',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        app_metadata: {},
+        user_metadata: {},
+        aud: 'authenticated',
+        confirmation_sent_at: null,
+        confirmed_at: new Date().toISOString(),
+        email_confirmed_at: new Date().toISOString(),
+        invited_at: null,
+        last_sign_in_at: new Date().toISOString(),
+        phone: null,
+        phone_confirmed_at: null,
+        recovery_sent_at: null,
       }
     }
 
@@ -72,8 +84,20 @@ export async function authenticate(req: NextRequest): Promise<MVPUser> {
       return {
         id: 'dev-admin',
         email: 'admin@dev.local',
-        name: '開発者',
         role: 'admin',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        app_metadata: {},
+        user_metadata: {},
+        aud: 'authenticated',
+        confirmation_sent_at: null,
+        confirmed_at: new Date().toISOString(),
+        email_confirmed_at: new Date().toISOString(),
+        invited_at: null,
+        last_sign_in_at: new Date().toISOString(),
+        phone: null,
+        phone_confirmed_at: null,
+        recovery_sent_at: null,
       }
     }
 

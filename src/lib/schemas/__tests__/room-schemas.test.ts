@@ -16,7 +16,6 @@ describe('room-schemas', () => {
         name: '第1図書室',
         capacity: 5,
         description: '5年生用の図書室です',
-        isActive: true,
       }
 
       expect(() => createRoomSchema.parse(validData)).not.toThrow()
@@ -29,7 +28,6 @@ describe('room-schemas', () => {
       }
 
       const result = createRoomSchema.parse(minimalData)
-      expect(result.isActive).toBe(true) // デフォルト値
       expect(result.description).toBeUndefined()
     })
 
@@ -62,18 +60,18 @@ describe('room-schemas', () => {
       }
 
       expect(() => createRoomSchema.parse(invalidData)).toThrow(
-        '定員は1以上で入力してください'
+        '収容人数は1以上で入力してください'
       )
     })
 
     it('定員が大きすぎる場合を拒否する', () => {
       const invalidData = {
         name: '第1図書室',
-        capacity: 11,
+        capacity: 101,
       }
 
       expect(() => createRoomSchema.parse(invalidData)).toThrow(
-        '定員は10以下で入力してください'
+        '収容人数は100以下で入力してください'
       )
     })
 
@@ -84,7 +82,7 @@ describe('room-schemas', () => {
       }
 
       expect(() => createRoomSchema.parse(invalidData)).toThrow(
-        '定員は整数で入力してください'
+        '収容人数は整数で入力してください'
       )
     })
 
@@ -136,13 +134,13 @@ describe('room-schemas', () => {
 
     it('無効な定員を拒否する', () => {
       expect(() => updateRoomSchema.parse({ capacity: 0 })).toThrow(
-        '定員は1以上で入力してください'
+        '収容人数は1以上で入力してください'
       )
-      expect(() => updateRoomSchema.parse({ capacity: 11 })).toThrow(
-        '定員は10以下で入力してください'
+      expect(() => updateRoomSchema.parse({ capacity: 101 })).toThrow(
+        '収容人数は100以下で入力してください'
       )
       expect(() => updateRoomSchema.parse({ capacity: 5.5 })).toThrow(
-        '定員は整数で入力してください'
+        '収容人数は整数で入力してください'
       )
     })
 
@@ -225,13 +223,11 @@ describe('room-schemas', () => {
         name: '第1図書室',
         capacity: 5,
         description: 'テスト用図書室',
-        isActive: true,
       })
 
       expect(typeof data.name).toBe('string')
       expect(typeof data.capacity).toBe('number')
       expect(typeof data.description).toBe('string')
-      expect(typeof data.isActive).toBe('boolean')
     })
 
     it('UpdateRoomData型が正しく推論される', () => {
@@ -243,7 +239,6 @@ describe('room-schemas', () => {
       expect(typeof data.name).toBe('string')
       expect(typeof data.capacity).toBe('number')
       expect(data.description).toBeUndefined()
-      expect(data.isActive).toBeUndefined()
     })
 
     it('RoomSearchParams型が正しく推論される', () => {

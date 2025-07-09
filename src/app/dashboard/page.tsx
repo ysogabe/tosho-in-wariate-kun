@@ -79,17 +79,21 @@ export default function DashboardPage() {
     error: statsError,
     isLoading: statsLoading,
     mutate: mutateStats,
-  } = useSWR('/api/dashboard/stats', async (url: string) => {
-    const response = await fetch(url)
-    if (!response.ok) {
-      throw new Error('Failed to fetch dashboard stats')
+  } = useSWR(
+    '/api/dashboard/stats',
+    async (url: string) => {
+      const response = await fetch(url)
+      if (!response.ok) {
+        throw new Error('Failed to fetch dashboard stats')
+      }
+      return response.json()
+    },
+    {
+      revalidateOnFocus: true,
+      revalidateOnMount: true,
+      refreshInterval: 30000, // 30秒ごとに更新
     }
-    return response.json()
-  }, {
-    revalidateOnFocus: true,
-    revalidateOnMount: true,
-    refreshInterval: 30000, // 30秒ごとに更新
-  })
+  )
 
   // 最近の活動の取得
   const { data: activitiesData, isLoading: activitiesLoading } = useSWR(
