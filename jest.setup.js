@@ -5,7 +5,7 @@ import '@testing-library/jest-dom'
 
 // Test environment setup
 process.env.NODE_ENV = 'test'
-process.env.DATABASE_URL = process.env.TEST_DATABASE_URL || 'file:./test.db'
+process.env.DATABASE_URL = process.env.TEST_DATABASE_URL || process.env.DATABASE_URL || 'file:./test.db'
 
 // Mock Prisma Client for unit tests
 jest.mock('@/lib/database/client', () => ({
