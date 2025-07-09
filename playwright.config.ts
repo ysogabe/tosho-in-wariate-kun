@@ -40,10 +40,18 @@ export default defineConfig({
     video: process.env.CI ? 'retain-on-failure' : 'retain-on-failure',
     
     /* Action timeout */
-    actionTimeout: 10000,
+    actionTimeout: 15000, // Docker環境では少し長めに
     
     /* Navigation timeout */
-    navigationTimeout: 30000,
+    navigationTimeout: 45000, // Docker環境では少し長めに
+    
+    /* Docker環境での設定 */
+    ...(process.env.CI && {
+      // CIでは安定性を重視
+      launchOptions: {
+        slowMo: 100, // 操作間に100msの遅延
+      },
+    }),
   },
 
   /* Configure projects for major browsers */
@@ -60,6 +68,10 @@ export default defineConfig({
             '--disable-gpu',
             '--disable-web-security',
             '--allow-running-insecure-content',
+            // Docker環境での最適化
+            '--disable-background-timer-throttling',
+            '--disable-backgrounding-occluded-windows',
+            '--disable-renderer-backgrounding',
           ],
         },
       },

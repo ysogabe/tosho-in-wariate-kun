@@ -167,7 +167,7 @@ jobs:
 
   playwright-tests:
     name: Playwright E2E Tests
-    # REQUIRED: Must use self-hosted runner exclusively
+    # REQUIRED: Must use self-hosted runner exclusively  
     runs-on: self-hosted
     needs: test
     permissions:
@@ -176,6 +176,11 @@ jobs:
       actions: read
       pages: write
       id-token: write
+    
+    # Use Playwright official Docker image for faster setup
+    container:
+      image: mcr.microsoft.com/playwright:v1.53.2-jammy
+      options: --user root
 
     steps:
       - name: Checkout code
@@ -189,9 +194,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
 
       - name: Setup test database
         run: |

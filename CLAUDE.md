@@ -282,7 +282,8 @@ pnpm --filter backend dev   # Start backend only
    - PR comment integration
 
 2. **Playwright E2E Tests**
-   - Runs on: `self-hosted`
+   - Runs on: `self-hosted` with Playwright Docker container
+   - Container: `mcr.microsoft.com/playwright:v1.53.2-jammy`
    - Dependencies: Test & Build job success
    - Production build testing
    - Database initialization
@@ -295,6 +296,16 @@ pnpm --filter backend dev   # Start backend only
 - **No GitHub-hosted runners**: Do not use `ubuntu-latest`, `windows-latest`, etc.
 - **Performance**: Self-hosted runners provide better performance and resource control
 - **Security**: Enhanced security for proprietary code
+
+#### Playwright Docker Environment
+
+- **Official Image**: `mcr.microsoft.com/playwright:v1.53.2-jammy`
+- **Benefits**:
+  - Pre-installed browsers and dependencies
+  - Consistent environment across runs
+  - Faster setup (no browser installation needed)
+  - Optimized for CI performance
+- **Configuration**: Adjusted timeouts and stability settings for container environment
 
 ### Test Execution Commands
 
