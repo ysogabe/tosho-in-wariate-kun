@@ -145,8 +145,10 @@ jobs:
               });
             }
 
-      - name: Build application
+      - name: Build for production
         run: npm run build
+        env:
+          NODE_ENV: production
 
       - name: Cache build artifacts
         if: matrix.node-version == '20.x'
@@ -157,12 +159,24 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-
 
-  build-check:
-    name: Build Check (Production)
+      - name: Check build size
+        if: matrix.node-version == '20.x'
+        run: |
+          echo "Build completed successfully"
+          ls -la .next/
+          du -sh .next/
+
+  playwright-tests:
+    name: Playwright E2E Tests
     # REQUIRED: Must use self-hosted runner exclusively
-    # DO NOT change to ubuntu-latest, windows-latest, or any GitHub-hosted runner
     runs-on: self-hosted
     needs: test
+    permissions:
+      contents: read
+      pull-requests: write
+      actions: read
+      pages: write
+      id-token: write
 
     steps:
       - name: Checkout code
@@ -177,13 +191,144 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build for production
-        run: npm run build
-        env:
-          NODE_ENV: production
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
 
-      - name: Check build size
+      - name: Restore build cache
+        uses: actions/cache@v4
+        with:
+          path: .next
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-${{ hashFiles('**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-
+
+      - name: Build if cache miss
         run: |
-          echo "Build completed successfully"
-          ls -la .next/
-          du -sh .next/
+          if [ ! -d ".next" ]; then
+            echo "Build cache miss, building application..."
+            npm run build
+          else
+            echo "Using cached build"
+          fi
+
+      - name: Start development server
+        run: |
+          npm run dev &
+          npx wait-on http://localhost:3000 --timeout 60000
+        env:
+          NODE_ENV: test
+
+      - name: Run Playwright tests
+        run: npm run test:e2e:ci
+        env:
+          CI: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 30
+
+      - name: Upload screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-screenshots
+          path: test-results/**/*.png
+          retention-days: 30
+
+      - name: Upload videos on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-videos
+          path: test-results/**/*.webm
+          retention-days: 30
+
+      - name: Comment PR with test results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            try {
+              const resultsPath = 'playwright-report/results.json';
+              if (fs.existsSync(resultsPath)) {
+                const results = JSON.parse(fs.readFileSync(resultsPath, 'utf8'));
+                
+                const { stats } = results;
+                const passed = stats.expected || 0;
+                const failed = stats.unexpected || 0;
+                const skipped = stats.skipped || 0;
+                const total = passed + failed + skipped;
+                
+                const emoji = failed > 0 ? '❌' : '✅';
+                const status = failed > 0 ? 'FAILED' : 'PASSED';
+                
+                let comment = `## ${emoji} Playwright E2E Test Results\n\n`;
+                comment += `**Status**: ${status}\n`;
+                comment += `**Total**: ${total} tests\n`;
+                comment += `**Passed**: ${passed} ✅\n`;
+                comment += `**Failed**: ${failed} ❌\n`;
+                comment += `**Skipped**: ${skipped} ⏭️\n\n`;
+                
+                if (failed > 0) {
+                  comment += `### Failed Tests\n`;
+                  results.suites.forEach(suite => {
+                    suite.specs.forEach(spec => {
+                      spec.tests.forEach(test => {
+                        if (test.results.some(r => r.status === 'failed')) {
+                          comment += `- ${test.title}\n`;
+                        }
+                      });
+                    });
+                  });
+                  comment += `\n📸 Screenshots and videos are available in the artifacts.\n`;
+                }
+                
+                comment += `\n🎭 **Playwright Report**: [View detailed report](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})\n`;
+                comment += `_Generated by Playwright E2E Tests_`;
+                
+                // Find existing comment
+                const comments = await github.rest.issues.listComments({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                });
+                
+                const existingComment = comments.data.find(
+                  comment => comment.body.includes('Playwright E2E Test Results')
+                );
+                
+                if (existingComment) {
+                  await github.rest.issues.updateComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    comment_id: existingComment.id,
+                    body: comment
+                  });
+                } else {
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: context.issue.number,
+                    body: comment
+                  });
+                }
+              }
+            } catch (error) {
+              console.error('Error processing test results:', error);
+            }
+
+      - name: Deploy to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./playwright-report
+          destination_dir: playwright-reports/${{ github.run_id }}
