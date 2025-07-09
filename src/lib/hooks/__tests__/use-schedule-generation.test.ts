@@ -14,13 +14,10 @@ jest.mock('sonner', () => ({
   toast: mockToast,
 }))
 
-// Mock timers for progress simulation
-jest.useFakeTimers()
-
 describe('useScheduleGeneration', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    jest.clearAllTimers()
+    jest.useFakeTimers()
   })
 
   afterEach(() => {
