@@ -300,12 +300,46 @@ pnpm --filter backend dev   # Start backend only
 
 ```bash
 # Local development
-npm run test              # Watch mode
-npm run test:ci          # CI mode with coverage
+npm run test              # Unit tests with DB setup
+npm run test:watch       # Watch mode with DB setup
+npm run test:ci          # CI mode with coverage and DB setup
+npm run test:setup       # Database setup only
+npm run test:e2e         # E2E tests with DB setup
+npm run test:e2e:setup   # E2E database setup only
+
+# Development tools
 npm run lint             # ESLint validation
 npm run type-check       # TypeScript validation
 npm run build            # Production build
 ```
+
+### Test Database Information
+
+**重要**: テスト作成時は以下のデータベース構造とテストデータを参照してください。
+
+#### データベース設定
+- **単体テスト**: モックPrismaクライアント使用
+- **E2Eテスト**: 実際のテストデータベース使用
+- **自動初期化**: 全テスト実行前にDB初期化
+
+#### テストデータ構造
+- **ユーザー**: 管理者・一般ユーザー各1名
+- **クラス**: 1年1組〜6年3組（18クラス）
+- **生徒**: 各クラス25名（計450名）
+- **図書室**: A・B・C室（3室）
+- **当番割り当て**: 1学期・2学期分のサンプルデータ
+
+#### テストデータアクセス例
+```typescript
+// 単体テストでモックデータを使用
+expect(global.testData.students).toHaveLength(2)
+
+// E2Eテストで実際のDBデータを使用
+const students = await prisma.student.findMany()
+expect(students).toHaveLength(450)
+```
+
+詳細は[テストデータベースセットアップガイド](docs/testing/test-database-setup.md)を参照。
 
 ### 重要: ローカルテスト実行について
 

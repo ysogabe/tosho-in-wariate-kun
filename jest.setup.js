@@ -3,6 +3,153 @@
 
 import '@testing-library/jest-dom'
 
+// Test environment setup
+process.env.NODE_ENV = 'test'
+process.env.DATABASE_URL = process.env.TEST_DATABASE_URL || 'file:./test.db'
+
+// Mock Prisma Client for unit tests
+jest.mock('@/lib/database/client', () => ({
+  prisma: {
+    user: {
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn(),
+    },
+    student: {
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn(),
+    },
+    class: {
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn(),
+    },
+    room: {
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn(),
+    },
+    assignment: {
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn(),
+      createMany: jest.fn(),
+      deleteMany: jest.fn(),
+    },
+    $transaction: jest.fn(),
+    $disconnect: jest.fn(),
+  },
+}))
+
+// Mock test data utilities
+global.testData = {
+  users: [
+    {
+      id: '1',
+      email: 'admin@example.com',
+      name: '管理者',
+      role: 'ADMIN',
+      createdAt: new Date('2024-01-01T00:00:00Z'),
+      updatedAt: new Date('2024-01-01T00:00:00Z'),
+    },
+    {
+      id: '2',
+      email: 'user@example.com',
+      name: '一般ユーザー',
+      role: 'USER',
+      createdAt: new Date('2024-01-01T00:00:00Z'),
+      updatedAt: new Date('2024-01-01T00:00:00Z'),
+    },
+  ],
+  classes: [
+    {
+      id: '1',
+      name: '1組',
+      grade: 1,
+      year: 2024,
+      createdAt: new Date('2024-01-01T00:00:00Z'),
+      updatedAt: new Date('2024-01-01T00:00:00Z'),
+    },
+    {
+      id: '2',
+      name: '2組',
+      grade: 1,
+      year: 2024,
+      createdAt: new Date('2024-01-01T00:00:00Z'),
+      updatedAt: new Date('2024-01-01T00:00:00Z'),
+    },
+  ],
+  students: [
+    {
+      id: '1',
+      name: '佐藤太郎',
+      studentNumber: '101001',
+      classId: '1',
+      isActive: true,
+      createdAt: new Date('2024-01-01T00:00:00Z'),
+      updatedAt: new Date('2024-01-01T00:00:00Z'),
+    },
+    {
+      id: '2',
+      name: '田中花子',
+      studentNumber: '101002',
+      classId: '1',
+      isActive: true,
+      createdAt: new Date('2024-01-01T00:00:00Z'),
+      updatedAt: new Date('2024-01-01T00:00:00Z'),
+    },
+  ],
+  rooms: [
+    {
+      id: '1',
+      name: '図書室A',
+      isActive: true,
+      createdAt: new Date('2024-01-01T00:00:00Z'),
+      updatedAt: new Date('2024-01-01T00:00:00Z'),
+    },
+    {
+      id: '2',
+      name: '図書室B',
+      isActive: true,
+      createdAt: new Date('2024-01-01T00:00:00Z'),
+      updatedAt: new Date('2024-01-01T00:00:00Z'),
+    },
+  ],
+  assignments: [
+    {
+      id: '1',
+      studentId: '1',
+      roomId: '1',
+      date: new Date('2024-04-01T00:00:00Z'),
+      term: 'FIRST',
+      year: 2024,
+      createdAt: new Date('2024-01-01T00:00:00Z'),
+      updatedAt: new Date('2024-01-01T00:00:00Z'),
+    },
+  ],
+}
+
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
   useRouter() {
