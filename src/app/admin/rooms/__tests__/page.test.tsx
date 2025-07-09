@@ -303,7 +303,7 @@ describe('RoomManagementPage', () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const swr = jest.mocked(require('swr'))
     swr.default = jest.fn((url: string) => {
-      if (url === '/api/rooms') {
+      if (url === '/api/rooms?page=1&limit=100') {
         return {
           data: { data: { rooms: mockRooms } },
           error: null,
@@ -611,7 +611,7 @@ describe('RoomManagementPage', () => {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const swr = jest.mocked(require('swr'))
       swr.default = jest.fn((url: string) => {
-        if (url === '/api/rooms') {
+        if (url === '/api/rooms?page=1&limit=100') {
           return {
             data: null,
             error: new Error('データ取得エラー'),
@@ -666,7 +666,7 @@ describe('RoomManagementPage', () => {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const swr = jest.mocked(require('swr'))
       swr.default = jest.fn((url: string) => {
-        if (url === '/api/rooms') {
+        if (url === '/api/rooms?page=1&limit=100') {
           return {
             data: null,
             error: null,
@@ -747,7 +747,7 @@ describe('RoomManagementPage', () => {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const swr = jest.mocked(require('swr'))
       swr.default = jest.fn((url: string) => {
-        if (url === '/api/rooms') {
+        if (url === '/api/rooms?page=1&limit=100') {
           return {
             data: { data: { rooms: largeDataSet } },
             error: null,
