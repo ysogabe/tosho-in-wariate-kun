@@ -197,10 +197,13 @@ jobs:
       - name: Setup test database
         run: |
           echo "Setting up test database for E2E tests..."
+          # Create and fix Prisma cache directory
+          mkdir -p $HOME/.cache/prisma
           npm run test:e2e:setup
         env:
           NODE_ENV: test
           DATABASE_URL: file:./e2e-test.db
+          PRISMA_CACHE_DIR: $HOME/.cache/prisma
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
