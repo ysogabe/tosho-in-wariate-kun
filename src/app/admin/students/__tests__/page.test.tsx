@@ -3,7 +3,7 @@
  * t-wada提唱のTDDメソッドに従った包括的テスト
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import { toast } from 'sonner'
@@ -83,8 +83,8 @@ jest.mock('@/components/ui/select', () => ({
   SelectContent: ({ children }: any) => (
     <div data-testid="select-content">{children}</div>
   ),
-  SelectItem: ({ children, value }: any) => (
-    <div data-testid="select-item" data-value={value}>
+  SelectItem: ({ children, value: _value }: any) => (
+    <div data-testid="select-item" data-value={_value}>
       {children}
     </div>
   ),
@@ -164,7 +164,7 @@ jest.mock('@/components/layout/page-layout', () => ({
 }))
 
 jest.mock('@/components/ui/data-table', () => ({
-  DataTable: ({ columns, data, searchKey, onSelectionChange }: any) => (
+  DataTable: ({ columns: _columns, data, searchKey, onSelectionChange }: any) => (
     <div data-testid="data-table">
       <div data-testid="table-search-key">{searchKey}</div>
       <div data-testid="table-data-count">{data?.length || 0}</div>
@@ -272,6 +272,7 @@ describe('StudentManagementPage', () => {
     jest.clearAllMocks()
 
     // Setup SWR mock
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const swr = require('swr')
     swr.default = jest
       .fn()
@@ -530,7 +531,6 @@ describe('StudentManagementPage', () => {
 
       // 複数の図書委員を選択
       const selectButton1 = screen.getByTestId('select-row-0')
-      const selectButton2 = screen.getByTestId('select-row-1')
 
       await user.click(selectButton1)
       // Note: 実際の実装では複数選択ロジックが必要
@@ -584,6 +584,7 @@ describe('StudentManagementPage', () => {
 
   describe('エラーハンドリング', () => {
     it('データ取得エラー時にエラーメッセージが表示される', () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const swr = require('swr')
       swr.default = jest
         .fn()
@@ -636,6 +637,7 @@ describe('StudentManagementPage', () => {
 
   describe('ローディング状態', () => {
     it('データ読み込み中にローディングスピナーが表示される', () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const swr = require('swr')
       swr.default = jest
         .fn()
@@ -719,6 +721,7 @@ describe('StudentManagementPage', () => {
         updatedAt: '2024-01-01T00:00:00Z',
       }))
 
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const swr = require('swr')
       swr.default = jest
         .fn()

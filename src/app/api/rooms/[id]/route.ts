@@ -5,8 +5,7 @@
  * DELETE /api/rooms/[id] - 図書室削除
  */
 
-import { NextRequest, NextResponse } from 'next/server'
-import { z } from 'zod'
+import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/database/client'
 import {
   handleApiError,

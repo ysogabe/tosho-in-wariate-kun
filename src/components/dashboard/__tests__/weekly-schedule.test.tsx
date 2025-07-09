@@ -35,7 +35,9 @@ jest.mock('react-to-print', () => ({
   useReactToPrint: jest.fn(() => jest.fn()),
 }))
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const mockSWR = require('swr').default
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const mockUseReactToPrint = require('react-to-print').useReactToPrint
 
 describe('WeeklySchedule', () => {

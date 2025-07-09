@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/database/client'
 import { authenticate } from '@/lib/auth/helpers'
-import { getCurrentTerm, type Term } from '@/lib/utils/term-utils'
+import { getCurrentTerm } from '@/lib/utils/term-utils'
 // エラーハンドリング用のヘルパー関数
 function handleApiError(error: unknown, message: string) {
   console.error('API Error:', error)
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
     // 認証チェック
     try {
       await authenticate(request)
-    } catch (authError) {
+    } catch {
       return NextResponse.json(
         {
           success: false,

@@ -3,7 +3,7 @@
  * t-wada提唱のTDDメソッドに従った包括的テスト
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import { ScheduleGrid } from '../schedule-grid'

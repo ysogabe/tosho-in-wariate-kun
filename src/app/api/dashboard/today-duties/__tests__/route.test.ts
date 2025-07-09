@@ -58,6 +58,7 @@ jest.mock('@/lib/auth/helpers', () => ({
 }))
 
 const mockPrisma = prisma as jest.Mocked<typeof prisma>
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { authenticate } = require('@/lib/auth/helpers')
 const mockAuthenticate = authenticate as jest.MockedFunction<
   (request: NextRequest) => Promise<MVPUser>

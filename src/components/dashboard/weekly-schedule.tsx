@@ -293,7 +293,7 @@ export function WeeklySchedule() {
                           data-testid={`day-column-${dayOfWeek}`}
                         >
                           {scheduleMatrix[roomId]?.[dayOfWeek]?.map(
-                            (assignment, index) => (
+                            (assignment, _index) => (
                               <div key={assignment.id} className="mb-1">
                                 <div className="font-medium">
                                   {assignment.student.name}

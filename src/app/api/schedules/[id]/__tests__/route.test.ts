@@ -5,7 +5,6 @@
 
 import { NextRequest } from 'next/server'
 import { PUT } from '../route'
-import { prisma } from '@/lib/database/client'
 import { authenticateAdmin } from '@/lib/auth/helpers'
 
 // モック設定

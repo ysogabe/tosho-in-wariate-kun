@@ -4,10 +4,10 @@
  */
 
 import { NextRequest } from 'next/server'
-import { prisma } from '@/lib/database/client'
 import { authenticate } from '@/lib/auth/helpers'
 
 // Next.js環境のセットアップ
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { POST } = require('../route')
 
 // モック設定
