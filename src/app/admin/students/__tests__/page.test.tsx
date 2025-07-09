@@ -308,7 +308,7 @@ describe('StudentManagementPage', () => {
     it('新規登録ボタンが表示される', () => {
       render(<StudentManagementPage />)
 
-      expect(screen.getByText('新規登録')).toBeInTheDocument()
+      expect(screen.getByText('✨ 新規登録')).toBeInTheDocument()
       expect(screen.getByTestId('plus-icon')).toBeInTheDocument()
     })
 
@@ -399,7 +399,7 @@ describe('StudentManagementPage', () => {
       const user = userEvent.setup()
       render(<StudentManagementPage />)
 
-      const createButton = screen.getByText('新規登録')
+      const createButton = screen.getByText('✨ 新規登録')
       await user.click(createButton)
 
       expect(screen.getByTestId('dialog')).toBeInTheDocument()
@@ -410,7 +410,7 @@ describe('StudentManagementPage', () => {
       const user = userEvent.setup()
       render(<StudentManagementPage />)
 
-      const createButton = screen.getByText('新規登録')
+      const createButton = screen.getByText('✨ 新規登録')
       await user.click(createButton)
 
       expect(screen.getByText('氏名')).toBeInTheDocument()
@@ -428,7 +428,7 @@ describe('StudentManagementPage', () => {
 
       render(<StudentManagementPage />)
 
-      const createButton = screen.getByText('新規登録')
+      const createButton = screen.getByText('✨ 新規登録')
       await user.click(createButton)
 
       const submitButton = screen.getByText('登録')
@@ -628,7 +628,7 @@ describe('StudentManagementPage', () => {
 
       render(<StudentManagementPage />)
 
-      const createButton = screen.getByText('新規登録')
+      const createButton = screen.getByText('✨ 新規登録')
       await user.click(createButton)
 
       const submitButton = screen.getByText('登録')
@@ -681,7 +681,7 @@ describe('StudentManagementPage', () => {
       const user = userEvent.setup()
       render(<StudentManagementPage />)
 
-      const createButton = screen.getByText('新規登録')
+      const createButton = screen.getByText('✨ 新規登録')
       await user.click(createButton)
 
       expect(screen.getByText('氏名')).toBeInTheDocument()
