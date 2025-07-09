@@ -365,7 +365,7 @@ describe('ScheduleManagementPage', () => {
   describe('基本レンダリング', () => {
     it('正常にレンダリングされる', async () => {
       // Mock SWR to return data immediately
-      const useSWR = require('swr').default
+      const useSWR = jest.mocked(require('swr').default)
       useSWR
         .mockReturnValueOnce({
           data: mockScheduleData,
@@ -391,7 +391,7 @@ describe('ScheduleManagementPage', () => {
     })
 
     it('ローディング状態を表示する', () => {
-      const useSWR = require('swr').default
+      const useSWR = jest.mocked(require('swr').default)
       useSWR.mockReturnValue({
         data: null,
         error: null,
@@ -408,7 +408,7 @@ describe('ScheduleManagementPage', () => {
     })
 
     it('エラー状態を表示する', () => {
-      const useSWR = require('swr').default
+      const useSWR = jest.mocked(require('swr').default)
       useSWR.mockReturnValue({
         data: null,
         error: new Error('データ取得エラー'),
@@ -427,7 +427,7 @@ describe('ScheduleManagementPage', () => {
 
   describe('期間選択とビューモード', () => {
     beforeEach(() => {
-      const useSWR = require('swr').default
+      const useSWR = jest.mocked(require('swr').default)
       useSWR
         .mockReturnValueOnce({
           data: mockScheduleData,
@@ -482,7 +482,7 @@ describe('ScheduleManagementPage', () => {
 
   describe('統計情報表示', () => {
     it('統計情報を正しく表示する', () => {
-      const useSWR = require('swr').default
+      const useSWR = jest.mocked(require('swr').default)
       useSWR
         .mockReturnValueOnce({
           data: mockScheduleData,
@@ -508,7 +508,7 @@ describe('ScheduleManagementPage', () => {
 
   describe('スケジュール生成機能', () => {
     beforeEach(() => {
-      const useSWR = require('swr').default
+      const useSWR = jest.mocked(require('swr').default)
       useSWR
         .mockReturnValueOnce({
           data: mockScheduleData,
@@ -602,7 +602,7 @@ describe('ScheduleManagementPage', () => {
 
   describe('スケジュールリセット機能', () => {
     beforeEach(() => {
-      const useSWR = require('swr').default
+      const useSWR = jest.mocked(require('swr').default)
       useSWR
         .mockReturnValueOnce({
           data: mockScheduleData,
@@ -670,7 +670,7 @@ describe('ScheduleManagementPage', () => {
 
   describe('エクスポート機能', () => {
     beforeEach(() => {
-      const useSWR = require('swr').default
+      const useSWR = jest.mocked(require('swr').default)
       useSWR
         .mockReturnValueOnce({
           data: mockScheduleData,
@@ -753,7 +753,7 @@ describe('ScheduleManagementPage', () => {
 
   describe('スケジュール表示コンポーネント統合', () => {
     beforeEach(() => {
-      const useSWR = require('swr').default
+      const useSWR = jest.mocked(require('swr').default)
       useSWR
         .mockReturnValueOnce({
           data: mockScheduleData,
@@ -814,7 +814,7 @@ describe('ScheduleManagementPage', () => {
 
   describe('レスポンシブ対応', () => {
     it('モバイル表示に適応する', () => {
-      const useSWR = require('swr').default
+      const useSWR = jest.mocked(require('swr').default)
       useSWR
         .mockReturnValueOnce({
           data: mockScheduleData,
@@ -839,7 +839,7 @@ describe('ScheduleManagementPage', () => {
 
   describe('アクセシビリティ', () => {
     beforeEach(() => {
-      const useSWR = require('swr').default
+      const useSWR = jest.mocked(require('swr').default)
       useSWR
         .mockReturnValueOnce({
           data: mockScheduleData,
@@ -879,7 +879,7 @@ describe('ScheduleManagementPage', () => {
 
   describe('エラーハンドリング', () => {
     it('ネットワークエラーを適切に処理する', async () => {
-      const useSWR = require('swr').default
+      const useSWR = jest.mocked(require('swr').default)
       useSWR
         .mockReturnValueOnce({
           data: mockScheduleData,
@@ -916,7 +916,7 @@ describe('ScheduleManagementPage', () => {
     })
 
     it('空のスケジュール状態を正しく表示する', () => {
-      const useSWR = require('swr').default
+      const useSWR = jest.mocked(require('swr').default)
       useSWR
         .mockReturnValueOnce({
           data: {

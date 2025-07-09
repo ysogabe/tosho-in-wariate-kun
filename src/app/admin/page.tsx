@@ -3,12 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  School,
-  Users,
-  Calendar,
-  RefreshCw,
-} from 'lucide-react'
+import { School, Users, Calendar, RefreshCw } from 'lucide-react'
 import useSWR from 'swr'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { Alert, AlertDescription } from '@/components/ui/alert'

@@ -176,7 +176,7 @@ jest.mock('@/components/layout/page-layout', () => ({
 }))
 
 jest.mock('@/components/ui/data-table', () => ({
-  DataTable: ({ columns, data, searchKey, onSelectionChange }: any) => (
+  DataTable: ({ data, searchKey, onSelectionChange }: any) => (
     <div data-testid="data-table">
       <div data-testid="table-search-key">{searchKey}</div>
       <div data-testid="table-data-count">{data?.length || 0}</div>
@@ -287,7 +287,7 @@ describe('RoomManagementPage', () => {
     jest.clearAllMocks()
 
     // Setup SWR mock with consistent return values
-    const swr = require('swr')
+    const swr = jest.mocked(require('swr'))
     swr.default = jest.fn((url: string) => {
       if (url === '/api/rooms') {
         return {
@@ -594,7 +594,7 @@ describe('RoomManagementPage', () => {
 
   describe('エラーハンドリング', () => {
     it('データ取得エラー時にエラーメッセージが表示される', () => {
-      const swr = require('swr')
+      const swr = jest.mocked(require('swr'))
       swr.default = jest.fn((url: string) => {
         if (url === '/api/rooms') {
           return {
@@ -648,7 +648,7 @@ describe('RoomManagementPage', () => {
 
   describe('ローディング状態', () => {
     it('データ読み込み中にローディングスピナーが表示される', () => {
-      const swr = require('swr')
+      const swr = jest.mocked(require('swr'))
       swr.default = jest.fn((url: string) => {
         if (url === '/api/rooms') {
           return {
@@ -728,7 +728,7 @@ describe('RoomManagementPage', () => {
         updatedAt: '2024-01-01T00:00:00Z',
       }))
 
-      const swr = require('swr')
+      const swr = jest.mocked(require('swr'))
       swr.default = jest.fn((url: string) => {
         if (url === '/api/rooms') {
           return {

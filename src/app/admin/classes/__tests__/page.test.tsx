@@ -277,7 +277,7 @@ describe('ClassManagementPage', () => {
     jest.clearAllMocks()
 
     // Setup SWR mock with consistent return values
-    const swr = jest.requireMock('swr')
+    const swr = jest.mocked(require('swr'))
     swr.default = jest.fn((url: string) => {
       if (url === '/api/classes') {
         return {
@@ -597,7 +597,7 @@ describe('ClassManagementPage', () => {
 
   describe('エラーハンドリング', () => {
     it('データ取得エラー時にエラーメッセージが表示される', () => {
-      const swr = require('swr')
+      const swr = jest.mocked(require('swr'))
       swr.default = jest.fn((url: string) => {
         if (url === '/api/classes') {
           return {
@@ -659,7 +659,7 @@ describe('ClassManagementPage', () => {
 
   describe('ローディング状態', () => {
     it('データ読み込み中にローディングスピナーが表示される', () => {
-      const swr = require('swr')
+      const swr = jest.mocked(require('swr'))
       swr.default = jest.fn((url: string) => {
         if (url === '/api/classes') {
           return {
@@ -751,7 +751,7 @@ describe('ClassManagementPage', () => {
         updatedAt: '2024-01-01T00:00:00Z',
       }))
 
-      const swr = require('swr')
+      const swr = jest.mocked(require('swr'))
       swr.default = jest.fn((url: string) => {
         if (url === '/api/classes') {
           return {
