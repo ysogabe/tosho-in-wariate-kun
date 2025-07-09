@@ -233,23 +233,26 @@ describe('TodayDuties', () => {
 
   describe('日付フォーマット', () => {
     const dateTestCases = [
-      { date: '2025-07-07', expected: '7月7日(月)' }, // 月曜日
-      { date: '2025-07-08', expected: '7月8日(火)' }, // 火曜日
-      { date: '2025-07-09', expected: '7月9日(水)' }, // 水曜日
-      { date: '2025-07-10', expected: '7月10日(木)' }, // 木曜日
-      { date: '2025-07-11', expected: '7月11日(金)' }, // 金曜日
-      { date: '2025-07-05', expected: '7月5日(土)' }, // 土曜日
-      { date: '2025-07-06', expected: '7月6日(日)' }, // 日曜日
+      { date: '2025-07-07', dayOfWeek: 'monday', expected: '7月7日(月)' }, // 月曜日
+      { date: '2025-07-08', dayOfWeek: 'tuesday', expected: '7月8日(火)' }, // 火曜日
+      { date: '2025-07-09', dayOfWeek: 'wednesday', expected: '7月9日(水)' }, // 水曜日
+      { date: '2025-07-10', dayOfWeek: 'thursday', expected: '7月10日(木)' }, // 木曜日
+      { date: '2025-07-11', dayOfWeek: 'friday', expected: '7月11日(金)' }, // 金曜日
+      { date: '2025-07-05', dayOfWeek: 'saturday', expected: '7月5日(土)' }, // 土曜日
+      { date: '2025-07-06', dayOfWeek: 'sunday', expected: '7月6日(日)' }, // 日曜日
     ]
 
-    dateTestCases.forEach(({ date, expected }) => {
+    dateTestCases.forEach(({ date, dayOfWeek, expected }) => {
       it(`${date}が${expected}として表示される`, () => {
+        // Restore the original Date for this test
+        jest.restoreAllMocks()
+        
         const testData = {
           success: true,
           data: {
             date,
-            dayOfWeek: 'monday', // この値は使用せず、実際の日付から算出
-            isWeekend: false,
+            dayOfWeek,
+            isWeekend: dayOfWeek === 'saturday' || dayOfWeek === 'sunday',
             duties: [],
           },
         }

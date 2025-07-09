@@ -156,7 +156,7 @@ describe('ValidationError', () => {
 
       // アイコンと絵文字の確認
       expect(screen.getByTestId('alert-circle-icon')).toBeInTheDocument()
-      expect(screen.getByText('❌')).toBeInTheDocument()
+      expect(screen.getByText('❌ 入力エラーがあります')).toBeInTheDocument()
     })
   })
 

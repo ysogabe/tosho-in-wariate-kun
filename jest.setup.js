@@ -569,3 +569,181 @@ jest.mock('react-error-boundary', () => ({
 
 // Mock window.location.reload for error boundary tests - keep it simple
 global.mockReload = jest.fn()
+
+// Web API polyfills for Next.js API route testing
+// Polyfill Request, Response, Headers for Jest environment
+global.Request = class Request {
+  constructor(url, options = {}) {
+    this._url = url
+    this._method = options.method || 'GET'
+    this._headers = new Headers(options.headers || {})
+    this._body = options.body || null
+    this._cache = options.cache || 'default'
+    this._credentials = options.credentials || 'same-origin'
+    this._integrity = options.integrity || ''
+    this._keepalive = options.keepalive || false
+    this._mode = options.mode || 'cors'
+    this._redirect = options.redirect || 'follow'
+    this._referrer = options.referrer || 'about:client'
+    this._referrerPolicy = options.referrerPolicy || ''
+    this._signal = options.signal || null
+  }
+  
+  get url() { return this._url }
+  get method() { return this._method }
+  get headers() { return this._headers }
+  get body() { return this._body }
+  get cache() { return this._cache }
+  get credentials() { return this._credentials }
+  get integrity() { return this._integrity }
+  get keepalive() { return this._keepalive }
+  get mode() { return this._mode }
+  get redirect() { return this._redirect }
+  get referrer() { return this._referrer }
+  get referrerPolicy() { return this._referrerPolicy }
+  get signal() { return this._signal }
+  
+  clone() {
+    return new Request(this._url, {
+      method: this._method,
+      headers: this._headers,
+      body: this._body,
+      cache: this._cache,
+      credentials: this._credentials,
+      integrity: this._integrity,
+      keepalive: this._keepalive,
+      mode: this._mode,
+      redirect: this._redirect,
+      referrer: this._referrer,
+      referrerPolicy: this._referrerPolicy,
+      signal: this._signal
+    })
+  }
+  
+  json() {
+    return Promise.resolve(this._body ? JSON.parse(this._body) : {})
+  }
+  
+  text() {
+    return Promise.resolve(this._body ? this._body.toString() : '')
+  }
+  
+  formData() {
+    return Promise.resolve(new FormData())
+  }
+}
+
+global.Response = class Response {
+  constructor(body, options = {}) {
+    this.body = body
+    this.status = options.status || 200
+    this.statusText = options.statusText || 'OK'
+    this.headers = new Headers(options.headers || {})
+    this.ok = this.status >= 200 && this.status < 300
+    this.redirected = false
+    this.type = 'basic'
+    this.url = ''
+  }
+  
+  clone() {
+    return new Response(this.body, {
+      status: this.status,
+      statusText: this.statusText,
+      headers: this.headers
+    })
+  }
+  
+  json() {
+    return Promise.resolve(this.body ? JSON.parse(this.body) : {})
+  }
+  
+  text() {
+    return Promise.resolve(this.body ? this.body.toString() : '')
+  }
+  
+  formData() {
+    return Promise.resolve(new FormData())
+  }
+  
+  static json(data, options = {}) {
+    return new Response(JSON.stringify(data), {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+      }
+    })
+  }
+  
+  static error() {
+    return new Response(null, { status: 500, statusText: 'Internal Server Error' })
+  }
+  
+  static redirect(url, status = 302) {
+    return new Response(null, {
+      status,
+      headers: { Location: url }
+    })
+  }
+}
+
+global.Headers = class Headers {
+  constructor(init) {
+    this.map = new Map()
+    if (init) {
+      if (typeof init === 'object') {
+        for (const [key, value] of Object.entries(init)) {
+          this.set(key, value)
+        }
+      }
+    }
+  }
+  
+  append(name, value) {
+    const existing = this.map.get(name.toLowerCase())
+    if (existing) {
+      this.map.set(name.toLowerCase(), existing + ', ' + value)
+    } else {
+      this.map.set(name.toLowerCase(), value)
+    }
+  }
+  
+  delete(name) {
+    this.map.delete(name.toLowerCase())
+  }
+  
+  get(name) {
+    return this.map.get(name.toLowerCase()) || null
+  }
+  
+  has(name) {
+    return this.map.has(name.toLowerCase())
+  }
+  
+  set(name, value) {
+    this.map.set(name.toLowerCase(), value)
+  }
+  
+  entries() {
+    return this.map.entries()
+  }
+  
+  keys() {
+    return this.map.keys()
+  }
+  
+  values() {
+    return this.map.values()
+  }
+  
+  forEach(callback) {
+    this.map.forEach(callback)
+  }
+}
+
+// Mock fetch for Jest environment
+global.fetch = jest.fn()
+
+// Additional Web API polyfills for server-side components
+global.URL = URL
+global.URLSearchParams = URLSearchParams
