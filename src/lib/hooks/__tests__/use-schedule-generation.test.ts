@@ -374,8 +374,8 @@ describe('useScheduleGeneration', () => {
 
   describe('同時実行制御', () => {
     it('生成中は重複実行されない', async () => {
-      let resolveFirst: (value: any) => void
-      const firstPromise = new Promise((resolve) => {
+      let resolveFirst: (value: Response) => void
+      const firstPromise = new Promise<Response>((resolve) => {
         resolveFirst = resolve
       })
 
@@ -403,7 +403,7 @@ describe('useScheduleGeneration', () => {
         resolveFirst({
           ok: true,
           json: async () => ({ success: true, data: { message: '完了' } }),
-        })
+        } as Response)
         await Promise.resolve()
       })
 

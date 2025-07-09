@@ -16,7 +16,6 @@ describe('room-schemas', () => {
         name: '第1図書室',
         capacity: 5,
         description: '5年生用の図書室です',
-        isActive: true,
       }
 
       expect(() => createRoomSchema.parse(validData)).not.toThrow()
@@ -29,7 +28,6 @@ describe('room-schemas', () => {
       }
 
       const result = createRoomSchema.parse(minimalData)
-      expect(result.isActive).toBe(true) // デフォルト値
       expect(result.description).toBeUndefined()
     })
 
@@ -225,13 +223,11 @@ describe('room-schemas', () => {
         name: '第1図書室',
         capacity: 5,
         description: 'テスト用図書室',
-        isActive: true,
       })
 
       expect(typeof data.name).toBe('string')
       expect(typeof data.capacity).toBe('number')
       expect(typeof data.description).toBe('string')
-      expect(typeof data.isActive).toBe('boolean')
     })
 
     it('UpdateRoomData型が正しく推論される', () => {
@@ -243,7 +239,6 @@ describe('room-schemas', () => {
       expect(typeof data.name).toBe('string')
       expect(typeof data.capacity).toBe('number')
       expect(data.description).toBeUndefined()
-      expect(data.isActive).toBeUndefined()
     })
 
     it('RoomSearchParams型が正しく推論される', () => {

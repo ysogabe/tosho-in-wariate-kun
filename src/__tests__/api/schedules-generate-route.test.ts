@@ -79,7 +79,7 @@ describe('/api/schedules/generate Route Tests', () => {
       const mockGenerateSchedule = jest.fn().mockResolvedValue(mockResult)
       mockSchedulerService.mockImplementation(() => ({
         generateSchedule: mockGenerateSchedule,
-      }))
+      }) as any)
 
       const requestBody = {
         term: 'FIRST_TERM',
@@ -131,7 +131,7 @@ describe('/api/schedules/generate Route Tests', () => {
       const mockGenerateSchedule = jest.fn().mockResolvedValue(mockResult)
       mockSchedulerService.mockImplementation(() => ({
         generateSchedule: mockGenerateSchedule,
-      }))
+      }) as any)
 
       const requestBody = {
         term: 'SECOND_TERM',
@@ -166,7 +166,7 @@ describe('/api/schedules/generate Route Tests', () => {
       const mockGenerateSchedule = jest.fn().mockResolvedValue(mockResult)
       mockSchedulerService.mockImplementation(() => ({
         generateSchedule: mockGenerateSchedule,
-      }))
+      }) as any)
 
       const requestBody = {
         term: 'FIRST_TERM',
@@ -274,7 +274,7 @@ describe('/api/schedules/generate Route Tests', () => {
 
       mockSchedulerService.mockImplementation(() => ({
         generateSchedule: mockGenerateSchedule,
-      }))
+      }) as any)
 
       const requestBody = {
         term: 'FIRST_TERM',
@@ -310,7 +310,7 @@ describe('/api/schedules/generate Route Tests', () => {
       const mockGenerateSchedule = jest.fn().mockResolvedValue(mockResult)
       mockSchedulerService.mockImplementation(() => ({
         generateSchedule: mockGenerateSchedule,
-      }))
+      }) as any)
 
       // forceRegenerate未指定（デフォルトfalse）
       const requestBody1 = {
@@ -372,7 +372,7 @@ describe('/api/schedules/generate Route Tests', () => {
       const mockGenerateSchedule = jest.fn().mockResolvedValue(mockResult)
       mockSchedulerService.mockImplementation(() => ({
         generateSchedule: mockGenerateSchedule,
-      }))
+      }) as any)
 
       const requestBody = {
         term: 'FIRST_TERM',

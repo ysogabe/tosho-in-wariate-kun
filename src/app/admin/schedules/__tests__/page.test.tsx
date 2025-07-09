@@ -622,8 +622,8 @@ describe('ScheduleManagementPage', () => {
         }
         return originalCreateElement.call(document, tagName)
       })
-      document.body.appendChild = jest.fn()
-      document.body.removeChild = jest.fn()
+      document.body.appendChild = jest.fn() as any
+      document.body.removeChild = jest.fn() as any
     })
 
     afterEach(() => {
