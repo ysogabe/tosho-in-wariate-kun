@@ -1,14 +1,10 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
-import {
-  Card,
-  CardContent,
-} from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   Dialog,
@@ -59,7 +55,6 @@ interface ScheduleStats {
 }
 
 export default function ScheduleManagementPage() {
-  const router = useRouter()
   const [selectedTerm, setSelectedTerm] = useState<Term>('FIRST_TERM')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [isGenerating, setIsGenerating] = useState(false)
@@ -216,7 +211,6 @@ export default function ScheduleManagementPage() {
   }
 
   const assignments = scheduleData?.data?.assignments || []
-  const summary = scheduleData?.data?.summary || {}
   const stats = statsData?.data as ScheduleStats
 
   return (

@@ -365,6 +365,7 @@ describe('ScheduleManagementPage', () => {
   describe('基本レンダリング', () => {
     it('正常にレンダリングされる', async () => {
       // Mock SWR to return data immediately
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const useSWR = jest.mocked(require('swr').default)
       useSWR
         .mockReturnValueOnce({
@@ -391,6 +392,7 @@ describe('ScheduleManagementPage', () => {
     })
 
     it('ローディング状態を表示する', () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const useSWR = jest.mocked(require('swr').default)
       useSWR.mockReturnValue({
         data: null,
@@ -408,6 +410,7 @@ describe('ScheduleManagementPage', () => {
     })
 
     it('エラー状態を表示する', () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const useSWR = jest.mocked(require('swr').default)
       useSWR.mockReturnValue({
         data: null,
@@ -427,6 +430,7 @@ describe('ScheduleManagementPage', () => {
 
   describe('期間選択とビューモード', () => {
     beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const useSWR = jest.mocked(require('swr').default)
       useSWR
         .mockReturnValueOnce({
@@ -482,6 +486,7 @@ describe('ScheduleManagementPage', () => {
 
   describe('統計情報表示', () => {
     it('統計情報を正しく表示する', () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const useSWR = jest.mocked(require('swr').default)
       useSWR
         .mockReturnValueOnce({
@@ -508,6 +513,7 @@ describe('ScheduleManagementPage', () => {
 
   describe('スケジュール生成機能', () => {
     beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const useSWR = jest.mocked(require('swr').default)
       useSWR
         .mockReturnValueOnce({
@@ -602,6 +608,7 @@ describe('ScheduleManagementPage', () => {
 
   describe('スケジュールリセット機能', () => {
     beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const useSWR = jest.mocked(require('swr').default)
       useSWR
         .mockReturnValueOnce({
@@ -670,6 +677,7 @@ describe('ScheduleManagementPage', () => {
 
   describe('エクスポート機能', () => {
     beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const useSWR = jest.mocked(require('swr').default)
       useSWR
         .mockReturnValueOnce({
@@ -753,6 +761,7 @@ describe('ScheduleManagementPage', () => {
 
   describe('スケジュール表示コンポーネント統合', () => {
     beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const useSWR = jest.mocked(require('swr').default)
       useSWR
         .mockReturnValueOnce({
@@ -814,6 +823,7 @@ describe('ScheduleManagementPage', () => {
 
   describe('レスポンシブ対応', () => {
     it('モバイル表示に適応する', () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const useSWR = jest.mocked(require('swr').default)
       useSWR
         .mockReturnValueOnce({
@@ -839,6 +849,7 @@ describe('ScheduleManagementPage', () => {
 
   describe('アクセシビリティ', () => {
     beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const useSWR = jest.mocked(require('swr').default)
       useSWR
         .mockReturnValueOnce({
@@ -879,6 +890,7 @@ describe('ScheduleManagementPage', () => {
 
   describe('エラーハンドリング', () => {
     it('ネットワークエラーを適切に処理する', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const useSWR = jest.mocked(require('swr').default)
       useSWR
         .mockReturnValueOnce({
@@ -916,6 +928,7 @@ describe('ScheduleManagementPage', () => {
     })
 
     it('空のスケジュール状態を正しく表示する', () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const useSWR = jest.mocked(require('swr').default)
       useSWR
         .mockReturnValueOnce({
