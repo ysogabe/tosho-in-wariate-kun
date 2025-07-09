@@ -60,18 +60,18 @@ describe('room-schemas', () => {
       }
 
       expect(() => createRoomSchema.parse(invalidData)).toThrow(
-        '定員は1以上で入力してください'
+        '収容人数は1以上で入力してください'
       )
     })
 
     it('定員が大きすぎる場合を拒否する', () => {
       const invalidData = {
         name: '第1図書室',
-        capacity: 11,
+        capacity: 101,
       }
 
       expect(() => createRoomSchema.parse(invalidData)).toThrow(
-        '定員は10以下で入力してください'
+        '収容人数は100以下で入力してください'
       )
     })
 
@@ -82,7 +82,7 @@ describe('room-schemas', () => {
       }
 
       expect(() => createRoomSchema.parse(invalidData)).toThrow(
-        '定員は整数で入力してください'
+        '収容人数は整数で入力してください'
       )
     })
 
@@ -134,13 +134,13 @@ describe('room-schemas', () => {
 
     it('無効な定員を拒否する', () => {
       expect(() => updateRoomSchema.parse({ capacity: 0 })).toThrow(
-        '定員は1以上で入力してください'
+        '収容人数は1以上で入力してください'
       )
-      expect(() => updateRoomSchema.parse({ capacity: 11 })).toThrow(
-        '定員は10以下で入力してください'
+      expect(() => updateRoomSchema.parse({ capacity: 101 })).toThrow(
+        '収容人数は100以下で入力してください'
       )
       expect(() => updateRoomSchema.parse({ capacity: 5.5 })).toThrow(
-        '定員は整数で入力してください'
+        '収容人数は整数で入力してください'
       )
     })
 
