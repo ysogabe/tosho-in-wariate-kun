@@ -25,7 +25,14 @@ jest.mock('@/lib/auth/helpers', () => ({
   authenticate: jest.fn(),
 }))
 
-const mockPrisma = prisma as jest.Mocked<typeof prisma>
+const mockPrisma = {
+  room: {
+    findUnique: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+  },
+} as any
+
 const mockAuthenticate = authenticate as jest.MockedFunction<typeof authenticate>
 
 // テストデータ
@@ -48,7 +55,24 @@ const mockRoomWithCount = {
 describe('GET /api/rooms/[id]', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockAuthenticate.mockResolvedValue(undefined)
+    mockAuthenticate.mockResolvedValue({
+      id: 'test-user',
+      email: 'test@example.com',
+      role: 'admin',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      app_metadata: {},
+      user_metadata: {},
+      aud: 'authenticated',
+      confirmation_sent_at: null,
+      confirmed_at: new Date().toISOString(),
+      email_confirmed_at: new Date().toISOString(),
+      invited_at: null,
+      last_sign_in_at: new Date().toISOString(),
+      phone: null,
+      phone_confirmed_at: null,
+      recovery_sent_at: null,
+    })
   })
 
   it('指定されたIDの図書室情報を取得できる', async () => {
@@ -114,7 +138,24 @@ describe('GET /api/rooms/[id]', () => {
 describe('PUT /api/rooms/[id]', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockAuthenticate.mockResolvedValue(undefined)
+    mockAuthenticate.mockResolvedValue({
+      id: 'test-user',
+      email: 'test@example.com',
+      role: 'admin',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      app_metadata: {},
+      user_metadata: {},
+      aud: 'authenticated',
+      confirmation_sent_at: null,
+      confirmed_at: new Date().toISOString(),
+      email_confirmed_at: new Date().toISOString(),
+      invited_at: null,
+      last_sign_in_at: new Date().toISOString(),
+      phone: null,
+      phone_confirmed_at: null,
+      recovery_sent_at: null,
+    })
   })
 
   it('図書室情報を正常に更新できる', async () => {
@@ -198,7 +239,24 @@ describe('PUT /api/rooms/[id]', () => {
 describe('DELETE /api/rooms/[id]', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockAuthenticate.mockResolvedValue(undefined)
+    mockAuthenticate.mockResolvedValue({
+      id: 'test-user',
+      email: 'test@example.com',
+      role: 'admin',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      app_metadata: {},
+      user_metadata: {},
+      aud: 'authenticated',
+      confirmation_sent_at: null,
+      confirmed_at: new Date().toISOString(),
+      email_confirmed_at: new Date().toISOString(),
+      invited_at: null,
+      last_sign_in_at: new Date().toISOString(),
+      phone: null,
+      phone_confirmed_at: null,
+      recovery_sent_at: null,
+    })
   })
 
   it('図書室を正常に削除できる', async () => {

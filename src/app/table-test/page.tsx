@@ -68,7 +68,7 @@ export default function TableTestPage() {
                 {sampleClassesData.length}
               </div>
               <p className="text-xs text-muted-foreground">
-                アクティブ: {sampleClassesData.filter((c) => c.isActive).length}
+                アクティブ: {sampleClassesData.length}
               </p>
             </CardContent>
           </Card>

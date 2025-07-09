@@ -93,7 +93,7 @@ export function WeeklySchedule() {
   }
 
   const handlePrint = useReactToPrint({
-    content: () => printRef.current,
+    contentRef: printRef,
     documentTitle: '今週のスケジュール',
   })
 

@@ -31,7 +31,22 @@ jest.mock('@/lib/auth/helpers', () => ({
   authenticateAdmin: jest.fn(),
 }))
 
-const mockPrisma = prisma as jest.Mocked<typeof prisma>
+const mockPrisma = {
+  assignment: {
+    findUnique: jest.fn(),
+    findFirst: jest.fn(),
+    update: jest.fn(),
+    count: jest.fn(),
+  },
+  student: {
+    findUnique: jest.fn(),
+  },
+  room: {
+    findUnique: jest.fn(),
+  },
+  $transaction: jest.fn(),
+} as any
+
 const mockAuthenticateAdmin = authenticateAdmin as jest.MockedFunction<
   typeof authenticateAdmin
 >
@@ -39,7 +54,24 @@ const mockAuthenticateAdmin = authenticateAdmin as jest.MockedFunction<
 describe('PUT /api/schedules/[id]', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockAuthenticateAdmin.mockResolvedValue(undefined)
+    mockAuthenticateAdmin.mockResolvedValue({
+      id: 'test-user',
+      email: 'test@example.com',
+      role: 'admin',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      app_metadata: {},
+      user_metadata: {},
+      aud: 'authenticated',
+      confirmation_sent_at: null,
+      confirmed_at: new Date().toISOString(),
+      email_confirmed_at: new Date().toISOString(),
+      invited_at: null,
+      last_sign_in_at: new Date().toISOString(),
+      phone: null,
+      phone_confirmed_at: null,
+      recovery_sent_at: null,
+    })
   })
 
   const mockExistingAssignment = {
@@ -112,7 +144,7 @@ describe('PUT /api/schedules/[id]', () => {
       )
       mockAuthenticateAdmin.mockRejectedValue(new Error('Unauthorized'))
 
-      const response = await PUT(request, { params: { id: 'assignment-1' } })
+      const response = await PUT(request, { params: Promise.resolve({ id: 'assignment-1' }) })
 
       expect(mockAuthenticateAdmin).toHaveBeenCalledWith(request)
       expect(response.status).toBe(500) // handleApiError により500エラーになる
@@ -139,7 +171,7 @@ describe('PUT /api/schedules/[id]', () => {
       mockPrisma.room.findUnique.mockResolvedValue(mockTargetRoom)
       mockPrisma.assignment.findFirst.mockResolvedValue(null) // 重複なし
       mockPrisma.assignment.count.mockResolvedValue(2) // 定員内
-      mockPrisma.$transaction.mockImplementation(async (callback) => {
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
         return callback({
           assignment: {
             update: jest.fn().mockResolvedValue(mockUpdatedAssignment),
@@ -147,7 +179,7 @@ describe('PUT /api/schedules/[id]', () => {
         })
       })
 
-      const response = await PUT(request, { params: { id: 'assignment-1' } })
+      const response = await PUT(request, { params: Promise.resolve({ id: 'assignment-1' }) })
       const data = await response.json()
 
       expect(response.status).toBe(200)
@@ -212,7 +244,7 @@ describe('PUT /api/schedules/[id]', () => {
       mockPrisma.room.findUnique.mockResolvedValue(mockTargetRoom)
       mockPrisma.assignment.findFirst.mockResolvedValue(null)
       mockPrisma.assignment.count.mockResolvedValue(1)
-      mockPrisma.$transaction.mockImplementation(async (callback) => {
+      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
         return callback({
           assignment: {
             update: jest.fn().mockResolvedValue(partialUpdateAssignment),
@@ -220,7 +252,7 @@ describe('PUT /api/schedules/[id]', () => {
         })
       })
 
-      const response = await PUT(request, { params: { id: 'assignment-1' } })
+      const response = await PUT(request, { params: Promise.resolve({ id: 'assignment-1' }) })
       const data = await response.json()
 
       expect(response.status).toBe(200)
@@ -248,7 +280,7 @@ describe('PUT /api/schedules/[id]', () => {
         }
       )
 
-      const response = await PUT(request, { params: { id: 'invalid-id' } })
+      const response = await PUT(request, { params: Promise.resolve({ id: 'invalid-id' }) })
       const data = await response.json()
 
       expect(response.status).toBe(400)
@@ -269,7 +301,7 @@ describe('PUT /api/schedules/[id]', () => {
         }
       )
 
-      const response = await PUT(request, { params: { id: 'assignment-1' } })
+      const response = await PUT(request, { params: Promise.resolve({ id: 'assignment-1' }) })
       const data = await response.json()
 
       expect(response.status).toBe(400)
@@ -290,7 +322,7 @@ describe('PUT /api/schedules/[id]', () => {
         }
       )
 
-      const response = await PUT(request, { params: { id: 'assignment-1' } })
+      const response = await PUT(request, { params: Promise.resolve({ id: 'assignment-1' }) })
       const data = await response.json()
 
       expect(response.status).toBe(400)
@@ -311,7 +343,7 @@ describe('PUT /api/schedules/[id]', () => {
         }
       )
 
-      const response = await PUT(request, { params: { id: 'assignment-1' } })
+      const response = await PUT(request, { params: Promise.resolve({ id: 'assignment-1' }) })
       const data = await response.json()
 
       expect(response.status).toBe(400)
@@ -336,7 +368,7 @@ describe('PUT /api/schedules/[id]', () => {
 
       mockPrisma.assignment.findUnique.mockResolvedValue(null)
 
-      const response = await PUT(request, { params: { id: 'assignment-1' } })
+      const response = await PUT(request, { params: Promise.resolve({ id: 'assignment-1' }) })
       const data = await response.json()
 
       expect(response.status).toBe(404)
@@ -362,7 +394,7 @@ describe('PUT /api/schedules/[id]', () => {
       mockPrisma.assignment.findUnique.mockResolvedValue(mockExistingAssignment)
       mockPrisma.student.findUnique.mockResolvedValue(null)
 
-      const response = await PUT(request, { params: { id: 'assignment-1' } })
+      const response = await PUT(request, { params: Promise.resolve({ id: 'assignment-1' }) })
       const data = await response.json()
 
       expect(response.status).toBe(404)
@@ -389,7 +421,7 @@ describe('PUT /api/schedules/[id]', () => {
       mockPrisma.student.findUnique.mockResolvedValue(mockTargetStudent)
       mockPrisma.room.findUnique.mockResolvedValue(null)
 
-      const response = await PUT(request, { params: { id: 'assignment-1' } })
+      const response = await PUT(request, { params: Promise.resolve({ id: 'assignment-1' }) })
       const data = await response.json()
 
       expect(response.status).toBe(404)
@@ -423,7 +455,7 @@ describe('PUT /api/schedules/[id]', () => {
         term: 'SECOND_TERM',
       })
 
-      const response = await PUT(request, { params: { id: 'assignment-1' } })
+      const response = await PUT(request, { params: Promise.resolve({ id: 'assignment-1' }) })
       const data = await response.json()
 
       expect(response.status).toBe(409)
@@ -454,7 +486,7 @@ describe('PUT /api/schedules/[id]', () => {
       mockPrisma.assignment.findFirst.mockResolvedValue(null)
       mockPrisma.assignment.count.mockResolvedValue(4) // 定員4を超過
 
-      const response = await PUT(request, { params: { id: 'assignment-1' } })
+      const response = await PUT(request, { params: Promise.resolve({ id: 'assignment-1' }) })
       const data = await response.json()
 
       expect(response.status).toBe(409)
