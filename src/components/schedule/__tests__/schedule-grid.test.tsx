@@ -10,7 +10,7 @@ import { ScheduleGrid } from '../schedule-grid'
 
 // Mock the select component to avoid Radix UI issues in tests
 jest.mock('@/components/ui/select', () => ({
-  Select: ({ children, onValueChange }: any) => (
+  Select: ({ children, onValueChange, value: _value }: any) => (
     <div data-testid="select-root" onClick={() => onValueChange?.('test')}>
       {children}
     </div>
@@ -29,7 +29,7 @@ jest.mock('@/components/ui/select', () => ({
     </button>
   ),
   SelectValue: ({ placeholder }: any) => (
-    <span data-testid="select-value">{placeholder}</span>
+    <span data-testid="select-value">{placeholder || 'すべて'}</span>
   ),
 }))
 
@@ -164,10 +164,11 @@ describe('ScheduleGrid', () => {
       render(<ScheduleGrid assignments={mockAssignments} />)
 
       // 図書室フィルタを変更
-      const roomSelect = screen.getByDisplayValue('すべて')
-      await user.click(roomSelect)
+      const roomSelectTriggers = screen.getAllByTestId('select-trigger')
+      const roomSelectTrigger = roomSelectTriggers[0] // 最初のSelectは図書室フィルタ
+      await user.click(roomSelectTrigger)
 
-      const roomOption = screen.getByText('図書室A')
+      const roomOption = screen.getByTestId('select-item')
       await user.click(roomOption)
 
       // 図書室Aの当番のみ表示されることを確認
@@ -180,24 +181,16 @@ describe('ScheduleGrid', () => {
       render(<ScheduleGrid assignments={mockAssignments} />)
 
       // 学年フィルタを変更
-      const gradeSelects = screen.getAllByDisplayValue('すべて')
-      const gradeSelect = gradeSelects.find((select) =>
-        select
-          .closest('div')
-          ?.querySelector('label')
-          ?.textContent?.includes('🎒 学年')
-      )
+      const gradeSelectTriggers = screen.getAllByTestId('select-trigger')
+      const gradeSelectTrigger = gradeSelectTriggers[1] // 2番目のSelectは学年フィルタ
+      await user.click(gradeSelectTrigger)
 
-      if (gradeSelect) {
-        await user.click(gradeSelect)
+      const gradeOption = screen.getAllByTestId('select-item')[0]
+      await user.click(gradeOption)
 
-        const gradeOption = screen.getByText('5年生')
-        await user.click(gradeOption)
-
-        // 5年生のみ表示されることを確認
-        expect(screen.getByText('田中太郎')).toBeInTheDocument()
-        expect(screen.queryByText('佐藤花子')).not.toBeInTheDocument()
-      }
+      // 5年生のみ表示されることを確認
+      expect(screen.getByText('田中太郎')).toBeInTheDocument()
+      expect(screen.queryByText('佐藤花子')).not.toBeInTheDocument()
     })
   })
 
