@@ -7,9 +7,6 @@ import {
   School,
   Users,
   Calendar,
-  BookOpen,
-  TrendingUp,
-  Plus,
   RefreshCw,
 } from 'lucide-react'
 import useSWR from 'swr'

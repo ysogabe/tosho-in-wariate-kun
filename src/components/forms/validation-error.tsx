@@ -17,7 +17,7 @@ export function ValidationError({ errors, className }: ValidationErrorProps) {
   // エラーメッセージを配列に変換
   const errorMessages: string[] = []
 
-  Object.entries(errors).forEach(([field, error]) => {
+  Object.entries(errors).forEach(([, error]) => {
     if (!error) return
 
     if (Array.isArray(error)) {

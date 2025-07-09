@@ -6,12 +6,8 @@ import useSWR from 'swr'
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
@@ -116,6 +112,11 @@ export default function ScheduleManagementPage() {
           }),
         })
 
+        if (!response.ok) {
+          const errorText = await response.text()
+          throw new Error(`HTTP ${response.status}: ${errorText}`)
+        }
+
         const result = await response.json()
 
         if (result.success) {
@@ -148,6 +149,11 @@ export default function ScheduleManagementPage() {
         }),
       })
 
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`HTTP ${response.status}: ${errorText}`)
+      }
+
       const result = await response.json()
 
       if (result.success) {
@@ -172,21 +178,22 @@ export default function ScheduleManagementPage() {
           `/api/schedules/export?term=${selectedTerm}&format=${format}`
         )
 
-        if (response.ok) {
-          const blob = await response.blob()
-          const url = window.URL.createObjectURL(blob)
-          const a = document.createElement('a')
-          a.href = url
-          a.download = `schedule-${selectedTerm}-${new Date().toISOString().split('T')[0]}.${format}`
-          document.body.appendChild(a)
-          a.click()
-          window.URL.revokeObjectURL(url)
-          document.body.removeChild(a)
-
-          toast.success(`${format.toUpperCase()}ファイルをダウンロードしました`)
-        } else {
-          toast.error('エクスポートに失敗しました')
+        if (!response.ok) {
+          const errorText = await response.text()
+          throw new Error(`HTTP ${response.status}: ${errorText}`)
         }
+
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `schedule-${selectedTerm}-${new Date().toISOString().split('T')[0]}.${format}`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+
+        toast.success(`${format.toUpperCase()}ファイルをダウンロードしました`)
       } catch (error) {
         console.error('Export error:', error)
         toast.error('エクスポート中にエラーが発生しました')

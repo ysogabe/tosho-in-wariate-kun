@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { toast } from 'sonner'
 
 interface GenerateScheduleOptions {
@@ -13,6 +13,15 @@ interface GenerateScheduleOptions {
 export function useScheduleGeneration() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [progress, setProgress] = useState(0)
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current)
+      }
+    }
+  }, [])
 
   const generateSchedule = useCallback(
     async ({
@@ -26,7 +35,7 @@ export function useScheduleGeneration() {
 
       try {
         // 進捗シミュレーション
-        const progressInterval = setInterval(() => {
+        progressIntervalRef.current = setInterval(() => {
           setProgress((prev) => Math.min(prev + 10, 90))
         }, 500)
 
@@ -41,8 +50,16 @@ export function useScheduleGeneration() {
           }),
         })
 
-        clearInterval(progressInterval)
+        if (progressIntervalRef.current) {
+          clearInterval(progressIntervalRef.current)
+          progressIntervalRef.current = null
+        }
         setProgress(100)
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          throw new Error(`HTTP ${response.status}: ${errorText}`)
+        }
 
         const result = await response.json()
 

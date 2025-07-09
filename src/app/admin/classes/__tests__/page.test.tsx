@@ -75,7 +75,7 @@ jest.mock('@/components/ui/input', () => ({
 }))
 
 jest.mock('@/components/ui/select', () => ({
-  Select: ({ children, onValueChange, value }: any) => (
+  Select: ({ children, onValueChange }: any) => (
     <div data-testid="select" onClick={() => onValueChange?.('test')}>
       {children}
     </div>
@@ -164,7 +164,7 @@ jest.mock('@/components/layout/page-layout', () => ({
 }))
 
 jest.mock('@/components/ui/data-table', () => ({
-  DataTable: ({ columns, data, searchKey, onSelectionChange }: any) => (
+  DataTable: ({ data, searchKey, onSelectionChange }: any) => (
     <div data-testid="data-table">
       <div data-testid="table-search-key">{searchKey}</div>
       <div data-testid="table-data-count">{data?.length || 0}</div>
@@ -277,7 +277,7 @@ describe('ClassManagementPage', () => {
     jest.clearAllMocks()
 
     // Setup SWR mock with consistent return values
-    const swr = require('swr')
+    const swr = jest.requireMock('swr')
     swr.default = jest.fn((url: string) => {
       if (url === '/api/classes') {
         return {
