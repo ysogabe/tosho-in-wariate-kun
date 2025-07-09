@@ -33,7 +33,9 @@ const mockPrisma = {
   },
 } as any
 
-const mockAuthenticate = authenticate as jest.MockedFunction<typeof authenticate>
+const mockAuthenticate = authenticate as jest.MockedFunction<
+  typeof authenticate
+>
 
 // テストデータ
 const mockRoom = {
@@ -79,7 +81,7 @@ describe('GET /api/rooms/[id]', () => {
     // Arrange
     const params = Promise.resolve({ id: 'room-1' })
     const request = new NextRequest('http://localhost/api/rooms/room-1')
-    
+
     mockPrisma.room.findUnique.mockResolvedValue(mockRoomWithCount)
 
     // Act
@@ -106,7 +108,7 @@ describe('GET /api/rooms/[id]', () => {
     // Arrange
     const params = Promise.resolve({ id: 'non-existent' })
     const request = new NextRequest('http://localhost/api/rooms/non-existent')
-    
+
     mockPrisma.room.findUnique.mockResolvedValue(null)
 
     // Act
@@ -123,7 +125,7 @@ describe('GET /api/rooms/[id]', () => {
     // Arrange
     const params = Promise.resolve({ id: 'room-1' })
     const request = new NextRequest('http://localhost/api/rooms/room-1')
-    
+
     mockAuthenticate.mockRejectedValue(new Error('Unauthorized'))
 
     // Act
@@ -166,7 +168,7 @@ describe('PUT /api/rooms/[id]', () => {
       capacity: 35,
       description: '更新された説明',
     }
-    
+
     const request = new NextRequest('http://localhost/api/rooms/room-1', {
       method: 'PUT',
       body: JSON.stringify(updateData),
@@ -219,7 +221,7 @@ describe('PUT /api/rooms/[id]', () => {
       name: '', // 空文字は無効
       capacity: -1, // 負の値は無効
     }
-    
+
     const request = new NextRequest('http://localhost/api/rooms/room-1', {
       method: 'PUT',
       body: JSON.stringify(invalidData),

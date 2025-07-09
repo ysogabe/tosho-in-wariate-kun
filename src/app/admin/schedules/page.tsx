@@ -3,7 +3,13 @@
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -13,7 +19,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
 } from '@/components/ui/dialog'
 import {
   AlertDialog,
@@ -40,7 +46,7 @@ import {
   CheckCircle,
   Clock,
   Users,
-  BarChart3
+  BarChart3,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -70,7 +76,7 @@ export default function ScheduleManagementPage() {
     data: scheduleData,
     error,
     isLoading,
-    mutate
+    mutate,
   } = useSWR(
     `/api/schedules?term=${selectedTerm}&format=grid&includeStudents=true&includeRooms=true`,
     async (url: string) => {
@@ -93,37 +99,40 @@ export default function ScheduleManagementPage() {
   )
 
   // スケジュール生成
-  const handleGenerateSchedule = useCallback(async (forceRegenerate: boolean = false) => {
-    setIsGenerating(true)
-    setShowGenerateDialog(false)
+  const handleGenerateSchedule = useCallback(
+    async (forceRegenerate: boolean = false) => {
+      setIsGenerating(true)
+      setShowGenerateDialog(false)
 
-    try {
-      const response = await fetch('/api/schedules/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          term: selectedTerm,
-          forceRegenerate,
-        }),
-      })
+      try {
+        const response = await fetch('/api/schedules/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            term: selectedTerm,
+            forceRegenerate,
+          }),
+        })
 
-      const result = await response.json()
+        const result = await response.json()
 
-      if (result.success) {
-        toast.success(result.data.message)
-        mutate() // データを再取得
-      } else {
-        toast.error(result.error.message || 'スケジュール生成に失敗しました')
+        if (result.success) {
+          toast.success(result.data.message)
+          mutate() // データを再取得
+        } else {
+          toast.error(result.error.message || 'スケジュール生成に失敗しました')
+        }
+      } catch (error) {
+        console.error('Schedule generation error:', error)
+        toast.error('スケジュール生成中にエラーが発生しました')
+      } finally {
+        setIsGenerating(false)
       }
-    } catch (error) {
-      console.error('Schedule generation error:', error)
-      toast.error('スケジュール生成中にエラーが発生しました')
-    } finally {
-      setIsGenerating(false)
-    }
-  }, [selectedTerm, mutate])
+    },
+    [selectedTerm, mutate]
+  )
 
   // スケジュールリセット
   const handleResetSchedule = useCallback(async () => {
@@ -156,32 +165,35 @@ export default function ScheduleManagementPage() {
   }, [resetTerm, mutate])
 
   // エクスポート処理
-  const handleExport = useCallback(async (format: string) => {
-    try {
-      const response = await fetch(
-        `/api/schedules/export?term=${selectedTerm}&format=${format}`
-      )
+  const handleExport = useCallback(
+    async (format: string) => {
+      try {
+        const response = await fetch(
+          `/api/schedules/export?term=${selectedTerm}&format=${format}`
+        )
 
-      if (response.ok) {
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `schedule-${selectedTerm}-${new Date().toISOString().split('T')[0]}.${format}`
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
-        document.body.removeChild(a)
+        if (response.ok) {
+          const blob = await response.blob()
+          const url = window.URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `schedule-${selectedTerm}-${new Date().toISOString().split('T')[0]}.${format}`
+          document.body.appendChild(a)
+          a.click()
+          window.URL.revokeObjectURL(url)
+          document.body.removeChild(a)
 
-        toast.success(`${format.toUpperCase()}ファイルをダウンロードしました`)
-      } else {
-        toast.error('エクスポートに失敗しました')
+          toast.success(`${format.toUpperCase()}ファイルをダウンロードしました`)
+        } else {
+          toast.error('エクスポートに失敗しました')
+        }
+      } catch (error) {
+        console.error('Export error:', error)
+        toast.error('エクスポート中にエラーが発生しました')
       }
-    } catch (error) {
-      console.error('Export error:', error)
-      toast.error('エクスポート中にエラーが発生しました')
-    }
-  }, [selectedTerm])
+    },
+    [selectedTerm]
+  )
 
   if (error) {
     return (
@@ -241,7 +253,10 @@ export default function ScheduleManagementPage() {
               <div className="flex items-center gap-4">
                 <div>
                   <label className="text-sm font-medium">表示期間</label>
-                  <Tabs value={selectedTerm} onValueChange={(value) => setSelectedTerm(value as Term)}>
+                  <Tabs
+                    value={selectedTerm}
+                    onValueChange={(value) => setSelectedTerm(value as Term)}
+                  >
                     <TabsList className="mt-1">
                       <TabsTrigger value="FIRST_TERM">前期</TabsTrigger>
                       <TabsTrigger value="SECOND_TERM">後期</TabsTrigger>
@@ -251,7 +266,10 @@ export default function ScheduleManagementPage() {
 
                 <div>
                   <label className="text-sm font-medium">表示形式</label>
-                  <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as ViewMode)}>
+                  <Tabs
+                    value={viewMode}
+                    onValueChange={(value) => setViewMode(value as ViewMode)}
+                  >
                     <TabsList className="mt-1">
                       <TabsTrigger value="grid">グリッド</TabsTrigger>
                       <TabsTrigger value="calendar">カレンダー</TabsTrigger>
@@ -283,7 +301,9 @@ export default function ScheduleManagementPage() {
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-muted-foreground" />
                   <div>
-                    <div className="text-2xl font-bold">{stats.totalAssignments}</div>
+                    <div className="text-2xl font-bold">
+                      {stats.totalAssignments}
+                    </div>
                     <p className="text-sm text-muted-foreground">総当番数</p>
                   </div>
                 </div>
@@ -295,8 +315,12 @@ export default function ScheduleManagementPage() {
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <div>
-                    <div className="text-2xl font-bold">{stats.studentsAssigned}</div>
-                    <p className="text-sm text-muted-foreground">参加図書委員数</p>
+                    <div className="text-2xl font-bold">
+                      {stats.studentsAssigned}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      参加図書委員数
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -310,7 +334,9 @@ export default function ScheduleManagementPage() {
                     <div className="text-2xl font-bold">
                       {stats.averageAssignmentsPerStudent.toFixed(1)}
                     </div>
-                    <p className="text-sm text-muted-foreground">平均当番回数</p>
+                    <p className="text-sm text-muted-foreground">
+                      平均当番回数
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -324,7 +350,9 @@ export default function ScheduleManagementPage() {
                     <div className="text-2xl font-bold">
                       {Math.round(stats.balanceScore * 100)}%
                     </div>
-                    <p className="text-sm text-muted-foreground">バランススコア</p>
+                    <p className="text-sm text-muted-foreground">
+                      バランススコア
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -346,7 +374,8 @@ export default function ScheduleManagementPage() {
             <CardContent className="p-8 text-center">
               <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">
-                {selectedTerm === 'FIRST_TERM' ? '前期' : '後期'}のスケジュールがありません
+                {selectedTerm === 'FIRST_TERM' ? '前期' : '後期'}
+                のスケジュールがありません
               </h3>
               <p className="text-muted-foreground mb-4">
                 スケジュールを生成して当番表を作成してください。
@@ -367,16 +396,10 @@ export default function ScheduleManagementPage() {
               />
             )}
             {viewMode === 'calendar' && (
-              <ScheduleCalendar
-                assignments={assignments}
-                term={selectedTerm}
-              />
+              <ScheduleCalendar assignments={assignments} term={selectedTerm} />
             )}
             {viewMode === 'list' && (
-              <ScheduleList
-                assignments={assignments}
-                term={selectedTerm}
-              />
+              <ScheduleList assignments={assignments} term={selectedTerm} />
             )}
           </>
         )}
@@ -387,7 +410,8 @@ export default function ScheduleManagementPage() {
             <DialogHeader>
               <DialogTitle>スケジュール生成</DialogTitle>
               <DialogDescription>
-                {selectedTerm === 'FIRST_TERM' ? '前期' : '後期'}の当番表を生成します。
+                {selectedTerm === 'FIRST_TERM' ? '前期' : '後期'}
+                の当番表を生成します。
                 {assignments.length > 0 && (
                   <span className="block mt-2 text-amber-600">
                     既存のスケジュールがある場合は上書きされます。
@@ -442,7 +466,10 @@ export default function ScheduleManagementPage() {
 
             <div className="my-4">
               <label className="text-sm font-medium">削除対象</label>
-              <Tabs value={resetTerm} onValueChange={(value) => setResetTerm(value as Term | 'ALL')}>
+              <Tabs
+                value={resetTerm}
+                onValueChange={(value) => setResetTerm(value as Term | 'ALL')}
+              >
                 <TabsList className="mt-1">
                   <TabsTrigger value="FIRST_TERM">前期のみ</TabsTrigger>
                   <TabsTrigger value="SECOND_TERM">後期のみ</TabsTrigger>

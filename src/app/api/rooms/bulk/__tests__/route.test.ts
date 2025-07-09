@@ -35,7 +35,9 @@ const mockPrisma = {
   $transaction: jest.fn(),
 } as any
 
-const mockAuthenticate = authenticate as jest.MockedFunction<typeof authenticate>
+const mockAuthenticate = authenticate as jest.MockedFunction<
+  typeof authenticate
+>
 
 // テストデータ
 const mockRooms = [
@@ -85,7 +87,7 @@ describe('POST /api/rooms/bulk', () => {
         operation: 'activate',
         roomIds: ['room-1', 'room-2'],
       }
-      
+
       const request = new NextRequest('http://localhost/api/rooms/bulk', {
         method: 'POST',
         body: JSON.stringify(bulkData),
@@ -113,7 +115,7 @@ describe('POST /api/rooms/bulk', () => {
         operation: 'deactivate',
         roomIds: ['room-1', 'room-2'],
       }
-      
+
       const request = new NextRequest('http://localhost/api/rooms/bulk', {
         method: 'POST',
         body: JSON.stringify(bulkData),
@@ -141,7 +143,7 @@ describe('POST /api/rooms/bulk', () => {
         operation: 'delete',
         roomIds: ['room-1'], // room-1は割り当てなし
       }
-      
+
       const request = new NextRequest('http://localhost/api/rooms/bulk', {
         method: 'POST',
         body: JSON.stringify(bulkData),
@@ -167,7 +169,7 @@ describe('POST /api/rooms/bulk', () => {
         operation: 'delete',
         roomIds: ['room-2'], // room-2は割り当てあり
       }
-      
+
       const request = new NextRequest('http://localhost/api/rooms/bulk', {
         method: 'POST',
         body: JSON.stringify(bulkData),
@@ -194,7 +196,7 @@ describe('POST /api/rooms/bulk', () => {
         operation: 'invalid_operation',
         roomIds: ['room-1'],
       }
-      
+
       const request = new NextRequest('http://localhost/api/rooms/bulk', {
         method: 'POST',
         body: JSON.stringify(invalidData),
@@ -216,7 +218,7 @@ describe('POST /api/rooms/bulk', () => {
         operation: 'activate',
         roomIds: [],
       }
-      
+
       const request = new NextRequest('http://localhost/api/rooms/bulk', {
         method: 'POST',
         body: JSON.stringify(invalidData),
@@ -238,7 +240,7 @@ describe('POST /api/rooms/bulk', () => {
         operation: 'activate',
         roomIds: ['room-1', 'non-existent'],
       }
-      
+
       const request = new NextRequest('http://localhost/api/rooms/bulk', {
         method: 'POST',
         body: JSON.stringify(bulkData),
@@ -264,12 +266,12 @@ describe('POST /api/rooms/bulk', () => {
         operation: 'activate',
         roomIds: ['room-1'],
       }
-      
+
       const request = new NextRequest('http://localhost/api/rooms/bulk', {
         method: 'POST',
         body: JSON.stringify(bulkData),
       })
-      
+
       mockAuthenticate.mockRejectedValue(new Error('Unauthorized'))
 
       // Act

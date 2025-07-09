@@ -45,8 +45,8 @@ describe('useScheduleGeneration', () => {
         data: {
           message: 'スケジュール生成が完了しました',
           assignmentsCreated: 10,
-          term: 'FIRST_TERM'
-        }
+          term: 'FIRST_TERM',
+        },
       }
 
       mockFetch.mockResolvedValueOnce({
@@ -108,13 +108,15 @@ describe('useScheduleGeneration', () => {
       // コールバック確認
       expect(mockOnSuccess).toHaveBeenCalledWith(mockSuccessResponse.data)
       expect(mockOnError).not.toHaveBeenCalled()
-      expect(mockToast.success).toHaveBeenCalledWith('スケジュール生成が完了しました')
+      expect(mockToast.success).toHaveBeenCalledWith(
+        'スケジュール生成が完了しました'
+      )
     })
 
     it('強制再生成オプションが正しく送信される', async () => {
       const mockSuccessResponse = {
         success: true,
-        data: { message: '強制再生成完了' }
+        data: { message: '強制再生成完了' },
       }
 
       mockFetch.mockResolvedValueOnce({
@@ -150,8 +152,8 @@ describe('useScheduleGeneration', () => {
         success: false,
         error: {
           message: '図書委員データが不足しています',
-          code: 'INSUFFICIENT_STUDENTS'
-        }
+          code: 'INSUFFICIENT_STUDENTS',
+        },
       }
 
       mockFetch.mockResolvedValueOnce({
@@ -179,7 +181,9 @@ describe('useScheduleGeneration', () => {
       // コールバック確認
       expect(mockOnSuccess).not.toHaveBeenCalled()
       expect(mockOnError).toHaveBeenCalledWith('図書委員データが不足しています')
-      expect(mockToast.error).toHaveBeenCalledWith('図書委員データが不足しています')
+      expect(mockToast.error).toHaveBeenCalledWith(
+        '図書委員データが不足しています'
+      )
 
       // 戻り値確認
       expect(response).toEqual(mockErrorResponse)
@@ -208,20 +212,24 @@ describe('useScheduleGeneration', () => {
 
       // コールバック確認
       expect(mockOnSuccess).not.toHaveBeenCalled()
-      expect(mockOnError).toHaveBeenCalledWith('スケジュール生成中にエラーが発生しました')
-      expect(mockToast.error).toHaveBeenCalledWith('スケジュール生成中にエラーが発生しました')
+      expect(mockOnError).toHaveBeenCalledWith(
+        'スケジュール生成中にエラーが発生しました'
+      )
+      expect(mockToast.error).toHaveBeenCalledWith(
+        'スケジュール生成中にエラーが発生しました'
+      )
 
       // 戻り値確認
       expect(response).toEqual({
         success: false,
-        error: 'スケジュール生成中にエラーが発生しました'
+        error: 'スケジュール生成中にエラーが発生しました',
       })
     })
 
     it('レスポンスエラーメッセージがない場合のデフォルトメッセージ', async () => {
       const mockErrorResponse = {
         success: false,
-        error: {}
+        error: {},
       }
 
       mockFetch.mockResolvedValueOnce({
@@ -241,21 +249,27 @@ describe('useScheduleGeneration', () => {
       })
 
       expect(mockOnError).toHaveBeenCalledWith('スケジュール生成に失敗しました')
-      expect(mockToast.error).toHaveBeenCalledWith('スケジュール生成に失敗しました')
+      expect(mockToast.error).toHaveBeenCalledWith(
+        'スケジュール生成に失敗しました'
+      )
     })
   })
 
   describe('進捗管理', () => {
     it('進捗が正しく更新される', async () => {
-      mockFetch.mockImplementation(() => 
-        new Promise((resolve) => {
-          setTimeout(() => {
-            resolve({
-              ok: true,
-              json: async () => ({ success: true, data: { message: '完了' } }),
-            } as Response)
-          }, 1000)
-        })
+      mockFetch.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            setTimeout(() => {
+              resolve({
+                ok: true,
+                json: async () => ({
+                  success: true,
+                  data: { message: '完了' },
+                }),
+              } as Response)
+            }, 1000)
+          })
       )
 
       const { result } = renderHook(() => useScheduleGeneration())
@@ -303,8 +317,8 @@ describe('useScheduleGeneration', () => {
     })
 
     it('進捗が90%を超えないことを確認', () => {
-      mockFetch.mockImplementation(() => 
-        new Promise(() => {}) // 永続的にペンディング
+      mockFetch.mockImplementation(
+        () => new Promise(() => {}) // 永続的にペンディング
       )
 
       const { result } = renderHook(() => useScheduleGeneration())
@@ -328,7 +342,7 @@ describe('useScheduleGeneration', () => {
     it('onSuccessコールバックが呼ばれない場合もエラーにならない', async () => {
       const mockSuccessResponse = {
         success: true,
-        data: { message: '成功' }
+        data: { message: '成功' },
       }
 
       mockFetch.mockResolvedValueOnce({
@@ -351,7 +365,7 @@ describe('useScheduleGeneration', () => {
     it('onErrorコールバックが呼ばれない場合もエラーにならない', async () => {
       const mockErrorResponse = {
         success: false,
-        error: { message: 'エラー' }
+        error: { message: 'エラー' },
       }
 
       mockFetch.mockResolvedValueOnce({

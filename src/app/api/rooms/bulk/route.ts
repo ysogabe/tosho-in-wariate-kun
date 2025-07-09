@@ -12,7 +12,10 @@ import { authenticate } from '@/lib/auth/helpers'
 // 一括操作スキーマ
 const BulkOperationSchema = z.object({
   operation: z.enum(['activate', 'deactivate', 'delete'], {
-    errorMap: () => ({ message: '操作は activate, deactivate, delete のいずれかを指定してください' }),
+    errorMap: () => ({
+      message:
+        '操作は activate, deactivate, delete のいずれかを指定してください',
+    }),
   }),
   roomIds: z
     .array(z.string())
@@ -66,7 +69,7 @@ export async function POST(request: NextRequest) {
     if (existingRooms.length !== roomIds.length) {
       const foundIds = existingRooms.map((room) => room.id)
       const missingIds = roomIds.filter((id) => !foundIds.includes(id))
-      
+
       return NextResponse.json(
         {
           success: false,
@@ -84,13 +87,13 @@ export async function POST(request: NextRequest) {
     switch (operation) {
       case 'activate':
         return await handleActivateRooms(roomIds)
-      
+
       case 'deactivate':
         return await handleDeactivateRooms(roomIds)
-      
+
       case 'delete':
         return await handleDeleteRooms(existingRooms)
-      
+
       default:
         // TypeScriptの網羅性チェックのためのfallback
         return NextResponse.json(
@@ -159,20 +162,24 @@ async function handleDeactivateRooms(roomIds: string[]) {
 /**
  * 図書室一括削除
  */
-async function handleDeleteRooms(rooms: Array<{ id: string; _count: { assignments: number } }>) {
+async function handleDeleteRooms(
+  rooms: Array<{ id: string; _count: { assignments: number } }>
+) {
   // 割り当てのある図書室がないかチェック
-  const roomsWithAssignments = rooms.filter((room) => room._count.assignments > 0)
-  
+  const roomsWithAssignments = rooms.filter(
+    (room) => room._count.assignments > 0
+  )
+
   if (roomsWithAssignments.length > 0) {
     const roomNames = roomsWithAssignments.map((room) => room.id).join(', ')
-    
+
     return NextResponse.json(
       {
         success: false,
         error: {
           code: 'ROOMS_HAVE_ASSIGNMENTS',
           message: `以下の図書室には当番の割り当てがあるため削除できません: ${roomNames}`,
-          details: { 
+          details: {
             roomsWithAssignments: roomsWithAssignments.map((room) => ({
               id: room.id,
               assignmentCount: room._count.assignments,

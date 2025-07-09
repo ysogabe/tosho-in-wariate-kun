@@ -83,29 +83,35 @@ export function WeeklySchedule() {
   // 図書室リストを取得
   const getRooms = (): string[] => {
     if (!response?.success || !response.data.schedules) return []
-    
+
     const schedules = response.data.schedules[currentTerm]
     const rooms = new Set<string>()
-    
-    Object.values(schedules).forEach(assignments => {
-      assignments.forEach(assignment => {
+
+    Object.values(schedules).forEach((assignments) => {
+      assignments.forEach((assignment) => {
         rooms.add(assignment.room.name)
       })
     })
-    
+
     return Array.from(rooms).sort()
   }
 
   const rooms = getRooms()
 
   // 特定の日・図書室の当番を取得
-  const getAssignmentForDayAndRoom = (dayNumber: string, roomName: string): ScheduleAssignment | null => {
+  const getAssignmentForDayAndRoom = (
+    dayNumber: string,
+    roomName: string
+  ): ScheduleAssignment | null => {
     if (!response?.success || !response.data.schedules) return null
-    
+
     const schedules = response.data.schedules[currentTerm]
     const assignments = schedules[dayNumber] || []
-    
-    return assignments.find(assignment => assignment.room.name === roomName) || null
+
+    return (
+      assignments.find((assignment) => assignment.room.name === roomName) ||
+      null
+    )
   }
 
   // ローディング中
@@ -130,10 +136,10 @@ export function WeeklySchedule() {
         <CardContent>
           <div className="text-center py-8">
             <div className="text-4xl mb-4">📅</div>
-            <h3 className="text-lg font-medium mb-2">スケジュールを読み込み中...</h3>
-            <p className="text-muted-foreground">
-              少々お待ちください
-            </p>
+            <h3 className="text-lg font-medium mb-2">
+              スケジュールを読み込み中...
+            </h3>
+            <p className="text-muted-foreground">少々お待ちください</p>
           </div>
         </CardContent>
       </Card>
@@ -197,7 +203,9 @@ export function WeeklySchedule() {
         <CardContent>
           <div className="text-center py-8">
             <div className="text-4xl mb-4">📅</div>
-            <h3 className="text-lg font-medium mb-2">スケジュールが設定されていません</h3>
+            <h3 className="text-lg font-medium mb-2">
+              スケジュールが設定されていません
+            </h3>
             <p className="text-muted-foreground mb-4">
               スケジュール管理から当番表を生成してください
             </p>
@@ -217,9 +225,7 @@ export function WeeklySchedule() {
     <Card className="w-full mb-6">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span className="flex items-center gap-2">
-            📋 今週のスケジュール
-          </span>
+          <span className="flex items-center gap-2">📋 今週のスケジュール</span>
           <div className="flex gap-2">
             <Button asChild variant="outline" size="sm">
               <Link href="/admin/schedules?format=grid">
@@ -255,7 +261,10 @@ export function WeeklySchedule() {
                     {roomName}
                   </th>
                   {dayNumbers.map((dayNumber) => {
-                    const assignment = getAssignmentForDayAndRoom(dayNumber, roomName)
+                    const assignment = getAssignmentForDayAndRoom(
+                      dayNumber,
+                      roomName
+                    )
                     return (
                       <td
                         key={dayNumber}
@@ -281,11 +290,11 @@ export function WeeklySchedule() {
             </tbody>
           </table>
         </div>
-        
+
         <div className="mt-4 text-center">
           <p className="text-xs text-muted-foreground">
-            📚 {getTermDisplayName(currentTerm)}のスケジュール表示中 | 
-            ⏰ 10分ごとに自動更新
+            📚 {getTermDisplayName(currentTerm)}のスケジュール表示中 | ⏰
+            10分ごとに自動更新
           </p>
         </div>
       </CardContent>

@@ -26,14 +26,21 @@ const CreateRoomSchema = z.object({
     .int()
     .min(1, '収容人数は1人以上を指定してください')
     .max(100, '収容人数は100人以下を指定してください'),
-  description: z.string().max(200, '説明は200文字以内で入力してください').optional(),
+  description: z
+    .string()
+    .max(200, '説明は200文字以内で入力してください')
+    .optional(),
 })
 
 // クエリパラメータスキーマ
 const RoomsQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
-  search: z.string().optional().nullable().transform(val => val || undefined),
+  search: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((val) => val || undefined),
 })
 
 /**
@@ -58,7 +65,7 @@ export async function GET(req: NextRequest) {
       console.error('Rooms API validation error:', queryResult.error)
       return createErrorResponse(
         'VALIDATION_ERROR',
-        `パラメータが正しくありません: ${queryResult.error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join(', ')}`,
+        `パラメータが正しくありません: ${queryResult.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(', ')}`,
         400
       )
     }
@@ -102,7 +109,9 @@ export async function GET(req: NextRequest) {
       description: room.description,
       isActive: true, // MVP: 全ての図書室をアクティブとして扱う
       classCount: room._count.assignments,
-      utilizationRate: Math.round((room._count.assignments / Math.max(room.capacity / 10, 1)) * 100), // 概算利用率
+      utilizationRate: Math.round(
+        (room._count.assignments / Math.max(room.capacity / 10, 1)) * 100
+      ), // 概算利用率
       createdAt: room.createdAt.toISOString(),
       updatedAt: room.updatedAt.toISOString(),
     }))

@@ -99,9 +99,7 @@ export function TodayDuties() {
           <div className="text-center py-8">
             <div className="text-4xl mb-4">📚</div>
             <h3 className="text-lg font-medium mb-2">今日の当番を確認中...</h3>
-            <p className="text-muted-foreground">
-              少々お待ちください
-            </p>
+            <p className="text-muted-foreground">少々お待ちください</p>
           </div>
         </CardContent>
       </Card>
@@ -140,9 +138,7 @@ export function TodayDuties() {
     <Card className="w-full mb-6">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span className="flex items-center gap-2">
-            🌟 今日の当番
-          </span>
+          <span className="flex items-center gap-2">🌟 今日の当番</span>
           <span className="text-sm font-normal text-muted-foreground">
             📅 今日: {formattedDate}
           </span>
@@ -162,7 +158,9 @@ export function TodayDuties() {
           // 平日だが当番なしの場合
           <div className="text-center py-8">
             <div className="text-4xl mb-4">📚</div>
-            <h3 className="text-lg font-medium mb-2">今日の当番は設定されていません</h3>
+            <h3 className="text-lg font-medium mb-2">
+              今日の当番は設定されていません
+            </h3>
             <p className="text-muted-foreground mb-4">
               スケジュール管理から当番表を確認してください
             </p>
@@ -185,13 +183,13 @@ export function TodayDuties() {
                   <span className="text-lg">📚</span>
                   <h3 className="font-medium text-gray-900">{duty.roomName}</h3>
                 </div>
-                
+
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <span className="text-sm">👤</span>
                     <span className="font-medium">{duty.student.name}</span>
                   </div>
-                  
+
                   <div className="text-sm text-gray-600">
                     {duty.student.class.year}年{duty.student.class.name}
                   </div>
@@ -200,7 +198,7 @@ export function TodayDuties() {
             ))}
           </div>
         )}
-        
+
         {/* 説明文 */}
         {!isWeekend && duties.length > 0 && (
           <div className="mt-4 text-xs text-muted-foreground text-center">

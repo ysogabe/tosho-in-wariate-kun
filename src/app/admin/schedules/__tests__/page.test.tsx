@@ -34,12 +34,12 @@ jest.mock('next/navigation', () => ({
 
 // Mock components
 jest.mock('@/components/layout/page-layout', () => {
-  return function MockPageLayout({ 
-    children, 
-    title, 
-    description, 
-    actions 
-  }: { 
+  return function MockPageLayout({
+    children,
+    title,
+    description,
+    actions,
+  }: {
     children: React.ReactNode
     title: string
     description: string
@@ -57,11 +57,11 @@ jest.mock('@/components/layout/page-layout', () => {
 })
 
 jest.mock('@/components/schedule/schedule-grid', () => {
-  return function MockScheduleGrid({ 
-    assignments, 
-    term, 
-    onExport 
-  }: { 
+  return function MockScheduleGrid({
+    assignments,
+    term,
+    onExport,
+  }: {
     assignments: any[]
     term: string
     onExport: (format: string) => void
@@ -77,10 +77,10 @@ jest.mock('@/components/schedule/schedule-grid', () => {
 })
 
 jest.mock('@/components/schedule/schedule-calendar', () => {
-  return function MockScheduleCalendar({ 
-    assignments, 
-    term 
-  }: { 
+  return function MockScheduleCalendar({
+    assignments,
+    term,
+  }: {
     assignments: any[]
     term: string
   }) {
@@ -94,10 +94,10 @@ jest.mock('@/components/schedule/schedule-calendar', () => {
 })
 
 jest.mock('@/components/schedule/schedule-list', () => {
-  return function MockScheduleList({ 
-    assignments, 
-    term 
-  }: { 
+  return function MockScheduleList({
+    assignments,
+    term,
+  }: {
     assignments: any[]
     term: string
   }) {
@@ -111,10 +111,10 @@ jest.mock('@/components/schedule/schedule-list', () => {
 })
 
 jest.mock('@/components/common/loading-spinner', () => {
-  return function MockLoadingSpinner({ 
-    size, 
-    text 
-  }: { 
+  return function MockLoadingSpinner({
+    size,
+    text,
+  }: {
     size?: string
     text?: string
   }) {
@@ -130,8 +130,8 @@ jest.mock('@/components/common/loading-spinner', () => {
 // Mock UI components
 jest.mock('@/components/ui/button', () => ({
   Button: ({ children, onClick, disabled, variant, size, ...props }: any) => (
-    <button 
-      onClick={onClick} 
+    <button
+      onClick={onClick}
       disabled={disabled}
       data-variant={variant}
       data-size={size}
@@ -143,24 +143,54 @@ jest.mock('@/components/ui/button', () => ({
 }))
 
 jest.mock('@/components/ui/card', () => ({
-  Card: ({ children, ...props }: any) => <div data-testid="card" {...props}>{children}</div>,
-  CardContent: ({ children, ...props }: any) => <div data-testid="card-content" {...props}>{children}</div>,
-  CardDescription: ({ children, ...props }: any) => <div data-testid="card-description" {...props}>{children}</div>,
-  CardHeader: ({ children, ...props }: any) => <div data-testid="card-header" {...props}>{children}</div>,
-  CardTitle: ({ children, ...props }: any) => <div data-testid="card-title" {...props}>{children}</div>,
+  Card: ({ children, ...props }: any) => (
+    <div data-testid="card" {...props}>
+      {children}
+    </div>
+  ),
+  CardContent: ({ children, ...props }: any) => (
+    <div data-testid="card-content" {...props}>
+      {children}
+    </div>
+  ),
+  CardDescription: ({ children, ...props }: any) => (
+    <div data-testid="card-description" {...props}>
+      {children}
+    </div>
+  ),
+  CardHeader: ({ children, ...props }: any) => (
+    <div data-testid="card-header" {...props}>
+      {children}
+    </div>
+  ),
+  CardTitle: ({ children, ...props }: any) => (
+    <div data-testid="card-title" {...props}>
+      {children}
+    </div>
+  ),
 }))
 
 jest.mock('@/components/ui/tabs', () => ({
   Tabs: ({ children, value, onValueChange, ...props }: any) => (
     <div data-testid="tabs" data-value={value} {...props}>
-      {React.Children.map(children, (child) => 
+      {React.Children.map(children, (child) =>
         React.cloneElement(child, { currentValue: value, onValueChange })
       )}
     </div>
   ),
-  TabsList: ({ children, ...props }: any) => <div data-testid="tabs-list" {...props}>{children}</div>,
-  TabsTrigger: ({ children, value, currentValue, onValueChange, ...props }: any) => (
-    <button 
+  TabsList: ({ children, ...props }: any) => (
+    <div data-testid="tabs-list" {...props}>
+      {children}
+    </div>
+  ),
+  TabsTrigger: ({
+    children,
+    value,
+    currentValue,
+    onValueChange,
+    ...props
+  }: any) => (
+    <button
       data-testid={`tab-trigger-${value}`}
       data-active={value === currentValue}
       onClick={() => onValueChange?.(value)}
@@ -169,65 +199,105 @@ jest.mock('@/components/ui/tabs', () => ({
       {children}
     </button>
   ),
-  TabsContent: ({ children, value, currentValue, ...props }: any) => 
-    value === currentValue ? <div data-testid={`tab-content-${value}`} {...props}>{children}</div> : null,
+  TabsContent: ({ children, value, currentValue, ...props }: any) =>
+    value === currentValue ? (
+      <div data-testid={`tab-content-${value}`} {...props}>
+        {children}
+      </div>
+    ) : null,
 }))
 
 jest.mock('@/components/ui/dialog', () => ({
-  Dialog: ({ children, open, onOpenChange }: any) => 
-    open ? <div data-testid="dialog" onClick={() => onOpenChange?.(false)}>{children}</div> : null,
+  Dialog: ({ children, open, onOpenChange }: any) =>
+    open ? (
+      <div data-testid="dialog" onClick={() => onOpenChange?.(false)}>
+        {children}
+      </div>
+    ) : null,
   DialogContent: ({ children, ...props }: any) => (
-    <div data-testid="dialog-content" {...props}>{children}</div>
+    <div data-testid="dialog-content" {...props}>
+      {children}
+    </div>
   ),
   DialogDescription: ({ children, ...props }: any) => (
-    <div data-testid="dialog-description" {...props}>{children}</div>
+    <div data-testid="dialog-description" {...props}>
+      {children}
+    </div>
   ),
   DialogHeader: ({ children, ...props }: any) => (
-    <div data-testid="dialog-header" {...props}>{children}</div>
+    <div data-testid="dialog-header" {...props}>
+      {children}
+    </div>
   ),
   DialogTitle: ({ children, ...props }: any) => (
-    <div data-testid="dialog-title" {...props}>{children}</div>
+    <div data-testid="dialog-title" {...props}>
+      {children}
+    </div>
   ),
 }))
 
 jest.mock('@/components/ui/alert-dialog', () => ({
-  AlertDialog: ({ children, open, onOpenChange }: any) => 
-    open ? <div data-testid="alert-dialog" onClick={() => onOpenChange?.(false)}>{children}</div> : null,
+  AlertDialog: ({ children, open, onOpenChange }: any) =>
+    open ? (
+      <div data-testid="alert-dialog" onClick={() => onOpenChange?.(false)}>
+        {children}
+      </div>
+    ) : null,
   AlertDialogAction: ({ children, onClick, ...props }: any) => (
-    <button data-testid="alert-dialog-action" onClick={onClick} {...props}>{children}</button>
+    <button data-testid="alert-dialog-action" onClick={onClick} {...props}>
+      {children}
+    </button>
   ),
   AlertDialogCancel: ({ children, ...props }: any) => (
-    <button data-testid="alert-dialog-cancel" {...props}>{children}</button>
+    <button data-testid="alert-dialog-cancel" {...props}>
+      {children}
+    </button>
   ),
   AlertDialogContent: ({ children, ...props }: any) => (
-    <div data-testid="alert-dialog-content" {...props}>{children}</div>
+    <div data-testid="alert-dialog-content" {...props}>
+      {children}
+    </div>
   ),
   AlertDialogDescription: ({ children, ...props }: any) => (
-    <div data-testid="alert-dialog-description" {...props}>{children}</div>
+    <div data-testid="alert-dialog-description" {...props}>
+      {children}
+    </div>
   ),
   AlertDialogFooter: ({ children, ...props }: any) => (
-    <div data-testid="alert-dialog-footer" {...props}>{children}</div>
+    <div data-testid="alert-dialog-footer" {...props}>
+      {children}
+    </div>
   ),
   AlertDialogHeader: ({ children, ...props }: any) => (
-    <div data-testid="alert-dialog-header" {...props}>{children}</div>
+    <div data-testid="alert-dialog-header" {...props}>
+      {children}
+    </div>
   ),
   AlertDialogTitle: ({ children, ...props }: any) => (
-    <div data-testid="alert-dialog-title" {...props}>{children}</div>
+    <div data-testid="alert-dialog-title" {...props}>
+      {children}
+    </div>
   ),
 }))
 
 jest.mock('@/components/ui/alert', () => ({
   Alert: ({ children, variant, ...props }: any) => (
-    <div data-testid="alert" data-variant={variant} {...props}>{children}</div>
+    <div data-testid="alert" data-variant={variant} {...props}>
+      {children}
+    </div>
   ),
   AlertDescription: ({ children, ...props }: any) => (
-    <div data-testid="alert-description" {...props}>{children}</div>
+    <div data-testid="alert-description" {...props}>
+      {children}
+    </div>
   ),
 }))
 
 jest.mock('@/components/ui/badge', () => ({
   Badge: ({ children, variant, ...props }: any) => (
-    <span data-testid="badge" data-variant={variant} {...props}>{children}</span>
+    <span data-testid="badge" data-variant={variant} {...props}>
+      {children}
+    </span>
   ),
 }))
 
@@ -241,34 +311,34 @@ const mockScheduleData = {
         term: 'FIRST_TERM',
         dayOfWeek: 1,
         room: { id: 'room1', name: '図書室A', capacity: 30 },
-        student: { 
-          id: 'student1', 
-          name: '田中太郎', 
+        student: {
+          id: 'student1',
+          name: '田中太郎',
           grade: 5,
-          class: { id: 'class1', name: '1組', year: 5 }
+          class: { id: 'class1', name: '1組', year: 5 },
         },
-        createdAt: '2024-01-01T00:00:00.000Z'
+        createdAt: '2024-01-01T00:00:00.000Z',
       },
       {
         id: '2',
         term: 'FIRST_TERM',
         dayOfWeek: 2,
         room: { id: 'room2', name: '図書室B', capacity: 25 },
-        student: { 
-          id: 'student2', 
-          name: '山田花子', 
+        student: {
+          id: 'student2',
+          name: '山田花子',
           grade: 6,
-          class: { id: 'class2', name: '2組', year: 6 }
+          class: { id: 'class2', name: '2組', year: 6 },
         },
-        createdAt: '2024-01-01T00:00:00.000Z'
-      }
+        createdAt: '2024-01-01T00:00:00.000Z',
+      },
     ],
     summary: {
       totalAssignments: 2,
       studentsAssigned: 2,
-      termBreakdown: { FIRST_TERM: 2, SECOND_TERM: 0 }
-    }
-  }
+      termBreakdown: { FIRST_TERM: 2, SECOND_TERM: 0 },
+    },
+  },
 }
 
 const mockStatsData = {
@@ -279,8 +349,8 @@ const mockStatsData = {
     averageAssignmentsPerStudent: 1.0,
     balanceScore: 0.95,
     assignmentsByDay: { 1: 1, 2: 1 },
-    assignmentsByRoom: { 'room1': 1, 'room2': 1 }
-  }
+    assignmentsByRoom: { room1: 1, room2: 1 },
+  },
 }
 
 describe('ScheduleManagementPage', () => {
@@ -312,8 +382,12 @@ describe('ScheduleManagementPage', () => {
 
       render(<ScheduleManagementPage />)
 
-      expect(screen.getByTestId('page-title')).toHaveTextContent('スケジュール管理')
-      expect(screen.getByTestId('page-description')).toHaveTextContent('図書委員の当番表を生成・管理します')
+      expect(screen.getByTestId('page-title')).toHaveTextContent(
+        'スケジュール管理'
+      )
+      expect(screen.getByTestId('page-description')).toHaveTextContent(
+        '図書委員の当番表を生成・管理します'
+      )
     })
 
     it('ローディング状態を表示する', () => {
@@ -328,7 +402,9 @@ describe('ScheduleManagementPage', () => {
       render(<ScheduleManagementPage />)
 
       expect(screen.getByTestId('loading-spinner')).toBeInTheDocument()
-      expect(screen.getByTestId('spinner-text')).toHaveTextContent('スケジュールを読み込み中...')
+      expect(screen.getByTestId('spinner-text')).toHaveTextContent(
+        'スケジュールを読み込み中...'
+      )
     })
 
     it('エラー状態を表示する', () => {
@@ -456,7 +532,9 @@ describe('ScheduleManagementPage', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('dialog')).toBeInTheDocument()
-        expect(screen.getByTestId('dialog-title')).toHaveTextContent('スケジュール生成')
+        expect(screen.getByTestId('dialog-title')).toHaveTextContent(
+          'スケジュール生成'
+        )
       })
     })
 
@@ -465,7 +543,7 @@ describe('ScheduleManagementPage', () => {
         ok: true,
         json: async () => ({
           success: true,
-          data: { message: 'スケジュール生成完了' }
+          data: { message: 'スケジュール生成完了' },
         }),
       } as Response)
 
@@ -500,7 +578,7 @@ describe('ScheduleManagementPage', () => {
         ok: false,
         json: async () => ({
           success: false,
-          error: { message: '生成に失敗しました' }
+          error: { message: '生成に失敗しました' },
         }),
       } as Response)
 
@@ -548,7 +626,9 @@ describe('ScheduleManagementPage', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('alert-dialog')).toBeInTheDocument()
-        expect(screen.getByTestId('alert-dialog-title')).toHaveTextContent('スケジュールリセット')
+        expect(screen.getByTestId('alert-dialog-title')).toHaveTextContent(
+          'スケジュールリセット'
+        )
       })
     })
 
@@ -557,7 +637,7 @@ describe('ScheduleManagementPage', () => {
         ok: true,
         json: async () => ({
           success: true,
-          data: { message: 'スケジュール削除完了' }
+          data: { message: 'スケジュール削除完了' },
         }),
       } as Response)
 
@@ -608,7 +688,7 @@ describe('ScheduleManagementPage', () => {
       // Mock URL.createObjectURL and related APIs
       global.URL.createObjectURL = jest.fn(() => 'mock-url')
       global.URL.revokeObjectURL = jest.fn()
-      
+
       // Mock document methods
       const mockAnchor = {
         href: '',
@@ -643,10 +723,14 @@ describe('ScheduleManagementPage', () => {
       fireEvent.click(exportButton)
 
       await waitFor(() => {
-        expect(mockFetch).toHaveBeenCalledWith('/api/schedules/export?term=FIRST_TERM&format=csv')
+        expect(mockFetch).toHaveBeenCalledWith(
+          '/api/schedules/export?term=FIRST_TERM&format=csv'
+        )
       })
 
-      expect(mockToast.success).toHaveBeenCalledWith('CSVファイルをダウンロードしました')
+      expect(mockToast.success).toHaveBeenCalledWith(
+        'CSVファイルをダウンロードしました'
+      )
     })
 
     it('エクスポートエラーを正しく処理する', async () => {
@@ -660,7 +744,9 @@ describe('ScheduleManagementPage', () => {
       fireEvent.click(exportButton)
 
       await waitFor(() => {
-        expect(mockToast.error).toHaveBeenCalledWith('エクスポートに失敗しました')
+        expect(mockToast.error).toHaveBeenCalledWith(
+          'エクスポートに失敗しました'
+        )
       })
     })
   })
@@ -688,7 +774,9 @@ describe('ScheduleManagementPage', () => {
 
       expect(screen.getByTestId('schedule-grid')).toBeInTheDocument()
       expect(screen.getByTestId('grid-term')).toHaveTextContent('FIRST_TERM')
-      expect(screen.getByTestId('grid-assignments-count')).toHaveTextContent('2')
+      expect(screen.getByTestId('grid-assignments-count')).toHaveTextContent(
+        '2'
+      )
     })
 
     it('ScheduleCalendarに切り替えできる', async () => {
@@ -699,8 +787,12 @@ describe('ScheduleManagementPage', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('schedule-calendar')).toBeInTheDocument()
-        expect(screen.getByTestId('calendar-term')).toHaveTextContent('FIRST_TERM')
-        expect(screen.getByTestId('calendar-assignments-count')).toHaveTextContent('2')
+        expect(screen.getByTestId('calendar-term')).toHaveTextContent(
+          'FIRST_TERM'
+        )
+        expect(
+          screen.getByTestId('calendar-assignments-count')
+        ).toHaveTextContent('2')
       })
     })
 
@@ -713,7 +805,9 @@ describe('ScheduleManagementPage', () => {
       await waitFor(() => {
         expect(screen.getByTestId('schedule-list')).toBeInTheDocument()
         expect(screen.getByTestId('list-term')).toHaveTextContent('FIRST_TERM')
-        expect(screen.getByTestId('list-assignments-count')).toHaveTextContent('2')
+        expect(screen.getByTestId('list-assignments-count')).toHaveTextContent(
+          '2'
+        )
       })
     })
   })
@@ -815,7 +909,9 @@ describe('ScheduleManagementPage', () => {
       fireEvent.click(confirmButton)
 
       await waitFor(() => {
-        expect(mockToast.error).toHaveBeenCalledWith('スケジュール生成中にエラーが発生しました')
+        expect(mockToast.error).toHaveBeenCalledWith(
+          'スケジュール生成中にエラーが発生しました'
+        )
       })
     })
 
@@ -823,7 +919,10 @@ describe('ScheduleManagementPage', () => {
       const useSWR = require('swr').default
       useSWR
         .mockReturnValueOnce({
-          data: { ...mockScheduleData, data: { ...mockScheduleData.data, assignments: [] } },
+          data: {
+            ...mockScheduleData,
+            data: { ...mockScheduleData.data, assignments: [] },
+          },
           error: null,
           isLoading: false,
           mutate: jest.fn(),
@@ -837,8 +936,12 @@ describe('ScheduleManagementPage', () => {
 
       render(<ScheduleManagementPage />)
 
-      expect(screen.getByText('前期のスケジュールがありません')).toBeInTheDocument()
-      expect(screen.getByText('スケジュールを生成して当番表を作成してください。')).toBeInTheDocument()
+      expect(
+        screen.getByText('前期のスケジュールがありません')
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText('スケジュールを生成して当番表を作成してください。')
+      ).toBeInTheDocument()
     })
   })
 })

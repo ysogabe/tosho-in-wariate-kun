@@ -3,7 +3,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { School, Users, Calendar, BookOpen, TrendingUp, Plus, RefreshCw } from 'lucide-react'
+import {
+  School,
+  Users,
+  Calendar,
+  BookOpen,
+  TrendingUp,
+  Plus,
+  RefreshCw,
+} from 'lucide-react'
 import useSWR from 'swr'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -49,26 +57,35 @@ export default function AdminDashboard() {
     data: statsData,
     error: statsError,
     isLoading: statsLoading,
-  } = useSWR('/api/dashboard/stats', async (url: string) => {
-    const response = await fetch(url)
-    if (!response.ok) {
-      throw new Error('Failed to fetch dashboard stats')
+  } = useSWR(
+    '/api/dashboard/stats',
+    async (url: string) => {
+      const response = await fetch(url)
+      if (!response.ok) {
+        throw new Error('Failed to fetch dashboard stats')
+      }
+      return response.json()
+    },
+    {
+      revalidateOnFocus: true,
+      revalidateOnMount: true,
+      refreshInterval: 30000, // 30秒ごとに更新
     }
-    return response.json()
-  }, {
-    revalidateOnFocus: true,
-    revalidateOnMount: true,
-    refreshInterval: 30000, // 30秒ごとに更新
-  })
+  )
 
   const stats = statsData?.data as DashboardStats
 
   // 現在の学期を判定
-  const currentTerm = stats?.schedules.firstTerm.exists && !stats?.schedules.secondTerm.exists ? 'FIRST_TERM' : 
-                    stats?.schedules.secondTerm.exists ? 'SECOND_TERM' : 'FIRST_TERM'
-  
-  const schedulesGenerated = (stats?.schedules.firstTerm.exists ? 1 : 0) + 
-                           (stats?.schedules.secondTerm.exists ? 1 : 0)
+  const currentTerm =
+    stats?.schedules.firstTerm.exists && !stats?.schedules.secondTerm.exists
+      ? 'FIRST_TERM'
+      : stats?.schedules.secondTerm.exists
+        ? 'SECOND_TERM'
+        : 'FIRST_TERM'
+
+  const schedulesGenerated =
+    (stats?.schedules.firstTerm.exists ? 1 : 0) +
+    (stats?.schedules.secondTerm.exists ? 1 : 0)
 
   const handleRefreshData = async () => {
     try {
@@ -104,7 +121,8 @@ export default function AdminDashboard() {
         >
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            😅 ダッシュボードデータの取得に失敗しました。ページを再読み込みしてください。
+            😅
+            ダッシュボードデータの取得に失敗しました。ページを再読み込みしてください。
           </AlertDescription>
         </Alert>
       </PageLayout>
@@ -296,7 +314,10 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-3">
-                <Calendar className="h-5 w-5" style={{ color: 'hsl(180, 70%, 50%)' }} />
+                <Calendar
+                  className="h-5 w-5"
+                  style={{ color: 'hsl(180, 70%, 50%)' }}
+                />
                 <Badge
                   variant="default"
                   style={{
@@ -421,7 +442,10 @@ export default function AdminDashboard() {
                   textDecoration: 'none',
                 }}
               >
-                <School className="h-6 w-6 mb-2" style={{ color: 'hsl(200, 70%, 50%)' }} />
+                <School
+                  className="h-6 w-6 mb-2"
+                  style={{ color: 'hsl(200, 70%, 50%)' }}
+                />
                 <h3
                   className="font-medium mb-1"
                   style={{
@@ -452,7 +476,10 @@ export default function AdminDashboard() {
                   textDecoration: 'none',
                 }}
               >
-                <Users className="h-6 w-6 mb-2" style={{ color: 'hsl(140, 70%, 50%)' }} />
+                <Users
+                  className="h-6 w-6 mb-2"
+                  style={{ color: 'hsl(140, 70%, 50%)' }}
+                />
                 <h3
                   className="font-medium mb-1"
                   style={{
@@ -483,7 +510,10 @@ export default function AdminDashboard() {
                   textDecoration: 'none',
                 }}
               >
-                <Calendar className="h-6 w-6 mb-2" style={{ color: 'hsl(280, 70%, 50%)' }} />
+                <Calendar
+                  className="h-6 w-6 mb-2"
+                  style={{ color: 'hsl(280, 70%, 50%)' }}
+                />
                 <h3
                   className="font-medium mb-1"
                   style={{

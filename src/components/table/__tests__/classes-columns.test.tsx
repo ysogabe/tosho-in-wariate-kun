@@ -82,7 +82,9 @@ describe('Classes Columns', () => {
       expect(studentCountColumn).toBeDefined()
       renderCell(studentCountColumn!, testClass)
 
-      expect(screen.getByText(`${testClass.studentCount}名`)).toBeInTheDocument()
+      expect(
+        screen.getByText(`${testClass.studentCount}名`)
+      ).toBeInTheDocument()
     })
   })
 

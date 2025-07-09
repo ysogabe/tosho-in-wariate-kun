@@ -35,8 +35,8 @@ interface TodayDuty {
 }
 
 interface TodayDutiesResponse {
-  date: string  // YYYY-MM-DD
-  dayOfWeek: string  // 'monday' | 'tuesday' | ...
+  date: string // YYYY-MM-DD
+  dayOfWeek: string // 'monday' | 'tuesday' | ...
   isWeekend: boolean
   duties: TodayDuty[]
 }
@@ -54,7 +54,7 @@ const dayOfWeekMap: Record<number, string> = {
 
 // 曜日をデータベースの dayOfWeek (1=月曜) に変換
 const getDayOfWeekForDb = (jsDay: number): number => {
-  if (jsDay === 0) return 7  // 日曜日は7
+  if (jsDay === 0) return 7 // 日曜日は7
   return jsDay
 }
 
@@ -121,10 +121,7 @@ export async function GET(request: NextRequest) {
         },
         room: true,
       },
-      orderBy: [
-        { room: { name: 'asc' } },
-        { student: { name: 'asc' } },
-      ],
+      orderBy: [{ room: { name: 'asc' } }, { student: { name: 'asc' } }],
     })
 
     // アクティブな図書室のみフィルタリング（isActiveプロパティがない場合は全て含める）
