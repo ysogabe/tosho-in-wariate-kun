@@ -299,6 +299,16 @@ npm run type-check       # TypeScript validation
 npm run build            # Production build
 ```
 
+### 重要: ローカルテスト実行について
+
+**ローカルでの単体テスト実施はCIの実施と同じ事を実施してください。**
+
+- 必ず `npm run test:ci` を使用してCIと同じ環境でテストを実行する
+- `npm run test` （watch mode）はローカル開発時のみ使用する
+- CI失敗時の原因調査では、ローカルで `npm run test:ci` を実行して再現確認を行う
+- テストファイルは既に `.eslintrc.json` の `ignorePatterns` で除外されており、Lintの対象外
+- プロダクションビルドも `npm run build` で事前確認する
+
 ### Testing Philosophy and Quality Focus
 
 **IMPORTANT**: カバレッジの向上より、根本的なテスト品質向上を目標とする

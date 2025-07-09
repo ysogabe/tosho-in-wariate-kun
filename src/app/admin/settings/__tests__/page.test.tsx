@@ -149,7 +149,7 @@ jest.mock('@/components/ui/alert', () => ({
 // Mock fetch globally
 global.fetch = jest.fn()
 
-import useSWR from 'swr'
+import useSWR, { SWRResponse } from 'swr'
 const mockUseSWR = useSWR as jest.MockedFunction<typeof useSWR>
 
 describe('SystemSettingsPage', () => {
@@ -194,10 +194,11 @@ describe('SystemSettingsPage', () => {
   it('システム設定ページが正常にレンダリングされる', () => {
     mockUseSWR.mockReturnValue({
       data: mockSystemData,
-      error: null,
+      error: undefined,
       isLoading: false,
+      isValidating: false,
       mutate: jest.fn(),
-    })
+    } as SWRResponse<any, any>)
 
     render(<SystemSettingsPage />)
 
@@ -210,11 +211,12 @@ describe('SystemSettingsPage', () => {
 
   it('ローディング状態が表示される', () => {
     mockUseSWR.mockReturnValue({
-      data: null,
-      error: null,
+      data: undefined,
+      error: undefined,
       isLoading: true,
+      isValidating: false,
       mutate: jest.fn(),
-    })
+    } as SWRResponse<any, any>)
 
     render(<SystemSettingsPage />)
 
@@ -224,11 +226,12 @@ describe('SystemSettingsPage', () => {
 
   it('エラー状態が表示される', () => {
     mockUseSWR.mockReturnValue({
-      data: null,
+      data: undefined,
       error: new Error('Failed to fetch'),
       isLoading: false,
+      isValidating: false,
       mutate: jest.fn(),
-    })
+    } as SWRResponse<any, any>)
 
     render(<SystemSettingsPage />)
 
@@ -239,10 +242,11 @@ describe('SystemSettingsPage', () => {
   it('システム情報が正しく表示される', () => {
     mockUseSWR.mockReturnValue({
       data: mockSystemData,
-      error: null,
+      error: undefined,
       isLoading: false,
+      isValidating: false,
       mutate: jest.fn(),
-    })
+    } as SWRResponse<any, any>)
 
     render(<SystemSettingsPage />)
 
@@ -260,16 +264,17 @@ describe('SystemSettingsPage', () => {
   it('データエクスポートが正常に動作する', async () => {
     mockUseSWR.mockReturnValue({
       data: mockSystemData,
-      error: null,
+      error: undefined,
       isLoading: false,
+      isValidating: false,
       mutate: jest.fn(),
-    })
+    } as SWRResponse<any, any>)
 
     const mockBlob = new Blob(['test data'], { type: 'application/json' })
     ;(global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       blob: () => Promise.resolve(mockBlob),
-    })
+    } as SWRResponse<any, any>)
 
     // Mock DOM methods
     const mockCreateObjectURL = jest.fn(() => 'mock-url')
@@ -283,23 +288,23 @@ describe('SystemSettingsPage', () => {
         createObjectURL: mockCreateObjectURL,
         revokeObjectURL: mockRevokeObjectURL,
       },
-    })
+    } as SWRResponse<any, any>)
 
     Object.defineProperty(document, 'createElement', {
       value: jest.fn(() => ({
         href: '',
         download: '',
         click: mockClick,
-      })),
-    })
+      } as SWRResponse<any, any>)),
+    } as SWRResponse<any, any>)
 
     Object.defineProperty(document.body, 'appendChild', {
       value: mockAppendChild,
-    })
+    } as SWRResponse<any, any>)
 
     Object.defineProperty(document.body, 'removeChild', {
       value: mockRemoveChild,
-    })
+    } as SWRResponse<any, any>)
 
     render(<SystemSettingsPage />)
 
@@ -315,14 +320,15 @@ describe('SystemSettingsPage', () => {
   it('データエクスポートでエラーが発生した場合、エラーメッセージが表示される', async () => {
     mockUseSWR.mockReturnValue({
       data: mockSystemData,
-      error: null,
+      error: undefined,
       isLoading: false,
+      isValidating: false,
       mutate: jest.fn(),
-    })
+    } as SWRResponse<any, any>)
 
     ;(global.fetch as jest.Mock).mockResolvedValue({
       ok: false,
-    })
+    } as SWRResponse<any, any>)
 
     render(<SystemSettingsPage />)
 
@@ -337,10 +343,11 @@ describe('SystemSettingsPage', () => {
   it('データリセットダイアログが表示される', () => {
     mockUseSWR.mockReturnValue({
       data: mockSystemData,
-      error: null,
+      error: undefined,
       isLoading: false,
+      isValidating: false,
       mutate: jest.fn(),
-    })
+    } as SWRResponse<any, any>)
 
     render(<SystemSettingsPage />)
 
@@ -355,18 +362,19 @@ describe('SystemSettingsPage', () => {
     const mockMutate = jest.fn()
     mockUseSWR.mockReturnValue({
       data: mockSystemData,
-      error: null,
+      error: undefined,
       isLoading: false,
+      isValidating: false,
       mutate: mockMutate,
-    })
+    } as SWRResponse<any, any>)
 
     ;(global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({
         success: true,
         data: { message: 'データリセットが完了しました' },
-      }),
-    })
+      } as SWRResponse<any, any>),
+    } as SWRResponse<any, any>)
 
     render(<SystemSettingsPage />)
 
@@ -400,18 +408,19 @@ describe('SystemSettingsPage', () => {
   it('データリセットでエラーが発生した場合、エラーメッセージが表示される', async () => {
     mockUseSWR.mockReturnValue({
       data: mockSystemData,
-      error: null,
+      error: undefined,
       isLoading: false,
+      isValidating: false,
       mutate: jest.fn(),
-    })
+    } as SWRResponse<any, any>)
 
     ;(global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({
         success: false,
         error: { message: 'リセットに失敗しました' },
-      }),
-    })
+      } as SWRResponse<any, any>),
+    } as SWRResponse<any, any>)
 
     render(<SystemSettingsPage />)
 
@@ -435,10 +444,11 @@ describe('SystemSettingsPage', () => {
   it('パスワードが空の場合、エラーメッセージが表示される', async () => {
     mockUseSWR.mockReturnValue({
       data: mockSystemData,
-      error: null,
+      error: undefined,
       isLoading: false,
+      isValidating: false,
       mutate: jest.fn(),
-    })
+    } as SWRResponse<any, any>)
 
     render(<SystemSettingsPage />)
 
@@ -459,10 +469,11 @@ describe('SystemSettingsPage', () => {
     const mockMutate = jest.fn()
     mockUseSWR.mockReturnValue({
       data: mockSystemData,
-      error: null,
+      error: undefined,
       isLoading: false,
+      isValidating: false,
       mutate: mockMutate,
-    })
+    } as SWRResponse<any, any>)
 
     render(<SystemSettingsPage />)
 
@@ -475,10 +486,11 @@ describe('SystemSettingsPage', () => {
   it('リセットタイプの説明が正しく表示される', () => {
     mockUseSWR.mockReturnValue({
       data: mockSystemData,
-      error: null,
+      error: undefined,
       isLoading: false,
+      isValidating: false,
       mutate: jest.fn(),
-    })
+    } as SWRResponse<any, any>)
 
     render(<SystemSettingsPage />)
 
@@ -493,10 +505,11 @@ describe('SystemSettingsPage', () => {
   it('メンテナンスタブが表示される', () => {
     mockUseSWR.mockReturnValue({
       data: mockSystemData,
-      error: null,
+      error: undefined,
       isLoading: false,
+      isValidating: false,
       mutate: jest.fn(),
-    })
+    } as SWRResponse<any, any>)
 
     render(<SystemSettingsPage />)
 
