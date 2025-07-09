@@ -193,11 +193,6 @@ jobs:
       actions: read
       pages: write
       id-token: write
-    
-    # Use Playwright official Docker image for faster setup
-    container:
-      image: mcr.microsoft.com/playwright:v1.53.2-noble
-      options: --user 1001:1001 --ipc=host
 
     steps:
       - name: Checkout code
@@ -212,22 +207,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Generate Prisma client
+      - name: Install Playwright browsers
         run: |
-          echo "Generating Prisma client..."
-          # Use temporary directory for Prisma cache
-          export PRISMA_CACHE_DIR=/tmp/prisma-cache
-          mkdir -p $PRISMA_CACHE_DIR
-          npx prisma generate
-        env:
-          DATABASE_URL: file:./e2e-test.db
+          echo "Installing Playwright browsers..."
+          npx playwright install --with-deps
 
       - name: Setup test database
         run: |
           echo "Setting up test database for E2E tests..."
-          # Skip generate step since we already did it
-          cross-env DATABASE_URL=file:./e2e-test.db npm run db:push
-          cross-env DATABASE_URL=file:./e2e-test.db npm run db:seed:dev
+          npm run test:e2e:setup
         env:
           NODE_ENV: test
           DATABASE_URL: file:./e2e-test.db
