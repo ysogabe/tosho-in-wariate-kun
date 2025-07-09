@@ -45,7 +45,7 @@ export const CreateStudentSchema = z.object({
     .max(50, '名前は50文字以内で入力してください'),
   classId: z.string().uuid('有効なクラスIDを指定してください'),
   grade: z.number().int().min(5).max(6, '学年は5年または6年を指定してください'),
-  isActive: z.boolean().default(true),
+  isActive: z.boolean(),
 })
 
 /**

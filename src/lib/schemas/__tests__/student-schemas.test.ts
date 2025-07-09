@@ -84,6 +84,7 @@ describe('student-schemas', () => {
         name: '田中太郎',
         classId: '123e4567-e89b-12d3-a456-426614174000',
         grade: 5,
+        isActive: true,
       }
 
       expect(() => CreateStudentSchema.parse(validData)).not.toThrow()
@@ -93,6 +94,7 @@ describe('student-schemas', () => {
       const invalidData = {
         classId: '123e4567-e89b-12d3-a456-426614174000',
         grade: 5,
+        isActive: true,
       }
 
       expect(() => CreateStudentSchema.parse(invalidData)).toThrow()
@@ -103,6 +105,7 @@ describe('student-schemas', () => {
         name: '',
         classId: '123e4567-e89b-12d3-a456-426614174000',
         grade: 5,
+        isActive: true,
       }
 
       expect(() => CreateStudentSchema.parse(invalidData)).toThrow()
@@ -113,6 +116,7 @@ describe('student-schemas', () => {
         name: 'a'.repeat(51),
         classId: '123e4567-e89b-12d3-a456-426614174000',
         grade: 5,
+        isActive: true,
       }
 
       expect(() => CreateStudentSchema.parse(invalidData)).toThrow()
@@ -123,6 +127,7 @@ describe('student-schemas', () => {
         name: '田中太郎',
         classId: 'invalid-uuid',
         grade: 5,
+        isActive: true,
       }
 
       expect(() => CreateStudentSchema.parse(invalidData)).toThrow()
@@ -133,6 +138,7 @@ describe('student-schemas', () => {
         name: '田中太郎',
         classId: '123e4567-e89b-12d3-a456-426614174000',
         grade: 4,
+        isActive: true,
       }
 
       expect(() => CreateStudentSchema.parse(invalidData)).toThrow()
@@ -244,11 +250,13 @@ describe('student-schemas', () => {
         name: '田中太郎',
         classId: '123e4567-e89b-12d3-a456-426614174000',
         grade: 5,
+        isActive: true,
       })
 
       expect(typeof data.name).toBe('string')
       expect(typeof data.classId).toBe('string')
       expect(typeof data.grade).toBe('number')
+      expect(typeof data.isActive).toBe('boolean')
     })
 
     it('UpdateStudentInput型が正しく推論される', () => {

@@ -288,7 +288,7 @@ describe('common validation schemas', () => {
 
   describe('capacitySchema', () => {
     it('有効な定員を受け入れる', () => {
-      const validCapacities = [1, 5, 10]
+      const validCapacities = [1, 5, 10, 50, 100]
 
       validCapacities.forEach((capacity) => {
         expect(() => capacitySchema.parse(capacity)).not.toThrow()
@@ -296,7 +296,7 @@ describe('common validation schemas', () => {
     })
 
     it('無効な定員を拒否する', () => {
-      const invalidCapacities = [0, -1, 11, 100]
+      const invalidCapacities = [0, -1, 101, 500]
 
       invalidCapacities.forEach((capacity) => {
         expect(() => capacitySchema.parse(capacity)).toThrow()
@@ -305,19 +305,19 @@ describe('common validation schemas', () => {
 
     it('0以下の定員を拒否する', () => {
       expect(() => capacitySchema.parse(0)).toThrow(
-        '定員は1以上で入力してください'
+        '収容人数は1以上で入力してください'
       )
     })
 
-    it('10より大きい定員を拒否する', () => {
-      expect(() => capacitySchema.parse(11)).toThrow(
-        '定員は10以下で入力してください'
+    it('100より大きい定員を拒否する', () => {
+      expect(() => capacitySchema.parse(101)).toThrow(
+        '収容人数は100以下で入力してください'
       )
     })
 
     it('整数以外を拒否する', () => {
       expect(() => capacitySchema.parse(5.5)).toThrow(
-        '定員は整数で入力してください'
+        '収容人数は整数で入力してください'
       )
     })
   })

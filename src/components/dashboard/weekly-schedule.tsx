@@ -12,7 +12,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
-import { RefreshCw, AlertCircle, BarChart3, Printer, Calendar } from 'lucide-react'
+import {
+  RefreshCw,
+  AlertCircle,
+  BarChart3,
+  Printer,
+  Calendar,
+} from 'lucide-react'
 
 interface Assignment {
   id: string
@@ -93,7 +99,7 @@ export function WeeklySchedule() {
   }
 
   const handlePrint = useReactToPrint({
-    content: () => printRef.current,
+    contentRef: printRef,
     documentTitle: '今週のスケジュール',
   })
 
@@ -109,10 +115,7 @@ export function WeeklySchedule() {
         <CardContent>
           <div className="flex items-center justify-center py-8">
             <div data-testid="loading-spinner">
-              <LoadingSpinner 
-                size="lg" 
-                text="スケジュールを読み込み中..." 
-              />
+              <LoadingSpinner size="lg" text="スケジュールを読み込み中..." />
             </div>
           </div>
         </CardContent>
@@ -164,7 +167,9 @@ export function WeeklySchedule() {
         <CardContent>
           <div className="text-center py-8">
             <div className="text-4xl mb-4">📅</div>
-            <h3 className="text-lg font-medium mb-2">今週のスケジュールはまだ作成されていません</h3>
+            <h3 className="text-lg font-medium mb-2">
+              今週のスケジュールはまだ作成されていません
+            </h3>
             <p className="text-muted-foreground mb-4">
               スケジュール管理から当番表を作成してください
             </p>
@@ -187,16 +192,16 @@ export function WeeklySchedule() {
   assignments.forEach((assignment) => {
     const roomId = assignment.room.id
     const dayOfWeek = assignment.dayOfWeek
-    
+
     rooms.add(roomId)
-    
+
     if (!scheduleMatrix[roomId]) {
       scheduleMatrix[roomId] = {}
     }
     if (!scheduleMatrix[roomId][dayOfWeek]) {
       scheduleMatrix[roomId][dayOfWeek] = []
     }
-    
+
     scheduleMatrix[roomId][dayOfWeek].push(assignment)
   })
 
@@ -206,9 +211,7 @@ export function WeeklySchedule() {
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span className="flex items-center gap-2">
-            📋 今週のスケジュール
-          </span>
+          <span className="flex items-center gap-2">📋 今週のスケジュール</span>
           <div className="flex gap-2" data-testid="schedule-actions">
             <Button asChild variant="outline" size="sm">
               <Link href="/admin/schedules?format=grid">
@@ -224,23 +227,20 @@ export function WeeklySchedule() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div 
+        <div
           ref={printRef}
           className="print:bg-white"
           data-testid="printable-weekly-schedule"
         >
-          <div 
-            className="overflow-x-auto"
-            data-testid="weekly-schedule-table"
-          >
-            <table 
+          <div className="overflow-x-auto" data-testid="weekly-schedule-table">
+            <table
               className="w-full min-w-[600px] border-collapse border border-gray-300"
               role="table"
               aria-label="今週のスケジュール表"
             >
               <thead>
                 <tr className="bg-gray-50">
-                  <th 
+                  <th
                     className="border border-gray-300 p-3 text-left font-medium"
                     role="columnheader"
                   >
@@ -250,14 +250,19 @@ export function WeeklySchedule() {
                     <th
                       key={dayOfWeek}
                       className={`border border-gray-300 p-3 text-center font-medium ${
-                        dayOfWeek === currentDayOfWeek ? 'bg-blue-100 text-blue-800' : ''
+                        dayOfWeek === currentDayOfWeek
+                          ? 'bg-blue-100 text-blue-800'
+                          : ''
                       }`}
                       role="columnheader"
                       data-testid={`day-header-${dayOfWeek}`}
                     >
                       {dayNames[dayOfWeek]}
                       {dayOfWeek === currentDayOfWeek && (
-                        <div className="text-xs text-blue-600 mt-1" aria-label="今日の当番">
+                        <div
+                          className="text-xs text-blue-600 mt-1"
+                          aria-label="今日の当番"
+                        >
                           今日
                         </div>
                       )}
@@ -267,11 +272,13 @@ export function WeeklySchedule() {
               </thead>
               <tbody>
                 {roomList.map((roomId) => {
-                  const roomName = assignments.find(a => a.room.id === roomId)?.room.name || roomId
-                  
+                  const roomName =
+                    assignments.find((a) => a.room.id === roomId)?.room.name ||
+                    roomId
+
                   return (
                     <tr key={roomId} data-testid={`room-row-${roomId}`}>
-                      <th 
+                      <th
                         className="border border-gray-300 p-3 text-left font-medium bg-gray-50"
                         role="rowheader"
                       >
@@ -285,19 +292,20 @@ export function WeeklySchedule() {
                           }`}
                           data-testid={`day-column-${dayOfWeek}`}
                         >
-                          {scheduleMatrix[roomId]?.[dayOfWeek]?.map((assignment, index) => (
-                            <div key={assignment.id} className="mb-1">
-                              <div className="font-medium">
-                                {assignment.student.name}
-                                {dayOfWeek === currentDayOfWeek && '★'}
+                          {scheduleMatrix[roomId]?.[dayOfWeek]?.map(
+                            (assignment, _index) => (
+                              <div key={assignment.id} className="mb-1">
+                                <div className="font-medium">
+                                  {assignment.student.name}
+                                  {dayOfWeek === currentDayOfWeek && '★'}
+                                </div>
+                                <div className="text-xs text-gray-600">
+                                  {assignment.student.class.year}-
+                                  {assignment.student.class.name}
+                                </div>
                               </div>
-                              <div className="text-xs text-gray-600">
-                                {assignment.student.class.year}-{assignment.student.class.name}
-                              </div>
-                            </div>
-                          )) || (
-                            <div className="text-gray-400 text-sm">-</div>
-                          )}
+                            )
+                          ) || <div className="text-gray-400 text-sm">-</div>}
                         </td>
                       ))}
                     </tr>
@@ -306,12 +314,12 @@ export function WeeklySchedule() {
               </tbody>
             </table>
           </div>
-          
+
           <div className="mt-4 text-xs text-muted-foreground">
             ★印: 今日の当番
           </div>
         </div>
-        
+
         {/* 印刷時に非表示のアクション */}
         <div className="mt-4 print:hidden text-center">
           <p className="text-sm text-muted-foreground">

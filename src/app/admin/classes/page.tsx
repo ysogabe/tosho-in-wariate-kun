@@ -10,10 +10,8 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
   Select,
   SelectContent,
@@ -52,14 +50,12 @@ import {
   Users,
   Download,
   Settings,
-  Calendar,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   type CreateClassRequest,
   type UpdateClassRequest,
 } from '@/lib/schemas/class-schemas'
-
 
 interface BulkOperation {
   operation: 'activate' | 'deactivate' | 'delete'
@@ -86,7 +82,6 @@ export default function ClassManagementPage() {
     isLoading: classesLoading,
     mutate: mutateClasses,
   } = useSWR('/api/classes', (url) => fetch(url).then((res) => res.json()))
-
 
   // データの準備
   const classes = useMemo(() => classesData?.data?.classes || [], [classesData])
@@ -256,15 +251,7 @@ export default function ClassManagementPage() {
       new Date(cls.createdAt).toLocaleDateString('ja-JP'),
     ])
 
-    const csvContent = [
-      [
-        'クラス名',
-        '学年',
-        '生徒数',
-        '作成日',
-      ],
-      ...csvData,
-    ]
+    const csvContent = [['クラス名', '学年', '生徒数', '作成日'], ...csvData]
       .map((row) => row.join(','))
       .join('\n')
 
@@ -310,401 +297,403 @@ export default function ClassManagementPage() {
         title="クラス管理"
         description="クラス情報の登録・管理を行います"
         actions={
-        <div className="flex gap-2">
-          {selectedClasses.length > 0 && (
+          <div className="flex gap-2">
+            {selectedClasses.length > 0 && (
+              <Button
+                variant="outline"
+                onClick={() => setShowBulkDialog(true)}
+                style={{
+                  backgroundColor: 'hsl(45, 100%, 95%)',
+                  borderColor: 'hsl(45, 70%, 70%)',
+                  color: 'hsl(45, 80%, 40%)',
+                  borderRadius: '12px',
+                }}
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                一括操作 ({selectedClasses.length})
+              </Button>
+            )}
             <Button
-              variant="outline"
-              onClick={() => setShowBulkDialog(true)}
+              onClick={() => {
+                setCreateErrors({})
+                setShowCreateDialog(true)
+              }}
               style={{
-                backgroundColor: 'hsl(45, 100%, 95%)',
-                borderColor: 'hsl(45, 70%, 70%)',
-                color: 'hsl(45, 80%, 40%)',
+                backgroundColor: 'hsl(200, 100%, 85%)',
+                borderColor: 'hsl(200, 70%, 70%)',
+                color: 'hsl(200, 80%, 30%)',
                 borderRadius: '12px',
               }}
             >
-              <Settings className="h-4 w-4 mr-2" />
-              一括操作 ({selectedClasses.length})
+              <Plus className="h-4 w-4 mr-2" />
+              新規クラス作成
             </Button>
-          )}
-          <Button
-            onClick={() => {
-              setCreateErrors({})
-              setShowCreateDialog(true)
-            }}
+          </div>
+        }
+      >
+        {/* 統計情報 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <Card
             style={{
-              backgroundColor: 'hsl(200, 100%, 85%)',
-              borderColor: 'hsl(200, 70%, 70%)',
-              color: 'hsl(200, 80%, 30%)',
+              backgroundColor: 'hsl(200, 100%, 95%)',
+              border: '2px dashed hsl(200, 70%, 70%)',
               borderRadius: '12px',
             }}
           >
-            <Plus className="h-4 w-4 mr-2" />
-            新規クラス作成
-          </Button>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                🏫 総クラス数
+              </CardTitle>
+              <School className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div
+                className="text-2xl font-bold"
+                style={{ color: 'hsl(200, 80%, 40%)' }}
+              >
+                {stats.totalClasses}
+              </div>
+              <p className="text-xs text-muted-foreground">全学年のクラス</p>
+            </CardContent>
+          </Card>
+
+          <Card
+            style={{
+              backgroundColor: 'hsl(280, 100%, 95%)',
+              border: '2px dashed hsl(280, 70%, 70%)',
+              borderRadius: '12px',
+            }}
+          >
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">👥 総生徒数</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div
+                className="text-2xl font-bold"
+                style={{ color: 'hsl(280, 80%, 40%)' }}
+              >
+                {stats.totalStudents}
+              </div>
+              <p className="text-xs text-muted-foreground">全クラスの生徒</p>
+            </CardContent>
+          </Card>
         </div>
-      }
-    >
-      {/* 統計情報 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <Card
-          style={{
-            backgroundColor: 'hsl(200, 100%, 95%)',
-            border: '2px dashed hsl(200, 70%, 70%)',
-            borderRadius: '12px',
-          }}
-        >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">🏫 総クラス数</CardTitle>
-            <School className="h-4 w-4 text-muted-foreground" />
+
+        {/* フィルタエリア */}
+        <Card className="mb-6" style={{ borderRadius: '12px' }}>
+          <CardHeader>
+            <CardTitle>🔍 検索・フィルタ</CardTitle>
+            <CardDescription>
+              クラス情報を絞り込んで表示できます
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div
-              className="text-2xl font-bold"
-              style={{ color: 'hsl(200, 80%, 40%)' }}
-            >
-              {stats.totalClasses}
-            </div>
-            <p className="text-xs text-muted-foreground">全学年のクラス</p>
-          </CardContent>
-        </Card>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="search">検索</Label>
+                <div className="relative">
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="search"
+                    placeholder="クラス名で検索..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-8"
+                  />
+                </div>
+              </div>
 
-
-        <Card
-          style={{
-            backgroundColor: 'hsl(280, 100%, 95%)',
-            border: '2px dashed hsl(280, 70%, 70%)',
-            borderRadius: '12px',
-          }}
-        >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">👥 総生徒数</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div
-              className="text-2xl font-bold"
-              style={{ color: 'hsl(280, 80%, 40%)' }}
-            >
-              {stats.totalStudents}
-            </div>
-            <p className="text-xs text-muted-foreground">全クラスの生徒</p>
-          </CardContent>
-        </Card>
-
-      </div>
-
-      {/* フィルタエリア */}
-      <Card className="mb-6" style={{ borderRadius: '12px' }}>
-        <CardHeader>
-          <CardTitle>🔍 検索・フィルタ</CardTitle>
-          <CardDescription>クラス情報を絞り込んで表示できます</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="search">検索</Label>
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="search"
-                  placeholder="クラス名で検索..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8"
-                />
+              <div className="space-y-2">
+                <Label htmlFor="year">学年</Label>
+                <Select value={selectedYear} onValueChange={setSelectedYear}>
+                  <SelectTrigger id="year">
+                    <SelectValue placeholder="学年を選択" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">すべて</SelectItem>
+                    <SelectItem value="5">5年</SelectItem>
+                    <SelectItem value="6">6年</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="year">学年</Label>
-              <Select value={selectedYear} onValueChange={setSelectedYear}>
-                <SelectTrigger id="year">
-                  <SelectValue placeholder="学年を選択" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">すべて</SelectItem>
-                  <SelectItem value="5">5年</SelectItem>
-                  <SelectItem value="6">6年</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-
-          </div>
-
-          <div className="flex justify-end mt-4">
-            <Button
-              variant="outline"
-              onClick={handleExportCSV}
-              style={{
-                backgroundColor: 'hsl(120, 60%, 95%)',
-                borderColor: 'hsl(120, 50%, 70%)',
-                color: 'hsl(120, 80%, 30%)',
-                borderRadius: '8px',
-              }}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              CSV出力
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* データテーブル */}
-      <DataTable
-        columns={classesColumns}
-        data={filteredClasses}
-        searchKey="name"
-        searchPlaceholder="クラス名で検索..."
-        enableSelection={true}
-        onSelectionChange={setSelectedClasses}
-      />
-
-      {/* 新規作成ダイアログ */}
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent style={{ borderRadius: '12px' }}>
-          <DialogHeader>
-            <DialogTitle>🏫 新規クラス作成</DialogTitle>
-            <DialogDescription>
-              新しいクラスを作成します。必要な情報を入力してください。
-            </DialogDescription>
-          </DialogHeader>
-
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              const formData = new FormData(e.currentTarget)
-              handleCreateSubmit({
-                name: formData.get('name') as string,
-                year: parseInt(formData.get('year') as string),
-              })
-            }}
-            className="space-y-4"
-          >
-            <ValidationError errors={createErrors} />
-
-            <div className="space-y-2">
-              <Label htmlFor="create-name">クラス名 *</Label>
-              <Input
-                id="create-name"
-                name="name"
-                placeholder="例: 5年1組"
-                style={{ borderRadius: '8px' }}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="create-year">学年 *</Label>
-              <Select name="year">
-                <SelectTrigger id="create-year" style={{ borderRadius: '8px' }}>
-                  <SelectValue placeholder="学年を選択" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="5">5年</SelectItem>
-                  <SelectItem value="6">6年</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-
-            <div className="flex justify-end gap-2 pt-4">
+            <div className="flex justify-end mt-4">
               <Button
-                type="button"
                 variant="outline"
-                onClick={() => setShowCreateDialog(false)}
-                style={{ borderRadius: '8px' }}
-              >
-                キャンセル
-              </Button>
-              <Button
-                type="submit"
-                disabled={isCreating}
+                onClick={handleExportCSV}
                 style={{
-                  backgroundColor: 'hsl(200, 100%, 85%)',
-                  borderColor: 'hsl(200, 70%, 70%)',
-                  color: 'hsl(200, 80%, 30%)',
+                  backgroundColor: 'hsl(120, 60%, 95%)',
+                  borderColor: 'hsl(120, 50%, 70%)',
+                  color: 'hsl(120, 80%, 30%)',
                   borderRadius: '8px',
                 }}
               >
-                {isCreating ? '作成中...' : '作成'}
+                <Download className="h-4 w-4 mr-2" />
+                CSV出力
               </Button>
             </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+          </CardContent>
+        </Card>
 
-      {/* 編集ダイアログ */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent style={{ borderRadius: '12px' }}>
-          <DialogHeader>
-            <DialogTitle>✏️ クラス編集</DialogTitle>
-            <DialogDescription>
-              クラス情報を編集します。変更したい項目を修正してください。
-            </DialogDescription>
-          </DialogHeader>
+        {/* データテーブル */}
+        <DataTable
+          columns={classesColumns}
+          data={filteredClasses}
+          searchKey="name"
+          searchPlaceholder="クラス名で検索..."
+          enableSelection={true}
+          onSelectionChange={setSelectedClasses}
+        />
 
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              const formData = new FormData(e.currentTarget)
-              handleEditSubmit({
-                name: formData.get('name') as string,
-                year: parseInt(formData.get('year') as string),
-              })
-            }}
-            className="space-y-4"
-          >
-            <ValidationError errors={updateErrors} />
+        {/* 新規作成ダイアログ */}
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogContent style={{ borderRadius: '12px' }}>
+            <DialogHeader>
+              <DialogTitle>🏫 新規クラス作成</DialogTitle>
+              <DialogDescription>
+                新しいクラスを作成します。必要な情報を入力してください。
+              </DialogDescription>
+            </DialogHeader>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-name">クラス名</Label>
-              <Input
-                id="edit-name"
-                name="name"
-                defaultValue={selectedClass?.name}
-                placeholder="例: 5年1組"
-                style={{ borderRadius: '8px' }}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="edit-year">学年</Label>
-              <Select
-                name="year"
-                defaultValue={selectedClass?.year?.toString()}
-              >
-                <SelectTrigger id="edit-year" style={{ borderRadius: '8px' }}>
-                  <SelectValue placeholder="学年を選択" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="5">5年</SelectItem>
-                  <SelectItem value="6">6年</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowEditDialog(false)}
-                style={{ borderRadius: '8px' }}
-              >
-                キャンセル
-              </Button>
-              <Button
-                type="submit"
-                disabled={isUpdating}
-                style={{
-                  backgroundColor: 'hsl(45, 100%, 85%)',
-                  borderColor: 'hsl(45, 70%, 70%)',
-                  color: 'hsl(45, 80%, 30%)',
-                  borderRadius: '8px',
-                }}
-              >
-                {isUpdating ? '更新中...' : '更新'}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* 削除確認ダイアログ */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent style={{ borderRadius: '12px' }}>
-          <AlertDialogHeader>
-            <AlertDialogTitle>🗑️ クラス削除</AlertDialogTitle>
-            <AlertDialogDescription>
-              「{selectedClass?.name}」を削除してもよろしいですか？
-              <br />
-              <strong style={{ color: 'hsl(0, 70%, 50%)' }}>
-                この操作は取り消せません。
-              </strong>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel style={{ borderRadius: '8px' }}>
-              キャンセル
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              style={{
-                backgroundColor: 'hsl(0, 70%, 50%)',
-                borderColor: 'hsl(0, 70%, 50%)',
-                borderRadius: '8px',
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                const formData = new FormData(e.currentTarget)
+                handleCreateSubmit({
+                  name: formData.get('name') as string,
+                  year: parseInt(formData.get('year') as string),
+                })
               }}
+              className="space-y-4"
             >
-              削除
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+              <ValidationError errors={createErrors} />
 
-      {/* 一括操作ダイアログ */}
-      <Dialog open={showBulkDialog} onOpenChange={setShowBulkDialog}>
-        <DialogContent style={{ borderRadius: '12px' }}>
-          <DialogHeader>
-            <DialogTitle>⚙️ 一括操作</DialogTitle>
-            <DialogDescription>
-              選択した{selectedClasses.length}
-              件のクラスに対して一括操作を実行します。
-            </DialogDescription>
-          </DialogHeader>
+              <div className="space-y-2">
+                <Label htmlFor="create-name">クラス名 *</Label>
+                <Input
+                  id="create-name"
+                  name="name"
+                  placeholder="例: 5年1組"
+                  style={{ borderRadius: '8px' }}
+                />
+              </div>
 
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="bulk-operation">操作</Label>
-              <Select
-                value={bulkOperation}
-                onValueChange={setBulkOperation as (value: string) => void}
-              >
-                <SelectTrigger
-                  id="bulk-operation"
+              <div className="space-y-2">
+                <Label htmlFor="create-year">学年 *</Label>
+                <Select name="year">
+                  <SelectTrigger
+                    id="create-year"
+                    style={{ borderRadius: '8px' }}
+                  >
+                    <SelectValue placeholder="学年を選択" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5">5年</SelectItem>
+                    <SelectItem value="6">6年</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowCreateDialog(false)}
                   style={{ borderRadius: '8px' }}
                 >
-                  <SelectValue placeholder="操作を選択" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="activate">アクティブ化</SelectItem>
-                  <SelectItem value="deactivate">非アクティブ化</SelectItem>
-                  <SelectItem value="delete">削除</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+                  キャンセル
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isCreating}
+                  style={{
+                    backgroundColor: 'hsl(200, 100%, 85%)',
+                    borderColor: 'hsl(200, 70%, 70%)',
+                    color: 'hsl(200, 80%, 30%)',
+                    borderRadius: '8px',
+                  }}
+                >
+                  {isCreating ? '作成中...' : '作成'}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
 
-            <div className="flex justify-end gap-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowBulkDialog(false)}
-                style={{ borderRadius: '8px' }}
-              >
+        {/* 編集ダイアログ */}
+        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+          <DialogContent style={{ borderRadius: '12px' }}>
+            <DialogHeader>
+              <DialogTitle>✏️ クラス編集</DialogTitle>
+              <DialogDescription>
+                クラス情報を編集します。変更したい項目を修正してください。
+              </DialogDescription>
+            </DialogHeader>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                const formData = new FormData(e.currentTarget)
+                handleEditSubmit({
+                  name: formData.get('name') as string,
+                  year: parseInt(formData.get('year') as string),
+                })
+              }}
+              className="space-y-4"
+            >
+              <ValidationError errors={updateErrors} />
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-name">クラス名</Label>
+                <Input
+                  id="edit-name"
+                  name="name"
+                  defaultValue={selectedClass?.name}
+                  placeholder="例: 5年1組"
+                  style={{ borderRadius: '8px' }}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-year">学年</Label>
+                <Select
+                  name="year"
+                  defaultValue={selectedClass?.year?.toString()}
+                >
+                  <SelectTrigger id="edit-year" style={{ borderRadius: '8px' }}>
+                    <SelectValue placeholder="学年を選択" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5">5年</SelectItem>
+                    <SelectItem value="6">6年</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowEditDialog(false)}
+                  style={{ borderRadius: '8px' }}
+                >
+                  キャンセル
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isUpdating}
+                  style={{
+                    backgroundColor: 'hsl(45, 100%, 85%)',
+                    borderColor: 'hsl(45, 70%, 70%)',
+                    color: 'hsl(45, 80%, 30%)',
+                    borderRadius: '8px',
+                  }}
+                >
+                  {isUpdating ? '更新中...' : '更新'}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* 削除確認ダイアログ */}
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent style={{ borderRadius: '12px' }}>
+            <AlertDialogHeader>
+              <AlertDialogTitle>🗑️ クラス削除</AlertDialogTitle>
+              <AlertDialogDescription>
+                「{selectedClass?.name}」を削除してもよろしいですか？
+                <br />
+                <strong style={{ color: 'hsl(0, 70%, 50%)' }}>
+                  この操作は取り消せません。
+                </strong>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel style={{ borderRadius: '8px' }}>
                 キャンセル
-              </Button>
-              <Button
-                onClick={handleBulkOperation}
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
                 style={{
-                  backgroundColor:
-                    bulkOperation === 'delete'
-                      ? 'hsl(0, 70%, 85%)'
-                      : 'hsl(45, 100%, 85%)',
-                  borderColor:
-                    bulkOperation === 'delete'
-                      ? 'hsl(0, 70%, 70%)'
-                      : 'hsl(45, 70%, 70%)',
-                  color:
-                    bulkOperation === 'delete'
-                      ? 'hsl(0, 80%, 30%)'
-                      : 'hsl(45, 80%, 30%)',
+                  backgroundColor: 'hsl(0, 70%, 50%)',
+                  borderColor: 'hsl(0, 70%, 50%)',
                   borderRadius: '8px',
                 }}
               >
-                実行
-              </Button>
+                削除
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* 一括操作ダイアログ */}
+        <Dialog open={showBulkDialog} onOpenChange={setShowBulkDialog}>
+          <DialogContent style={{ borderRadius: '12px' }}>
+            <DialogHeader>
+              <DialogTitle>⚙️ 一括操作</DialogTitle>
+              <DialogDescription>
+                選択した{selectedClasses.length}
+                件のクラスに対して一括操作を実行します。
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="bulk-operation">操作</Label>
+                <Select
+                  value={bulkOperation}
+                  onValueChange={setBulkOperation as (value: string) => void}
+                >
+                  <SelectTrigger
+                    id="bulk-operation"
+                    style={{ borderRadius: '8px' }}
+                  >
+                    <SelectValue placeholder="操作を選択" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="activate">アクティブ化</SelectItem>
+                    <SelectItem value="deactivate">非アクティブ化</SelectItem>
+                    <SelectItem value="delete">削除</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowBulkDialog(false)}
+                  style={{ borderRadius: '8px' }}
+                >
+                  キャンセル
+                </Button>
+                <Button
+                  onClick={handleBulkOperation}
+                  style={{
+                    backgroundColor:
+                      bulkOperation === 'delete'
+                        ? 'hsl(0, 70%, 85%)'
+                        : 'hsl(45, 100%, 85%)',
+                    borderColor:
+                      bulkOperation === 'delete'
+                        ? 'hsl(0, 70%, 70%)'
+                        : 'hsl(45, 70%, 70%)',
+                    color:
+                      bulkOperation === 'delete'
+                        ? 'hsl(0, 80%, 30%)'
+                        : 'hsl(45, 80%, 30%)',
+                    borderRadius: '8px',
+                  }}
+                >
+                  実行
+                </Button>
+              </div>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
       </PageLayout>
     </div>
   )

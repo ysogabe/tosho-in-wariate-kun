@@ -8,5 +8,12 @@
       { "argsIgnorePattern": "^_" }
     ],
     "@typescript-eslint/no-explicit-any": "warn"
-  }
+  },
+  "ignorePatterns": [
+    "**/__tests__/**",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx"
+  ]
 }

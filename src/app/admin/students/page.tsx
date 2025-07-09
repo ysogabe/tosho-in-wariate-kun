@@ -10,7 +10,6 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -41,28 +40,18 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { PageLayout } from '@/components/layout/page-layout'
 import { DataTable } from '@/components/ui/data-table'
-import { studentsColumns, StudentData } from '@/components/table/students-columns'
+import {
+  studentsColumns,
+  StudentData,
+} from '@/components/table/students-columns'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { ValidationError } from '@/components/forms/validation-error'
-import {
-  Plus,
-  Search,
-  AlertTriangle,
-  Users,
-  GraduationCap,
-  Calendar,
-  CheckCircle,
-  XCircle,
-  UserPlus,
-  FileText,
-  Download,
-} from 'lucide-react'
+import { Plus, Search, AlertTriangle, UserPlus, Download } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   type CreateStudentInput,
   type UpdateStudentInput,
 } from '@/lib/schemas/student-schemas'
-
 
 interface Class {
   id: string
@@ -79,7 +68,9 @@ export default function StudentManagementPage() {
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showBulkDialog, setShowBulkDialog] = useState(false)
-  const [selectedStudent, setSelectedStudent] = useState<StudentData | null>(null)
+  const [selectedStudent, setSelectedStudent] = useState<StudentData | null>(
+    null
+  )
   const [selectedStudents, setSelectedStudents] = useState<StudentData[]>([])
   const [bulkOperation, setBulkOperation] = useState<
     'activate' | 'deactivate' | 'delete' | 'changeClass'
@@ -91,10 +82,14 @@ export default function StudentManagementPage() {
     error: studentsError,
     isLoading: studentsLoading,
     mutate: mutateStudents,
-  } = useSWR('/api/students?limit=100', (url) => fetch(url).then((res) => res.json()))
+  } = useSWR('/api/students?limit=100', (url) =>
+    fetch(url).then((res) => res.json())
+  )
 
   // クラス一覧取得
-  const { data: classesData } = useSWR('/api/classes?limit=100', (url) => fetch(url).then((res) => res.json()))
+  const { data: classesData } = useSWR('/api/classes?limit=100', (url) =>
+    fetch(url).then((res) => res.json())
+  )
 
   // エラー状態管理
   const [createErrors, setCreateErrors] = useState<Record<string, string>>({})
@@ -255,12 +250,14 @@ export default function StudentManagementPage() {
       inactive: students.filter((s: StudentData) => !s.isActive).length,
       grade5: students.filter((s: StudentData) => s.grade === 5).length,
       grade6: students.filter((s: StudentData) => s.grade === 6).length,
-      withAssignments: students.filter((s: StudentData) => s.assignmentCount > 0).length,
+      withAssignments: students.filter(
+        (s: StudentData) => s.assignmentCount > 0
+      ).length,
     }
   }, [students])
 
   // テーブル用の列設定（studentsColumnsをそのまま使用）
-  const tableColumns = studentsColumns
+  // const _tableColumns = studentsColumns
 
   if (studentsError) {
     return (
@@ -680,6 +677,7 @@ export default function StudentManagementPage() {
                   name: formData.get('name') as string,
                   grade: parseInt(formData.get('grade') as string),
                   classId: formData.get('classId') as string,
+                  isActive: true,
                 })
               }}
             >

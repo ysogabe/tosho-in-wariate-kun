@@ -10,10 +10,8 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
@@ -54,16 +52,10 @@ import {
   Download,
   Settings,
   CheckCircle,
-  XCircle,
-  MapPin,
   BarChart3,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import {
-  CreateRoomData,
-  UpdateRoomData,
-} from '@/lib/schemas/room-schemas'
-
+import { CreateRoomData, UpdateRoomData } from '@/lib/schemas/room-schemas'
 
 interface BulkOperation {
   operation: 'activate' | 'deactivate' | 'delete'
@@ -91,7 +83,9 @@ export default function RoomManagementPage() {
     error: roomsError,
     isLoading: roomsLoading,
     mutate: mutateRooms,
-  } = useSWR('/api/rooms?page=1&limit=100', (url) => fetch(url).then((res) => res.json()))
+  } = useSWR('/api/rooms?page=1&limit=100', (url) =>
+    fetch(url).then((res) => res.json())
+  )
 
   // データの準備
   const rooms = useMemo(() => roomsData?.data?.rooms || [], [roomsData])
@@ -571,7 +565,8 @@ export default function RoomManagementPage() {
               handleCreateSubmit({
                 name: formData.get('name') as string,
                 capacity: parseInt(formData.get('capacity') as string),
-                description: formData.get('description') as string || undefined,
+                description:
+                  (formData.get('description') as string) || undefined,
               })
             }}
             className="space-y-4"
@@ -652,7 +647,8 @@ export default function RoomManagementPage() {
               handleEditSubmit({
                 name: formData.get('name') as string,
                 capacity: parseInt(formData.get('capacity') as string),
-                description: formData.get('description') as string || undefined,
+                description:
+                  (formData.get('description') as string) || undefined,
               })
             }}
             className="space-y-4"
