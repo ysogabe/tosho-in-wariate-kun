@@ -86,6 +86,14 @@ jest.mock('@/components/ui/textarea', () => ({
   ),
 }))
 
+jest.mock('@/components/ui/label', () => ({
+  Label: ({ children, htmlFor, ...props }: any) => (
+    <label htmlFor={htmlFor} data-testid="label" {...props}>
+      {children}
+    </label>
+  ),
+}))
+
 jest.mock('@/components/ui/select', () => ({
   Select: ({ children, onValueChange }: any) => (
     <div data-testid="select" onClick={() => onValueChange?.('test')}>
@@ -226,6 +234,11 @@ jest.mock('@/lib/hooks/use-form-validation', () => ({
     handleSubmit: onSubmit,
     clearErrors: jest.fn(),
   }),
+}))
+
+jest.mock('@/lib/schemas/room-schemas', () => ({
+  CreateRoomData: jest.fn(),
+  UpdateRoomData: jest.fn(),
 }))
 
 // lucide-react iconsのモック

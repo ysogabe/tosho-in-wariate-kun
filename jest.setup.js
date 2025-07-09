@@ -297,6 +297,206 @@ jest.mock('lucide-react', () => ({
       X
     </div>
   ),
+  BarChart3: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="bar-chart-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Chart
+    </div>
+  ),
+  Download: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="download-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Download
+    </div>
+  ),
+  Search: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="search-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Search
+    </div>
+  ),
+  MoreHorizontal: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="more-horizontal-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      More
+    </div>
+  ),
+  ArrowUpDown: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="arrow-up-down-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Sort
+    </div>
+  ),
+  ArrowLeft: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="arrow-left-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Back
+    </div>
+  ),
+  BookOpen: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="book-open-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Open Book
+    </div>
+  ),
+  Circle: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="circle-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Circle
+    </div>
+  ),
+  Eye: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="eye-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Show
+    </div>
+  ),
+  EyeOff: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="eye-off-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Hide
+    </div>
+  ),
+  FileText: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="file-text-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      File
+    </div>
+  ),
+  Home: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="home-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Home
+    </div>
+  ),
+  LogIn: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="log-in-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Login
+    </div>
+  ),
+  LogOut: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="log-out-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Logout
+    </div>
+  ),
+  MapPin: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="map-pin-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Location
+    </div>
+  ),
+  Printer: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="printer-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Print
+    </div>
+  ),
+  School: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="school-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      School
+    </div>
+  ),
+  Shield: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="shield-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Shield
+    </div>
+  ),
+  User: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="user-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      User
+    </div>
+  ),
+  UserPlus: ({ className, ...props }) => (
+    <div
+      className={className}
+      data-testid="user-plus-icon"
+      aria-hidden="true"
+      {...props}
+    >
+      Add User
+    </div>
+  ),
 }))
 
 // Global test utilities
