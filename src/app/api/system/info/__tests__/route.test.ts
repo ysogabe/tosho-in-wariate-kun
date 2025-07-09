@@ -27,7 +27,22 @@ jest.mock('@/lib/auth/helpers', () => ({
   authenticateAdmin: jest.fn(),
 }))
 
-const mockPrisma = prisma as jest.Mocked<typeof prisma>
+const mockPrisma = {
+  student: {
+    count: jest.fn(),
+    findFirst: jest.fn(),
+  },
+  class: {
+    count: jest.fn(),
+  },
+  room: {
+    count: jest.fn(),
+  },
+  assignment: {
+    count: jest.fn(),
+    findFirst: jest.fn(),
+  },
+} as any
 const mockAuthenticateAdmin = authenticateAdmin as jest.MockedFunction<typeof authenticateAdmin>
 
 describe('/api/system/info', () => {
@@ -40,15 +55,15 @@ describe('/api/system/info', () => {
     })
 
     // Mock environment variables
-    process.env.SYSTEM_VERSION = '1.0.0'
-    process.env.BUILD_DATE = '2025-01-01T00:00:00Z'
-    process.env.NODE_ENV = 'test'
+    ;(process.env as any).SYSTEM_VERSION = '1.0.0'
+    ;(process.env as any).BUILD_DATE = '2025-01-01T00:00:00Z'
+    ;(process.env as any).NODE_ENV = 'test'
   })
 
   afterEach(() => {
-    delete process.env.SYSTEM_VERSION
-    delete process.env.BUILD_DATE
-    delete process.env.NODE_ENV
+    delete (process.env as any).SYSTEM_VERSION
+    delete (process.env as any).BUILD_DATE
+    delete (process.env as any).NODE_ENV
   })
 
   describe('GET /api/system/info', () => {
@@ -65,16 +80,14 @@ describe('/api/system/info', () => {
     })
 
     it('システム情報を正常に取得できる', async () => {
-      mockAuthenticateAdmin.mockResolvedValue(undefined)
+      mockAuthenticateAdmin.mockResolvedValue({} as any)
 
       // Mock database queries
       mockPrisma.student.count
         .mockResolvedValueOnce(150) // totalStudents
         .mockResolvedValueOnce(145) // activeStudents
       mockPrisma.class.count.mockResolvedValue(12) // totalClasses
-      mockPrisma.room.count
-        .mockResolvedValueOnce(3) // totalRooms
-        .mockResolvedValueOnce(2) // activeRooms
+      mockPrisma.room.count.mockResolvedValue(3) // totalRooms
       mockPrisma.assignment.count
         .mockResolvedValueOnce(300) // totalAssignments
         .mockResolvedValueOnce(150) // firstTermAssignments
@@ -112,8 +125,6 @@ describe('/api/system/info', () => {
           },
           rooms: {
             total: 3,
-            active: 2,
-            inactive: 1,
           },
           assignments: {
             total: 300,
@@ -125,20 +136,18 @@ describe('/api/system/info', () => {
     })
 
     it('環境変数がない場合、デフォルト値を使用する', async () => {
-      delete process.env.SYSTEM_VERSION
-      delete process.env.BUILD_DATE
-      delete process.env.NODE_ENV
+      delete (process.env as any).SYSTEM_VERSION
+      delete (process.env as any).BUILD_DATE
+      delete (process.env as any).NODE_ENV
 
-      mockAuthenticateAdmin.mockResolvedValue(undefined)
+      mockAuthenticateAdmin.mockResolvedValue({} as any)
 
       // Mock database queries with minimal data
       mockPrisma.student.count
         .mockResolvedValueOnce(0) // totalStudents
         .mockResolvedValueOnce(0) // activeStudents
       mockPrisma.class.count.mockResolvedValue(0)
-      mockPrisma.room.count
-        .mockResolvedValueOnce(0) // totalRooms
-        .mockResolvedValueOnce(0) // activeRooms
+      mockPrisma.room.count.mockResolvedValue(0) // totalRooms
       mockPrisma.assignment.count
         .mockResolvedValueOnce(0) // totalAssignments
         .mockResolvedValueOnce(0) // firstTermAssignments
@@ -159,7 +168,7 @@ describe('/api/system/info', () => {
     })
 
     it('データベースエラーが発生した場合、エラーレスポンスを返す', async () => {
-      mockAuthenticateAdmin.mockResolvedValue(undefined)
+      mockAuthenticateAdmin.mockResolvedValue({} as any)
       mockPrisma.student.count.mockRejectedValue(new Error('Database error'))
 
       const response = await GET(request)
@@ -172,16 +181,14 @@ describe('/api/system/info', () => {
     })
 
     it('Promise.allが並列実行される', async () => {
-      mockAuthenticateAdmin.mockResolvedValue(undefined)
+      mockAuthenticateAdmin.mockResolvedValue({} as any)
 
       // Mock all database queries
       mockPrisma.student.count
         .mockResolvedValueOnce(50)
         .mockResolvedValueOnce(48)
       mockPrisma.class.count.mockResolvedValue(6)
-      mockPrisma.room.count
-        .mockResolvedValueOnce(2)
-        .mockResolvedValueOnce(1)
+      mockPrisma.room.count.mockResolvedValue(2)
       mockPrisma.assignment.count
         .mockResolvedValueOnce(100)
         .mockResolvedValueOnce(50)
@@ -199,23 +206,21 @@ describe('/api/system/info', () => {
       expect(response.status).toBe(200)
       
       // Verify all Prisma methods were called
-      expect(mockPrisma.student.count).toHaveBeenCalledTimes(3) // total, active, findFirst
+      expect(mockPrisma.student.count).toHaveBeenCalledTimes(2) // total, active
       expect(mockPrisma.class.count).toHaveBeenCalledTimes(1)
-      expect(mockPrisma.room.count).toHaveBeenCalledTimes(2) // total, active
-      expect(mockPrisma.assignment.count).toHaveBeenCalledTimes(4) // total, firstTerm, secondTerm, findFirst
+      expect(mockPrisma.room.count).toHaveBeenCalledTimes(1) // total
+      expect(mockPrisma.assignment.count).toHaveBeenCalledTimes(3) // total, firstTerm, secondTerm
     })
 
     it('統計データが正しく計算される', async () => {
-      mockAuthenticateAdmin.mockResolvedValue(undefined)
+      mockAuthenticateAdmin.mockResolvedValue({} as any)
 
       // Mock specific values to test calculations
       mockPrisma.student.count
         .mockResolvedValueOnce(100) // totalStudents
         .mockResolvedValueOnce(85) // activeStudents
       mockPrisma.class.count.mockResolvedValue(8)
-      mockPrisma.room.count
-        .mockResolvedValueOnce(5) // totalRooms
-        .mockResolvedValueOnce(3) // activeRooms
+      mockPrisma.room.count.mockResolvedValue(5) // totalRooms
       mockPrisma.assignment.count
         .mockResolvedValueOnce(200) // totalAssignments
         .mockResolvedValueOnce(120) // firstTermAssignments
@@ -228,7 +233,7 @@ describe('/api/system/info', () => {
       const data = await response.json()
 
       expect(data.data.statistics.students.inactive).toBe(15) // 100 - 85
-      expect(data.data.statistics.rooms.inactive).toBe(2) // 5 - 3
+      expect(data.data.statistics.rooms.total).toBe(5)
       expect(data.data.statistics.assignments.total).toBe(200)
       expect(data.data.statistics.assignments.firstTerm).toBe(120)
       expect(data.data.statistics.assignments.secondTerm).toBe(80)

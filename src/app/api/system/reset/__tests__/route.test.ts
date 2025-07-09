@@ -14,7 +14,9 @@ jest.mock('@/lib/auth/helpers', () => ({
   authenticateAdmin: jest.fn(),
 }))
 
-const mockPrisma = prisma as jest.Mocked<typeof prisma>
+const mockPrisma = {
+  $transaction: jest.fn(),
+} as any
 const mockAuthenticateAdmin = authenticateAdmin as jest.MockedFunction<typeof authenticateAdmin>
 
 describe('/api/system/reset', () => {
@@ -22,11 +24,11 @@ describe('/api/system/reset', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    process.env.ADMIN_RESET_PASSWORD = 'test123'
+    ;(process.env as any).ADMIN_RESET_PASSWORD = 'test123'
   })
 
   afterEach(() => {
-    delete process.env.ADMIN_RESET_PASSWORD
+    delete (process.env as any).ADMIN_RESET_PASSWORD
   })
 
   describe('POST /api/system/reset', () => {
@@ -52,7 +54,7 @@ describe('/api/system/reset', () => {
     })
 
     it('不正なリクエストボディの場合、バリデーションエラーを返す', async () => {
-      mockAuthenticateAdmin.mockResolvedValue(undefined)
+      mockAuthenticateAdmin.mockResolvedValue({} as any)
 
       request = new NextRequest('http://localhost:3000/api/system/reset', {
         method: 'POST',
@@ -74,7 +76,7 @@ describe('/api/system/reset', () => {
     })
 
     it('パスワードが間違っている場合、認証エラーを返す', async () => {
-      mockAuthenticateAdmin.mockResolvedValue(undefined)
+      mockAuthenticateAdmin.mockResolvedValue({} as any)
 
       request = new NextRequest('http://localhost:3000/api/system/reset', {
         method: 'POST',
@@ -95,7 +97,7 @@ describe('/api/system/reset', () => {
     })
 
     it('当番表のみのリセットが正常に実行される', async () => {
-      mockAuthenticateAdmin.mockResolvedValue(undefined)
+      mockAuthenticateAdmin.mockResolvedValue({} as any)
 
       const mockTransaction = jest.fn().mockImplementation(async (callback) => {
         const mockTx = {
@@ -130,7 +132,7 @@ describe('/api/system/reset', () => {
     })
 
     it('図書委員と当番表のリセットが正常に実行される', async () => {
-      mockAuthenticateAdmin.mockResolvedValue(undefined)
+      mockAuthenticateAdmin.mockResolvedValue({} as any)
 
       const mockTransaction = jest.fn().mockImplementation(async (callback) => {
         const mockTx = {
@@ -166,7 +168,7 @@ describe('/api/system/reset', () => {
     })
 
     it('全データのリセットが正常に実行される', async () => {
-      mockAuthenticateAdmin.mockResolvedValue(undefined)
+      mockAuthenticateAdmin.mockResolvedValue({} as any)
 
       const mockTransaction = jest.fn().mockImplementation(async (callback) => {
         const mockTx = {
@@ -210,7 +212,7 @@ describe('/api/system/reset', () => {
     })
 
     it('トランザクションエラーが発生した場合、エラーレスポンスを返す', async () => {
-      mockAuthenticateAdmin.mockResolvedValue(undefined)
+      mockAuthenticateAdmin.mockResolvedValue({} as any)
 
       mockPrisma.$transaction.mockRejectedValue(new Error('Transaction failed'))
 
@@ -233,8 +235,8 @@ describe('/api/system/reset', () => {
     })
 
     it('環境変数にパスワードが設定されていない場合、デフォルトパスワードを使用する', async () => {
-      delete process.env.ADMIN_RESET_PASSWORD
-      mockAuthenticateAdmin.mockResolvedValue(undefined)
+      delete (process.env as any).ADMIN_RESET_PASSWORD
+      mockAuthenticateAdmin.mockResolvedValue({} as any)
 
       const mockTransaction = jest.fn().mockImplementation(async (callback) => {
         const mockTx = {
@@ -264,7 +266,7 @@ describe('/api/system/reset', () => {
     })
 
     it('confirm フラグが false の場合、バリデーションエラーを返す', async () => {
-      mockAuthenticateAdmin.mockResolvedValue(undefined)
+      mockAuthenticateAdmin.mockResolvedValue({} as any)
 
       request = new NextRequest('http://localhost:3000/api/system/reset', {
         method: 'POST',
@@ -290,7 +292,7 @@ describe('/api/system/reset', () => {
     })
 
     it('リセットタイプが無効な場合、バリデーションエラーを返す', async () => {
-      mockAuthenticateAdmin.mockResolvedValue(undefined)
+      mockAuthenticateAdmin.mockResolvedValue({} as any)
 
       request = new NextRequest('http://localhost:3000/api/system/reset', {
         method: 'POST',

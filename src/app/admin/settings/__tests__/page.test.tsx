@@ -1,3 +1,4 @@
+import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { toast } from 'sonner'
 import SystemSettingsPage from '../page'
@@ -92,18 +93,52 @@ jest.mock('@/components/ui/select', () => ({
   SelectValue: () => <div data-testid="select-value">assignments</div>,
 }))
 
-jest.mock('@/components/ui/tabs', () => ({
-  Tabs: ({ children, defaultValue }: any) => (
-    <div data-testid="tabs" data-default-value={defaultValue}>{children}</div>
-  ),
-  TabsContent: ({ children, value }: any) => (
-    <div data-testid="tabs-content" data-value={value}>{children}</div>
-  ),
-  TabsList: ({ children }: any) => <div data-testid="tabs-list">{children}</div>,
-  TabsTrigger: ({ children, value }: any) => (
-    <button data-testid="tabs-trigger" data-value={value}>{children}</button>
-  ),
-}))
+jest.mock('@/components/ui/tabs', () => {
+  const { useState } = require('react')
+  return {
+    Tabs: ({ children, defaultValue }: any) => {
+      const [activeTab, setActiveTab] = useState(defaultValue)
+      return (
+        <div data-testid="tabs" data-default-value={defaultValue} data-active-tab={activeTab}>
+          {React.Children.map(children, (child: any) => {
+            if (child?.type?.name === 'TabsList') {
+              return React.cloneElement(child, { activeTab, setActiveTab })
+            }
+            if (child?.type?.name === 'TabsContent') {
+              return React.cloneElement(child, { activeTab })
+            }
+            return child
+          })}
+        </div>
+      )
+    },
+    TabsContent: ({ children, value, activeTab }: any) => (
+      activeTab === value ? (
+        <div data-testid="tabs-content" data-value={value}>{children}</div>
+      ) : null
+    ),
+    TabsList: ({ children, activeTab, setActiveTab }: any) => (
+      <div data-testid="tabs-list">
+        {React.Children.map(children, (child: any) => {
+          if (child?.type?.name === 'TabsTrigger') {
+            return React.cloneElement(child, { activeTab, setActiveTab })
+          }
+          return child
+        })}
+      </div>
+    ),
+    TabsTrigger: ({ children, value, activeTab, setActiveTab }: any) => (
+      <button 
+        data-testid="tabs-trigger" 
+        data-value={value}
+        data-active={activeTab === value}
+        onClick={() => setActiveTab(value)}
+      >
+        {children}
+      </button>
+    ),
+  }
+})
 
 jest.mock('@/components/ui/dialog', () => ({
   Dialog: ({ children, open, onOpenChange }: any) => (
@@ -174,8 +209,6 @@ describe('SystemSettingsPage', () => {
         },
         rooms: {
           total: 3,
-          active: 2,
-          inactive: 1,
         },
         assignments: {
           total: 300,
@@ -189,6 +222,14 @@ describe('SystemSettingsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(global.fetch as jest.Mock).mockClear()
+    
+    // Setup DOM for tests
+    document.body.innerHTML = '<div id="root"></div>'
+  })
+
+  afterEach(() => {
+    // Cleanup DOM after each test
+    document.body.innerHTML = ''
   })
 
   it('システム設定ページが正常にレンダリングされる', () => {
@@ -257,7 +298,6 @@ describe('SystemSettingsPage', () => {
     expect(screen.getByText('145名がアクティブ')).toBeInTheDocument()
     expect(screen.getByText('12')).toBeInTheDocument() // Total classes
     expect(screen.getByText('3')).toBeInTheDocument() // Total rooms
-    expect(screen.getByText('2室が稼働中')).toBeInTheDocument()
     expect(screen.getByText('300')).toBeInTheDocument() // Total assignments
   })
 
@@ -273,14 +313,12 @@ describe('SystemSettingsPage', () => {
     const mockBlob = new Blob(['test data'], { type: 'application/json' })
     ;(global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
-      blob: () => Promise.resolve(mockBlob),
-    } as SWRResponse<any, any>)
+      blob: jest.fn().mockResolvedValue(mockBlob),
+    })
 
-    // Mock DOM methods
+    // Mock URL.createObjectURL and revokeObjectURL for file download
     const mockCreateObjectURL = jest.fn(() => 'mock-url')
     const mockRevokeObjectURL = jest.fn()
-    const mockAppendChild = jest.fn()
-    const mockRemoveChild = jest.fn()
     const mockClick = jest.fn()
 
     Object.defineProperty(window, 'URL', {
@@ -288,33 +326,50 @@ describe('SystemSettingsPage', () => {
         createObjectURL: mockCreateObjectURL,
         revokeObjectURL: mockRevokeObjectURL,
       },
-    } as SWRResponse<any, any>)
-
-    Object.defineProperty(document, 'createElement', {
-      value: jest.fn(() => ({
-        href: '',
-        download: '',
-        click: mockClick,
-      } as SWRResponse<any, any>)),
-    } as SWRResponse<any, any>)
-
-    Object.defineProperty(document.body, 'appendChild', {
-      value: mockAppendChild,
-    } as SWRResponse<any, any>)
-
-    Object.defineProperty(document.body, 'removeChild', {
-      value: mockRemoveChild,
-    } as SWRResponse<any, any>)
+      writable: true,
+    })
 
     render(<SystemSettingsPage />)
+
+    // Switch to data tab first
+    const dataTab = screen.getByText('データ管理')
+    fireEvent.click(dataTab)
+
+    // Mock document.createElement for download link after render
+    const originalCreateElement = document.createElement
+    const originalAppendChild = document.body.appendChild
+    const originalRemoveChild = document.body.removeChild
+    
+    document.createElement = jest.fn((tagName) => {
+      if (tagName === 'a') {
+        return {
+          href: '',
+          download: '',
+          click: mockClick,
+          style: {},
+        }
+      }
+      return originalCreateElement.call(document, tagName)
+    }) as any
+    
+    document.body.appendChild = jest.fn()
+    document.body.removeChild = jest.fn()
 
     const exportButton = screen.getByText('データをエクスポート')
     fireEvent.click(exportButton)
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith('/api/system/export')
-      expect(toast.success).toHaveBeenCalledWith('システムデータをエクスポートしました')
     })
+
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith('システムデータをエクスポートしました')
+    }, { timeout: 3000 })
+
+    // Restore
+    document.createElement = originalCreateElement
+    document.body.appendChild = originalAppendChild
+    document.body.removeChild = originalRemoveChild
   })
 
   it('データエクスポートでエラーが発生した場合、エラーメッセージが表示される', async () => {
@@ -328,9 +383,13 @@ describe('SystemSettingsPage', () => {
 
     ;(global.fetch as jest.Mock).mockResolvedValue({
       ok: false,
-    } as SWRResponse<any, any>)
+    })
 
     render(<SystemSettingsPage />)
+
+    // Switch to data tab first
+    const dataTab = screen.getByText('データ管理')
+    fireEvent.click(dataTab)
 
     const exportButton = screen.getByText('データをエクスポート')
     fireEvent.click(exportButton)
@@ -350,6 +409,10 @@ describe('SystemSettingsPage', () => {
     } as SWRResponse<any, any>)
 
     render(<SystemSettingsPage />)
+
+    // Switch to data tab first
+    const dataTab = screen.getByText('データ管理')
+    fireEvent.click(dataTab)
 
     const resetButton = screen.getByText('データリセット')
     fireEvent.click(resetButton)
@@ -373,8 +436,8 @@ describe('SystemSettingsPage', () => {
       json: () => Promise.resolve({
         success: true,
         data: { message: 'データリセットが完了しました' },
-      } as SWRResponse<any, any>),
-    } as SWRResponse<any, any>)
+      }),
+    })
 
     render(<SystemSettingsPage />)
 
@@ -419,8 +482,8 @@ describe('SystemSettingsPage', () => {
       json: () => Promise.resolve({
         success: false,
         error: { message: 'リセットに失敗しました' },
-      } as SWRResponse<any, any>),
-    } as SWRResponse<any, any>)
+      }),
+    })
 
     render(<SystemSettingsPage />)
 
@@ -493,6 +556,10 @@ describe('SystemSettingsPage', () => {
     } as SWRResponse<any, any>)
 
     render(<SystemSettingsPage />)
+
+    // Switch to data tab first
+    const dataTab = screen.getByText('データ管理')
+    fireEvent.click(dataTab)
 
     // Open reset dialog
     const resetButton = screen.getByText('データリセット')

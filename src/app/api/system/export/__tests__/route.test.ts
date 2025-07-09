@@ -25,7 +25,20 @@ jest.mock('@/lib/auth/helpers', () => ({
   authenticateAdmin: jest.fn(),
 }))
 
-const mockPrisma = prisma as jest.Mocked<typeof prisma>
+const mockPrisma = {
+  class: {
+    findMany: jest.fn(),
+  },
+  student: {
+    findMany: jest.fn(),
+  },
+  room: {
+    findMany: jest.fn(),
+  },
+  assignment: {
+    findMany: jest.fn(),
+  },
+} as any
 const mockAuthenticateAdmin = authenticateAdmin as jest.MockedFunction<typeof authenticateAdmin>
 
 describe('/api/system/export', () => {
@@ -52,7 +65,7 @@ describe('/api/system/export', () => {
     })
 
     it('全データを正常にエクスポートできる', async () => {
-      mockAuthenticateAdmin.mockResolvedValue(undefined)
+      mockAuthenticateAdmin.mockResolvedValue({} as any)
 
       const mockClasses = [
         { id: 1, name: '1組', year: 5, createdAt: new Date('2024-01-01') },
@@ -172,7 +185,7 @@ describe('/api/system/export', () => {
     })
 
     it('空のデータベースでもエクスポートできる', async () => {
-      mockAuthenticateAdmin.mockResolvedValue(undefined)
+      mockAuthenticateAdmin.mockResolvedValue({} as any)
 
       mockPrisma.class.findMany.mockResolvedValue([])
       mockPrisma.student.findMany.mockResolvedValue([])
@@ -190,7 +203,7 @@ describe('/api/system/export', () => {
     })
 
     it('正しいファイル名のContent-Dispositionヘッダーが設定される', async () => {
-      mockAuthenticateAdmin.mockResolvedValue(undefined)
+      mockAuthenticateAdmin.mockResolvedValue({} as any)
 
       mockPrisma.class.findMany.mockResolvedValue([])
       mockPrisma.student.findMany.mockResolvedValue([])
@@ -206,7 +219,7 @@ describe('/api/system/export', () => {
     })
 
     it('データベースエラーが発生した場合、エラーレスポンスを返す', async () => {
-      mockAuthenticateAdmin.mockResolvedValue(undefined)
+      mockAuthenticateAdmin.mockResolvedValue({} as any)
       mockPrisma.class.findMany.mockRejectedValue(new Error('Database error'))
 
       const response = await GET(request)
@@ -219,7 +232,7 @@ describe('/api/system/export', () => {
     })
 
     it('Promise.allが並列実行される', async () => {
-      mockAuthenticateAdmin.mockResolvedValue(undefined)
+      mockAuthenticateAdmin.mockResolvedValue({} as any)
 
       mockPrisma.class.findMany.mockResolvedValue([])
       mockPrisma.student.findMany.mockResolvedValue([])
@@ -238,7 +251,7 @@ describe('/api/system/export', () => {
     })
 
     it('正しいソート順でデータが取得される', async () => {
-      mockAuthenticateAdmin.mockResolvedValue(undefined)
+      mockAuthenticateAdmin.mockResolvedValue({} as any)
 
       mockPrisma.class.findMany.mockResolvedValue([])
       mockPrisma.student.findMany.mockResolvedValue([])
@@ -279,7 +292,7 @@ describe('/api/system/export', () => {
     })
 
     it('エクスポートデータに必要なフィールドが含まれている', async () => {
-      mockAuthenticateAdmin.mockResolvedValue(undefined)
+      mockAuthenticateAdmin.mockResolvedValue({} as any)
 
       const testDate = new Date('2024-01-01T12:00:00Z')
       
