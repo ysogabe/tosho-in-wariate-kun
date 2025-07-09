@@ -14,21 +14,24 @@ jest.mock('@/lib/auth/helpers', () => ({
   authenticateAdmin: jest.fn(),
 }))
 
-const mockPrisma = {
-  $transaction: jest.fn(),
-} as any
+const mockPrisma = jest.mocked(prisma)
 const mockAuthenticateAdmin = authenticateAdmin as jest.MockedFunction<typeof authenticateAdmin>
 
 describe('/api/system/reset', () => {
   let request: NextRequest
+  let consoleErrorSpy: jest.SpyInstance
 
   beforeEach(() => {
     jest.clearAllMocks()
     ;(process.env as any).ADMIN_RESET_PASSWORD = 'test123'
+    
+    // Mock console.error to prevent test output pollution
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
   })
 
   afterEach(() => {
     delete (process.env as any).ADMIN_RESET_PASSWORD
+    consoleErrorSpy.mockRestore()
   })
 
   describe('POST /api/system/reset', () => {

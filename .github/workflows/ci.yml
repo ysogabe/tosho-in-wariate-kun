@@ -179,7 +179,7 @@ jobs:
     
     # Use Playwright official Docker image for faster setup
     container:
-      image: mcr.microsoft.com/playwright:v1.53.0-noble
+      image: mcr.microsoft.com/playwright:v1.53.2-noble
       options: --user root
 
     steps:
@@ -218,6 +218,7 @@ jobs:
 
       - name: Run Playwright tests against production build
         run: npm run test:e2e:ci
+        timeout-minutes: 30
         env:
           CI: true
           NODE_ENV: production
@@ -325,9 +326,10 @@ jobs:
             }
 
       - name: Deploy to GitHub Pages
-        if: always()
+        if: failure() && github.event_name == 'pull_request'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./playwright-report
           destination_dir: playwright-reports/${{ github.run_id }}
+          keep_files: true

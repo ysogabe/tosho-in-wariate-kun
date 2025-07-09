@@ -183,7 +183,6 @@ async function seedStudents() {
       try {
         const result = await prisma.student.createMany({
           data: studentsToCreate,
-          skipDuplicates: true, // 重複データの防止
         })
         console.log(`  ✓ Created ${result.count} students in batch operation`)
 

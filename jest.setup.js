@@ -891,6 +891,12 @@ global.Headers = class Headers {
 // Mock fetch for Jest environment
 global.fetch = jest.fn()
 
+// Mock console.error to prevent test output pollution
+global.console = {
+  ...console,
+  error: jest.fn(),
+}
+
 // Additional Web API polyfills for server-side components
 global.URL = URL
 global.URLSearchParams = URLSearchParams

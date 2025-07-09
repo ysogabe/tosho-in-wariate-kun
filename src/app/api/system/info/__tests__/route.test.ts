@@ -27,22 +27,7 @@ jest.mock('@/lib/auth/helpers', () => ({
   authenticateAdmin: jest.fn(),
 }))
 
-const mockPrisma = {
-  student: {
-    count: jest.fn(),
-    findFirst: jest.fn(),
-  },
-  class: {
-    count: jest.fn(),
-  },
-  room: {
-    count: jest.fn(),
-  },
-  assignment: {
-    count: jest.fn(),
-    findFirst: jest.fn(),
-  },
-} as any
+const mockPrisma = jest.mocked(prisma)
 const mockAuthenticateAdmin = authenticateAdmin as jest.MockedFunction<typeof authenticateAdmin>
 
 describe('/api/system/info', () => {
@@ -169,7 +154,16 @@ describe('/api/system/info', () => {
 
     it('データベースエラーが発生した場合、エラーレスポンスを返す', async () => {
       mockAuthenticateAdmin.mockResolvedValue({} as any)
-      mockPrisma.student.count.mockRejectedValue(new Error('Database error'))
+      
+      // Mock all database queries first (they need to exist to avoid undefined call errors)
+      mockPrisma.student.count
+        .mockRejectedValueOnce(new Error('Database error'))
+        .mockResolvedValue(0)
+      mockPrisma.class.count.mockResolvedValue(0)
+      mockPrisma.room.count.mockResolvedValue(0)
+      mockPrisma.assignment.count.mockResolvedValue(0)
+      mockPrisma.student.findFirst.mockResolvedValue(null)
+      mockPrisma.assignment.findFirst.mockResolvedValue(null)
 
       const response = await GET(request)
       const data = await response.json()
