@@ -151,10 +151,9 @@ jobs:
           NODE_ENV: production
 
       - name: Upload build artifacts
-        if: matrix.node-version == '20.x'
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts
+          name: build-artifacts-${{ matrix.node-version }}
           path: .next
           retention-days: 1
 
@@ -206,12 +205,20 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: build-artifacts
+          name: build-artifacts-20.x
           path: .next
 
       - name: Verify build artifacts
         run: |
           echo "Using production build from test job..."
+          if [ ! -d ".next" ]; then
+            echo "Error: .next directory not found"
+            exit 1
+          fi
+          if [ ! -f ".next/package.json" ] && [ ! -f ".next/BUILD_ID" ]; then
+            echo "Error: Build artifacts appear to be incomplete"
+            exit 1
+          fi
           ls -la .next/
           du -sh .next/
           echo "Build verification complete - ready for E2E testing"
