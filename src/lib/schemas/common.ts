@@ -41,7 +41,7 @@ export const passwordSchema = z
 export const uuidSchema = z.string().uuid('無効なIDです')
 
 // 学年バリデーション
-export const gradeSchema = z
+export const gradeSchema = z.coerce
   .number()
   .int('学年は整数で入力してください')
   .min(5, '学年は5年または6年を選択してください')
@@ -67,8 +67,8 @@ export const termSchema = z.enum(['FIRST_TERM', 'SECOND_TERM'], {
 })
 
 // 容量バリデーション
-export const capacitySchema = z
+export const capacitySchema = z.coerce
   .number()
-  .int('定員は整数で入力してください')
-  .min(1, '定員は1以上で入力してください')
-  .max(10, '定員は10以下で入力してください')
+  .int('収容人数は整数で入力してください')
+  .min(1, '収容人数は1以上で入力してください')
+  .max(100, '収容人数は100以下で入力してください')

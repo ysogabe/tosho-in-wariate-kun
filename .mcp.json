@@ -2,7 +2,10 @@
   "mcpServers": {
     "firecrawl-mcp": {
       "command": "npx",
-      "args": ["-y", "firecrawl-mcp"],
+      "args": [
+        "-y",
+        "firecrawl-mcp"
+      ],
       "env": {
         "FIRECRAWL_API_URL": "http://192.168.0.131:3002",
         "FIRECRAWL_RETRY_MAX_ATTEMPTS": "5",
@@ -14,13 +17,20 @@
       }
     },
     "playwright": {
-        "command": "npx",
-        "args": [
-          "-y",
-          "--headless",
-          "--browser: chromium",
-          "@playwright/mcp@latest"
-        ]
+      "command": "npx",
+      "args": [
+        "-y",
+        "--headless",
+        "--browser: chromium",
+        "@playwright/mcp@latest"
+      ]
+    },
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ]
     },
     "t2i-google-imagen3": {
       "type": "http",

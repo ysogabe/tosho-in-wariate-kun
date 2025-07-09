@@ -18,14 +18,14 @@ import {
 import {
   studentsColumns,
   sampleStudentsData,
-  type LibraryCommitteeMemberData,
+  type StudentData,
 } from '@/components/table/students-columns'
 import { Plus, Download, Settings, FileText } from 'lucide-react'
 
 export default function TableTestPage() {
   const [selectedClasses, setSelectedClasses] = useState<ClassData[]>([])
   const [selectedStudents, setSelectedStudents] = useState<
-    LibraryCommitteeMemberData[]
+    StudentData[]
   >([])
 
   return (

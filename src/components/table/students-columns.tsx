@@ -11,25 +11,24 @@ import {
   Calendar,
 } from 'lucide-react'
 
-// 図書委員情報の型定義
-export interface LibraryCommitteeMemberData {
+// 図書委員情報の型定義（APIレスポンスと一致）
+export interface StudentData {
   id: string
   name: string
+  classId: string
   grade: number
-  class: {
+  isActive: boolean
+  assignmentCount: number
+  createdAt: string
+  updatedAt: string
+  class?: {
     id: string
     name: string
     year: number
   }
-  isActive: boolean
-  assignmentCount: number
-  lastAssignment: string | null
-  joinDate: string
-  createdAt: string
-  updatedAt: string
 }
 
-export const studentsColumns: ColumnDef<LibraryCommitteeMemberData>[] = [
+export const studentsColumns: ColumnDef<StudentData>[] = [
   {
     accessorKey: 'name',
     header: ({ column }) => (
@@ -67,9 +66,12 @@ export const studentsColumns: ColumnDef<LibraryCommitteeMemberData>[] = [
       label: 'クラス',
     },
     cell: ({ row }) => {
-      const classData = row.getValue(
-        'class'
-      ) as LibraryCommitteeMemberData['class']
+      const classData = row.getValue('class') as StudentData['class']
+      if (!classData) {
+        return (
+          <span className="text-muted-foreground text-sm">クラス未設定</span>
+        )
+      }
       return (
         <div className="text-sm">
           <div className="font-medium">{classData.name}</div>
@@ -116,37 +118,15 @@ export const studentsColumns: ColumnDef<LibraryCommitteeMemberData>[] = [
     },
   },
   {
-    accessorKey: 'lastAssignment',
+    accessorKey: 'createdAt',
     header: ({ column }) => (
-      <SortableHeader column={column}>最終当番日</SortableHeader>
+      <SortableHeader column={column}>作成日</SortableHeader>
     ),
     meta: {
-      label: '最終当番日',
+      label: '作成日',
     },
     cell: ({ row }) => {
-      const lastAssignment = row.getValue('lastAssignment') as string | null
-      if (!lastAssignment) {
-        return <span className="text-muted-foreground text-sm">未割り当て</span>
-      }
-      const date = new Date(lastAssignment)
-      return (
-        <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm">{date.toLocaleDateString('ja-JP')}</span>
-        </div>
-      )
-    },
-  },
-  {
-    accessorKey: 'joinDate',
-    header: ({ column }) => (
-      <SortableHeader column={column}>参加日</SortableHeader>
-    ),
-    meta: {
-      label: '参加日',
-    },
-    cell: ({ row }) => {
-      const date = new Date(row.getValue('joinDate'))
+      const date = new Date(row.getValue('createdAt'))
       return (
         <div className="flex items-center gap-2">
           <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -211,85 +191,50 @@ export const studentsColumns: ColumnDef<LibraryCommitteeMemberData>[] = [
 ]
 
 // サンプルデータ
-export const sampleStudentsData: LibraryCommitteeMemberData[] = [
+export const sampleStudentsData: StudentData[] = [
   {
     id: 'student-1',
     name: '田中 太郎',
-    grade: 1,
-    class: {
-      id: 'class-1',
-      name: '1年A組',
-      year: 1,
-    },
+    classId: 'class-1',
+    grade: 5,
     isActive: true,
     assignmentCount: 5,
-    lastAssignment: '2024-01-20T09:00:00Z',
-    joinDate: '2024-01-10T09:00:00Z',
     createdAt: '2024-01-10T09:00:00Z',
     updatedAt: '2024-01-20T14:30:00Z',
+    class: {
+      id: 'class-1',
+      name: '5年1組',
+      year: 5,
+    },
   },
   {
     id: 'student-2',
     name: '佐藤 花子',
-    grade: 1,
-    class: {
-      id: 'class-1',
-      name: '1年A組',
-      year: 1,
-    },
+    classId: 'class-1',
+    grade: 5,
     isActive: true,
     assignmentCount: 3,
-    lastAssignment: '2024-01-15T09:00:00Z',
-    joinDate: '2024-01-10T09:00:00Z',
     createdAt: '2024-01-10T09:00:00Z',
     updatedAt: '2024-01-15T14:30:00Z',
+    class: {
+      id: 'class-1',
+      name: '5年1組',
+      year: 5,
+    },
   },
   {
     id: 'student-3',
     name: '鈴木 次郎',
-    grade: 2,
-    class: {
-      id: 'class-3',
-      name: '2年A組',
-      year: 2,
-    },
+    classId: 'class-3',
+    grade: 6,
     isActive: true,
     assignmentCount: 7,
-    lastAssignment: '2024-01-25T09:00:00Z',
-    joinDate: '2024-01-10T09:00:00Z',
     createdAt: '2024-01-10T09:00:00Z',
     updatedAt: '2024-01-25T14:30:00Z',
-  },
-  {
-    id: 'student-4',
-    name: '高橋 三郎',
-    grade: 2,
     class: {
       id: 'class-3',
-      name: '2年A組',
-      year: 2,
+      name: '6年1組',
+      year: 6,
     },
-    isActive: false,
-    assignmentCount: 0,
-    lastAssignment: null,
-    joinDate: '2024-01-10T09:00:00Z',
-    createdAt: '2024-01-10T09:00:00Z',
-    updatedAt: '2024-01-15T14:30:00Z',
-  },
-  {
-    id: 'student-5',
-    name: '山田 美咲',
-    grade: 3,
-    class: {
-      id: 'class-4',
-      name: '3年A組',
-      year: 3,
-    },
-    isActive: true,
-    assignmentCount: 12,
-    lastAssignment: '2024-01-22T09:00:00Z',
-    joinDate: '2024-01-10T09:00:00Z',
-    createdAt: '2024-01-10T09:00:00Z',
-    updatedAt: '2024-01-22T14:30:00Z',
   },
 ]

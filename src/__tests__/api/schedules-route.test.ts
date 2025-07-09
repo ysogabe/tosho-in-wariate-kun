@@ -269,7 +269,7 @@ describe('/api/schedules Route Tests', () => {
       const request = new NextRequest('http://localhost/api/schedules')
       const response = await GET(request)
 
-      expect(response.status).toBe(500)
+      expect(response.status).toBe(401)
     })
 
     it('データベースエラーが発生した場合は500を返す', async () => {
@@ -292,7 +292,7 @@ describe('/api/schedules Route Tests', () => {
 
       expect(response.status).toBe(400)
       expect(data.success).toBe(false)
-      expect(data.error).toBe('VALIDATION_ERROR')
+      expect(data.error.code).toBe('VALIDATION_ERROR')
     })
 
     it('無効なフォーマットパラメータの場合は400を返す', async () => {
@@ -304,7 +304,7 @@ describe('/api/schedules Route Tests', () => {
 
       expect(response.status).toBe(400)
       expect(data.success).toBe(false)
-      expect(data.error).toBe('VALIDATION_ERROR')
+      expect(data.error.code).toBe('VALIDATION_ERROR')
     })
 
     it('スケジュールが存在しない場合は空配列を返す', async () => {

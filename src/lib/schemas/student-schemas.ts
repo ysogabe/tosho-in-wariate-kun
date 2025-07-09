@@ -14,8 +14,8 @@ export interface StudentResponse {
   grade: number
   isActive: boolean
   assignmentCount: number
-  createdAt: Date
-  updatedAt: Date
+  createdAt: string
+  updatedAt: string
   class?: {
     id: string
     name: string

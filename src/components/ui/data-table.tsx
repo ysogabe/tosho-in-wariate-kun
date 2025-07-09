@@ -287,6 +287,7 @@ interface RowActionsProps<TData> {
     label: string
     onClick: (row: TData) => void
     variant?: 'default' | 'destructive'
+    disabled?: boolean
   }>
 }
 
@@ -306,6 +307,7 @@ export function RowActions<TData>({ row, actions }: RowActionsProps<TData>) {
           <DropdownMenuItem
             key={index}
             onClick={() => action.onClick(row)}
+            disabled={action.disabled}
             className={
               action.variant === 'destructive' ? 'text-destructive' : ''
             }
