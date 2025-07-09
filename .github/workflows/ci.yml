@@ -146,9 +146,27 @@ jobs:
             }
 
       - name: Build for production
-        run: npm run build
+        run: |
+          echo "Starting production build..."
+          npm run build || {
+            echo "Build failed. Checking for errors..."
+            ls -la
+            echo "Package.json scripts:"
+            cat package.json | grep -A 5 -B 5 "build"
+            exit 1
+          }
+          echo "Build completed successfully"
         env:
           NODE_ENV: production
+
+      - name: Verify build output
+        run: |
+          if [ ! -d ".next" ]; then
+            echo "Error: .next directory not found after build"
+            exit 1
+          fi
+          echo "Build directory contents:"
+          ls -la .next/
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
