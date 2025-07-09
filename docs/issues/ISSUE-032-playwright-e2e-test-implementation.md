@@ -246,6 +246,47 @@ While fixing CI test failures, it became apparent that many UI interaction tests
 
 **Playwright Implementation Priority**: Low
 
+### React Hook Tests
+
+**File**: `src/lib/hooks/__tests__/use-schedule-generation.test.ts` (EXCLUDED FROM UNIT TESTS)
+
+#### Excluded Test Categories:
+1. **初期状態テスト**
+   - 初期値が正しく設定されている
+   - useScheduleGeneration フックの基本動作確認
+
+2. **スケジュール生成成功シナリオ**
+   - 成功時の状態更新を正しく処理する
+   - プログレス進行をシミュレートする
+   - API完了まで適切に待機する
+   - 最終状態が正しく設定される
+   - APIコールバック確認
+   - Toast通知の確認
+
+3. **スケジュール生成エラーシナリオ**
+   - APIエラーレスポンスを正しく処理する
+   - ネットワークエラーを正しく処理する
+   - エラー時の状態更新処理
+   - エラーコールバック確認
+   - エラートースト通知の確認
+
+4. **非同期処理とタイマー**
+   - setInterval による進捗シミュレーション
+   - fetch API との組み合わせ
+   - React state updates と act() の同期
+   - タイマーのクリーンアップ処理
+
+5. **複雑な状態管理**
+   - isGenerating 状態の管理
+   - progress 状態の管理
+   - 非同期処理中の状態同期
+   - エラー時の状態リセット
+
+**Implementation Challenge**: 
+このテストは React Testing Library の act() 要件とsetInterval/fetch の組み合わせによる複雑な非同期処理のため、単体テストでは困難。実際のブラウザ環境での E2E テストがより適切。
+
+**Playwright Implementation Priority**: Medium
+
 ## Step-by-Step Implementation Plan
 
 ### Phase 1: Setup and Configuration (1-2 days)
@@ -262,6 +303,7 @@ While fixing CI test failures, it became apparent that many UI interaction tests
 - [ ] Create classes management e2e tests
 - [ ] Set up form validation testing utilities
 - [ ] Implement modal dialog testing patterns
+- [ ] Create React hook e2e tests for schedule generation
 
 ### Phase 3: Medium Priority Tests (2-3 days)
 
