@@ -81,9 +81,13 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm run dev',
+    // CI環境ではプロダクションサーバーを使用、ローカルでは開発サーバー
+    command: process.env.CI ? 'npm start' : 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: true, // 既存のサーバーを使用
     timeout: 120000, // 2分間待機
+    env: {
+      NODE_ENV: process.env.CI ? 'production' : 'development',
+    },
   },
 })

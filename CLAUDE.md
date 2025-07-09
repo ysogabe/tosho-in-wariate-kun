@@ -264,22 +264,30 @@ pnpm --filter backend dev   # Start backend only
 #### CI Workflow (`.github/workflows/ci.yml`)
 
 - **Runner**: `runs-on: self-hosted` - **REQUIRED**
-- **Matrix Strategy**: Node.js 18.x and 20.x
-- **Steps**: Type check, linting, unit tests, build verification
+- **Matrix Strategy**: Node.js 20.x
+- **Steps**: 
+  - Type check, linting, unit tests
+  - Production build with caching
+  - E2E tests with production build
+  - Database setup for E2E tests
 - **Coverage**: 30% minimum threshold for MVP phase
 
 #### Workflow Jobs
 
 1. **Test & Build**
    - Runs on: `self-hosted`
-   - Node versions: 18.x, 20.x
+   - Node version: 20.x
    - Coverage reporting to Codecov
+   - Production build with caching
    - PR comment integration
 
-2. **Build Check (Production)**
+2. **Playwright E2E Tests**
    - Runs on: `self-hosted`
-   - Production build verification
-   - Build size monitoring
+   - Dependencies: Test & Build job success
+   - Production build testing
+   - Database initialization
+   - Screenshot and video evidence
+   - Test report generation
 
 #### Self-Hosted Runner Requirements
 
