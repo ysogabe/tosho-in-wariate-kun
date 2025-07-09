@@ -75,7 +75,7 @@ jest.mock('@/components/ui/input', () => ({
 }))
 
 jest.mock('@/components/ui/select', () => ({
-  Select: ({ children, onValueChange, value }: any) => (
+  Select: ({ children, onValueChange, value: _value }: any) => (
     <div data-testid="select" onClick={() => onValueChange?.('test')}>
       {children}
     </div>

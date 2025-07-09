@@ -75,6 +75,7 @@ jest.mock('lucide-react', () => ({
   Calendar: () => <div data-testid="calendar-icon" />,
 }))
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const mockUseSWR = require('swr').default
 
 describe('TodayDuties', () => {
