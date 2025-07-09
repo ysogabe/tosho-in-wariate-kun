@@ -680,6 +680,7 @@ export default function StudentManagementPage() {
                   name: formData.get('name') as string,
                   grade: parseInt(formData.get('grade') as string),
                   classId: formData.get('classId') as string,
+                  isActive: true,
                 })
               }}
             >

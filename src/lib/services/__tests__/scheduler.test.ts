@@ -89,8 +89,22 @@ describe('SchedulerService', () => {
     ]
 
     const mockRooms = [
-      { id: 'room-1', name: '図書室', capacity: 4 },
-      { id: 'room-2', name: '視聴覚室', capacity: 2 },
+      { 
+        id: 'room-1', 
+        name: '図書室', 
+        capacity: 4,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+        description: null
+      },
+      { 
+        id: 'room-2', 
+        name: '視聴覚室', 
+        capacity: 2,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+        description: null
+      },
     ]
 
     beforeEach(() => {
@@ -267,7 +281,14 @@ describe('SchedulerService', () => {
     it('制約条件違反がある場合の処理', async () => {
       // 極端に制約が厳しい場合（学生1名、図書室1室、定員1名）
       const limitedStudents = [mockStudents[0]]
-      const limitedRooms = [{ id: 'room-1', name: '図書室', capacity: 1 }]
+      const limitedRooms = [{ 
+        id: 'room-1', 
+        name: '図書室', 
+        capacity: 1, 
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+        description: null
+      }]
 
       mockPrisma.student.findMany.mockResolvedValue(limitedStudents)
       mockPrisma.room.findMany.mockResolvedValue(limitedRooms)
@@ -336,7 +357,14 @@ describe('SchedulerService', () => {
         },
       ]
 
-      const singleRoom = [{ id: 'room-1', name: '図書室', capacity: 4 }]
+      const singleRoom = [{ 
+        id: 'room-1', 
+        name: '図書室', 
+        capacity: 4,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+        description: null
+      }]
 
       mockPrisma.student.findMany.mockResolvedValue(sameClassStudents)
       mockPrisma.room.findMany.mockResolvedValue(singleRoom)
@@ -384,7 +412,14 @@ describe('SchedulerService', () => {
       }))
 
       const limitedCapacityRoom = [
-        { id: 'room-1', name: '図書室', capacity: 2 }, // 定員2名
+        { 
+          id: 'room-1', 
+          name: '図書室', 
+          capacity: 2,
+          createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-01'),
+          description: null
+        }, // 定員2名
       ]
 
       mockPrisma.student.findMany.mockResolvedValue(manyStudents)
@@ -431,6 +466,9 @@ describe('SchedulerService', () => {
         id: `room-${i + 1}`,
         name: `図書室${i + 1}`,
         capacity: 4,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+        description: null,
       }))
 
       mockPrisma.student.findMany.mockResolvedValue(largeStudentSet)

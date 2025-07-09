@@ -616,9 +616,9 @@ describe('ScheduleManagementPage', () => {
         click: jest.fn(),
       }
       const originalCreateElement = document.createElement
-      document.createElement = jest.fn((tagName) => {
+      document.createElement = jest.fn((tagName: string) => {
         if (tagName === 'a') {
-          return mockAnchor as any
+          return mockAnchor as unknown as HTMLAnchorElement
         }
         return originalCreateElement.call(document, tagName)
       })
