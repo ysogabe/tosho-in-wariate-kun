@@ -212,16 +212,25 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Generate Prisma client
+        run: |
+          echo "Generating Prisma client..."
+          # Use temporary directory for Prisma cache
+          export PRISMA_CACHE_DIR=/tmp/prisma-cache
+          mkdir -p $PRISMA_CACHE_DIR
+          npx prisma generate
+        env:
+          DATABASE_URL: file:./e2e-test.db
+
       - name: Setup test database
         run: |
           echo "Setting up test database for E2E tests..."
-          # Create and fix Prisma cache directory
-          mkdir -p $HOME/.cache/prisma
-          npm run test:e2e:setup
+          # Skip generate step since we already did it
+          cross-env DATABASE_URL=file:./e2e-test.db npm run db:push
+          cross-env DATABASE_URL=file:./e2e-test.db npm run db:seed:dev
         env:
           NODE_ENV: test
           DATABASE_URL: file:./e2e-test.db
-          PRISMA_CACHE_DIR: $HOME/.cache/prisma
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
