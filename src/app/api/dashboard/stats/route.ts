@@ -99,7 +99,7 @@ export async function GET(_request: NextRequest) {
             },
           })
           .then(async (total) => {
-            // 図書室はすべてアクティブとして扱う（isActiveフィールドがないため）
+            // MVP: すべての図書室をアクティブとして扱う
             return {
               total: total._count.id,
               active: total._count.id,

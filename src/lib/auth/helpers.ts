@@ -5,6 +5,19 @@ import { MVPUser } from './types'
 // サーバーコンポーネント用認証チェック
 export async function getServerSession(): Promise<MVPUser | null> {
   try {
+    // 開発環境での認証バイパス
+    const isDevelopment = process.env.NODE_ENV === 'development'
+    const devBypassAuth = process.env.DEV_BYPASS_AUTH === 'true'
+
+    if (isDevelopment && devBypassAuth) {
+      return {
+        id: 'dev-admin',
+        email: 'admin@dev.local',
+        name: '開発者',
+        role: 'admin',
+      }
+    }
+
     const cookieStore = await cookies()
     const authCookie = cookieStore.get('auth-session')
     const userDataCookie = cookieStore.get('user-data')
@@ -51,6 +64,19 @@ export async function requireAdmin(): Promise<MVPUser> {
 // API Request用認証チェック
 export async function authenticate(req: NextRequest): Promise<MVPUser> {
   try {
+    // 開発環境での認証バイパス
+    const isDevelopment = process.env.NODE_ENV === 'development'
+    const devBypassAuth = process.env.DEV_BYPASS_AUTH === 'true'
+
+    if (isDevelopment && devBypassAuth) {
+      return {
+        id: 'dev-admin',
+        email: 'admin@dev.local',
+        name: '開発者',
+        role: 'admin',
+      }
+    }
+
     const authCookie = req.cookies.get('auth-session')
     const userDataCookie = req.cookies.get('user-data')
 

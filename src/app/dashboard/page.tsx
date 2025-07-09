@@ -26,6 +26,8 @@ import {
   Download,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { TodayDuties } from '@/components/dashboard/today-duties'
+import { WeeklySchedule } from '@/components/dashboard/weekly-schedule'
 
 interface DashboardStats {
   students: {
@@ -83,6 +85,10 @@ export default function DashboardPage() {
       throw new Error('Failed to fetch dashboard stats')
     }
     return response.json()
+  }, {
+    revalidateOnFocus: true,
+    revalidateOnMount: true,
+    refreshInterval: 30000, // 30秒ごとに更新
   })
 
   // 最近の活動の取得
@@ -136,9 +142,11 @@ export default function DashboardPage() {
 
   const handleRefreshData = async () => {
     try {
-      await mutateStats()
+      // SWRキャッシュを完全にクリアして強制的に再取得
+      await mutateStats(undefined, { revalidate: true })
       toast.success('データを更新しました')
-    } catch {
+    } catch (error) {
+      console.error('データ更新エラー:', error)
       toast.error('データの更新に失敗しました')
     }
   }
@@ -158,10 +166,15 @@ export default function DashboardPage() {
 
   return (
     <PageLayout
-      title="ダッシュボード"
+      title="📊 ダッシュボード"
       description="図書委員当番システムの概要"
+      schoolName="🏫 かがやき小学校 図書委員当番"
       actions={
-        <Button variant="outline" onClick={handleRefreshData}>
+        <Button
+          variant="outline"
+          onClick={handleRefreshData}
+          className="bg-white hover:bg-secondary/20 border-secondary transition-all duration-300 hover:shadow-md"
+        >
           <RefreshCw className="mr-2 h-4 w-4" />
           更新
         </Button>
@@ -169,21 +182,41 @@ export default function DashboardPage() {
     >
       <div className="space-y-6">
         {/* システム状況サマリー */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <Users className="h-5 w-5 text-blue-600" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div
+                  className="p-3 rounded-full animate-float"
+                  style={{
+                    backgroundColor: 'hsl(202, 100%, 95%)',
+                    border: '2px dashed hsl(202, 70%, 70%)',
+                  }}
+                >
+                  <Users
+                    className="h-8 w-8"
+                    style={{ color: 'hsl(202, 70%, 50%)' }}
+                  />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">
-                    {statsLoading ? '---' : stats?.students.total || 0}
+                  <div
+                    className="text-3xl font-bold"
+                    style={{ color: 'hsl(340, 80%, 45%)' }}
+                  >
+                    {statsLoading ? '📚' : stats?.students.total || 0}
                   </div>
-                  <p className="text-sm text-muted-foreground">図書委員数</p>
+                  <p
+                    className="text-sm font-medium"
+                    style={{ color: 'hsl(340, 60%, 50%)' }}
+                  >
+                    図書委員数
+                  </p>
                   {stats && (
-                    <p className="text-xs text-green-600">
-                      {stats.students.active}名がアクティブ
+                    <p
+                      className="text-xs"
+                      style={{ color: 'hsl(140, 60%, 45%)' }}
+                    >
+                      {stats.students.active}名がアクティブ ✨
                     </p>
                   )}
                 </div>
@@ -191,20 +224,41 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <Building className="h-5 w-5 text-green-600" />
+          <Card className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div
+                  className="p-3 rounded-full animate-float"
+                  style={{
+                    backgroundColor: 'hsl(140, 60%, 95%)',
+                    border: '2px dashed hsl(140, 60%, 70%)',
+                    animationDelay: '0.5s',
+                  }}
+                >
+                  <Building
+                    className="h-8 w-8"
+                    style={{ color: 'hsl(140, 60%, 45%)' }}
+                  />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">
-                    {statsLoading ? '---' : stats?.classes.total || 0}
+                  <div
+                    className="text-3xl font-bold"
+                    style={{ color: 'hsl(340, 80%, 45%)' }}
+                  >
+                    {statsLoading ? '🏫' : stats?.classes.total || 0}
                   </div>
-                  <p className="text-sm text-muted-foreground">クラス数</p>
+                  <p
+                    className="text-sm font-medium"
+                    style={{ color: 'hsl(340, 60%, 50%)' }}
+                  >
+                    クラス数
+                  </p>
                   {stats && (
-                    <p className="text-xs text-green-600">
-                      {stats.classes.withStudents}クラスに委員在籍
+                    <p
+                      className="text-xs"
+                      style={{ color: 'hsl(140, 60%, 45%)' }}
+                    >
+                      {stats.classes.withStudents}クラスに委員在籍 🎒
                     </p>
                   )}
                 </div>
@@ -212,42 +266,86 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <Calendar className="h-5 w-5 text-purple-600" />
+          <Card className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div
+                  className="p-3 rounded-full animate-float"
+                  style={{
+                    backgroundColor: 'hsl(280, 60%, 95%)',
+                    border: '2px dashed hsl(280, 60%, 70%)',
+                    animationDelay: '1s',
+                  }}
+                >
+                  <Calendar
+                    className="h-8 w-8"
+                    style={{ color: 'hsl(280, 60%, 50%)' }}
+                  />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">
+                  <div
+                    className="text-3xl font-bold"
+                    style={{ color: 'hsl(340, 80%, 45%)' }}
+                  >
                     {statsLoading
-                      ? '---'
+                      ? '📅'
                       : (stats?.schedules.firstTerm.assignmentCount || 0) +
                         (stats?.schedules.secondTerm.assignmentCount || 0)}
                   </div>
-                  <p className="text-sm text-muted-foreground">総当番数</p>
+                  <p
+                    className="text-sm font-medium"
+                    style={{ color: 'hsl(340, 60%, 50%)' }}
+                  >
+                    総当番数
+                  </p>
                   {scheduleStatus.status === 'complete' && (
-                    <p className="text-xs text-green-600">完了</p>
+                    <p
+                      className="text-xs"
+                      style={{ color: 'hsl(140, 60%, 45%)' }}
+                    >
+                      完了 🎉
+                    </p>
                   )}
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-orange-100 rounded-lg">
-                  <BookOpen className="h-5 w-5 text-orange-600" />
+          <Card className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div
+                  className="p-3 rounded-full animate-float"
+                  style={{
+                    backgroundColor: 'hsl(30, 100%, 95%)',
+                    border: '2px dashed hsl(30, 100%, 70%)',
+                    animationDelay: '1.5s',
+                  }}
+                >
+                  <BookOpen
+                    className="h-8 w-8"
+                    style={{ color: 'hsl(30, 100%, 50%)' }}
+                  />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">
-                    {statsLoading ? '---' : stats?.rooms.active || 0}
+                  <div
+                    className="text-3xl font-bold"
+                    style={{ color: 'hsl(340, 80%, 45%)' }}
+                  >
+                    {statsLoading ? '📖' : stats?.rooms.active || 0}
                   </div>
-                  <p className="text-sm text-muted-foreground">図書室数</p>
+                  <p
+                    className="text-sm font-medium"
+                    style={{ color: 'hsl(340, 60%, 50%)' }}
+                  >
+                    図書室数
+                  </p>
                   {stats && (
-                    <p className="text-xs text-muted-foreground">
-                      {stats.rooms.total}室中{stats.rooms.active}室稼働
+                    <p
+                      className="text-xs"
+                      style={{ color: 'hsl(140, 60%, 45%)' }}
+                    >
+                      {stats.rooms.total}室中{stats.rooms.active}室稼働 🏛️
                     </p>
                   )}
                 </div>
@@ -255,6 +353,12 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* 今日の当番表示 */}
+        <TodayDuties />
+
+        {/* 週間スケジュール表示 */}
+        <WeeklySchedule />
 
         {/* スケジュール状況とクイックアクション */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

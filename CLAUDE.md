@@ -142,6 +142,22 @@ npm run lint
 npm run type-check
 ```
 
+### Development Server Management
+
+**重要**: 開発サーバーの起動・停止は**ユーザーが管理**します。
+
+- **開発サーバー起動**: ユーザーが `npm run dev` で実行
+- **Claude Code**: サーバーの起動・停止は行わない
+- **必要時**: サーバーの起動が必要な場合はユーザーに通知する
+
+**例**:
+```
+開発サーバーの起動が必要です：
+npm run dev
+
+起動後、http://localhost:3000/admin で確認してください。
+```
+
 ### GitHub Operations
 
 All GitHub-related operations should use the `gh` CLI command for consistency:

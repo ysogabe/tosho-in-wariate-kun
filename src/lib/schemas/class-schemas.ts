@@ -15,7 +15,7 @@ export const CreateClassSchema = z.object({
     .refine((name) => name.trim().length > 0, {
       message: 'クラス名に有効な文字が含まれている必要があります',
     }),
-  year: z
+  year: z.coerce
     .number()
     .int('学年は整数で入力してください')
     .min(5, '学年は5年以上を指定してください')
@@ -38,7 +38,7 @@ export const UpdateClassSchema = z.object({
       message: 'クラス名に有効な文字が含まれている必要があります',
     })
     .optional(),
-  year: z
+  year: z.coerce
     .number()
     .int('学年は整数で入力してください')
     .min(5, '学年は5年以上を指定してください')

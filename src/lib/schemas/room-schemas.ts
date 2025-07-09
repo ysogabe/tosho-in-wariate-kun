@@ -17,7 +17,6 @@ export const createRoomSchema = z.object({
     .string()
     .max(200, '説明は200文字以内で入力してください')
     .optional(),
-  isActive: z.boolean().default(true),
 })
 
 // 図書室更新スキーマ

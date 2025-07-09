@@ -78,11 +78,12 @@ model Class {
 
 // 図書室テーブル
 model Room {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  capacity  Int      @default(2)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  name        String   @unique
+  capacity    Int      @default(2)
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // リレーション
   assignments Assignment[]

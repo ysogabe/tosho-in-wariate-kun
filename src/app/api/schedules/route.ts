@@ -12,13 +12,18 @@ import { authenticate } from '@/lib/auth/helpers'
 // クエリパラメータスキーマ
 const ScheduleQuerySchema = z.object({
   term: z
-    .enum(['FIRST_TERM', 'SECOND_TERM'])
+    .string()
+    .nullable()
     .optional()
-    .refine(
-      (val) => val === undefined || ['FIRST_TERM', 'SECOND_TERM'].includes(val),
-      {
-        message: '学期は FIRST_TERM または SECOND_TERM を指定してください',
+    .transform((val) => {
+      // null, undefined, 空文字列の場合はundefinedを返す
+      if (!val || val === 'null' || val === 'undefined') {
+        return undefined
       }
+      return val
+    })
+    .pipe(
+      z.enum(['FIRST_TERM', 'SECOND_TERM']).optional()
     ),
   format: z.enum(['list', 'calendar']).optional().default('list'),
 })
