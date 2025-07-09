@@ -150,14 +150,13 @@ jobs:
         env:
           NODE_ENV: production
 
-      - name: Cache build artifacts
+      - name: Upload build artifacts
         if: matrix.node-version == '20.x'
-        uses: actions/cache@v4
+        uses: actions/upload-artifact@v4
         with:
+          name: build-artifacts
           path: .next
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-${{ hashFiles('**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-
+          retention-days: 1
 
       - name: Check build size
         if: matrix.node-version == '20.x'
@@ -202,22 +201,18 @@ jobs:
           NODE_ENV: test
           DATABASE_URL: ${{ secrets.TEST_DATABASE_URL || env.DATABASE_URL }}
 
-      - name: Restore build cache
-        uses: actions/cache@v4
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
         with:
+          name: build-artifacts
           path: .next
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-${{ hashFiles('**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-
 
-      - name: Build if cache miss
+      - name: Verify build artifacts
         run: |
-          if [ ! -d ".next" ]; then
-            echo "Build cache miss, building application..."
-            npm run build
-          else
-            echo "Using cached build"
-          fi
+          echo "Using production build from test job..."
+          ls -la .next/
+          du -sh .next/
+          echo "Build verification complete - ready for E2E testing"
 
       - name: Run Playwright tests against production build
         run: npm run test:e2e:ci
