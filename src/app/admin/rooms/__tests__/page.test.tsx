@@ -95,8 +95,8 @@ jest.mock('@/components/ui/select', () => ({
   SelectContent: ({ children }: any) => (
     <div data-testid="select-content">{children}</div>
   ),
-  SelectItem: ({ children, value }: any) => (
-    <div data-testid="select-item" data-value={value}>
+  SelectItem: ({ children, value: _value }: any) => (
+    <div data-testid="select-item" data-value={_value}>
       {children}
     </div>
   ),

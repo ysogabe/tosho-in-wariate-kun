@@ -276,7 +276,7 @@ describe('POST /api/rooms/bulk', () => {
 
       // Act
       const response = await POST(request)
-      const json = await response.json()
+      // const _json = await response.json()
 
       // Assert
       expect(response.status).toBe(500) // handleApiErrorが500を返すと仮定

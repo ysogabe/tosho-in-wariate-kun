@@ -4,7 +4,7 @@
  * POST /api/rooms - 図書室作成
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/database/client'
 import {

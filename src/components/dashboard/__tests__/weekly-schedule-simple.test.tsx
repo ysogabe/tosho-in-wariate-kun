@@ -61,6 +61,7 @@ jest.mock('lucide-react', () => ({
   AlertCircle: () => <div data-testid="alert-icon" />,
 }))
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const mockUseSWR = require('swr').default
 
 describe('WeeklySchedule', () => {

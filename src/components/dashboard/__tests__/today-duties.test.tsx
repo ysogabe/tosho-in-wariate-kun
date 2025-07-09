@@ -30,6 +30,7 @@ jest.mock('next/link', () => {
   }
 })
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const mockSWR = require('swr').default
 
 describe('TodayDuties', () => {

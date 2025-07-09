@@ -46,13 +46,7 @@ import {
 } from '@/components/table/students-columns'
 import { LoadingSpinner } from '@/components/common/loading-spinner'
 import { ValidationError } from '@/components/forms/validation-error'
-import {
-  Plus,
-  Search,
-  AlertTriangle,
-  UserPlus,
-  Download,
-} from 'lucide-react'
+import { Plus, Search, AlertTriangle, UserPlus, Download } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   type CreateStudentInput,
@@ -263,7 +257,7 @@ export default function StudentManagementPage() {
   }, [students])
 
   // テーブル用の列設定（studentsColumnsをそのまま使用）
-  const tableColumns = studentsColumns
+  // const _tableColumns = studentsColumns
 
   if (studentsError) {
     return (

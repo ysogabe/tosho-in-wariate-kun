@@ -164,7 +164,12 @@ jest.mock('@/components/layout/page-layout', () => ({
 }))
 
 jest.mock('@/components/ui/data-table', () => ({
-  DataTable: ({ columns: _columns, data, searchKey, onSelectionChange }: any) => (
+  DataTable: ({
+    columns: _columns,
+    data,
+    searchKey,
+    onSelectionChange,
+  }: any) => (
     <div data-testid="data-table">
       <div data-testid="table-search-key">{searchKey}</div>
       <div data-testid="table-data-count">{data?.length || 0}</div>
