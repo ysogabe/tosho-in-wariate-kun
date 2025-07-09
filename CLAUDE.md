@@ -282,8 +282,8 @@ pnpm --filter backend dev   # Start backend only
    - PR comment integration
 
 2. **Playwright E2E Tests**
-   - Runs on: `self-hosted` with Playwright Docker container
-   - Container: `mcr.microsoft.com/playwright:v1.53.2-jammy`
+   - Runs on: `self-hosted` with Playwright Docker container  
+   - Container: `mcr.microsoft.com/playwright:v1.53.0-noble` (Ubuntu 24.04 LTS)
    - Dependencies: Test & Build job success
    - Production build testing
    - Database initialization
@@ -299,7 +299,7 @@ pnpm --filter backend dev   # Start backend only
 
 #### Playwright Docker Environment
 
-- **Official Image**: `mcr.microsoft.com/playwright:v1.53.2-jammy`
+- **Official Image**: `mcr.microsoft.com/playwright:v1.53.0-noble`
 - **Benefits**:
   - Pre-installed browsers and dependencies
   - Consistent environment across runs

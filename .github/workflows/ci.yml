@@ -179,7 +179,7 @@ jobs:
     
     # Use Playwright official Docker image for faster setup
     container:
-      image: mcr.microsoft.com/playwright:v1.53.2-jammy
+      image: mcr.microsoft.com/playwright:v1.53.0-noble
       options: --user root
 
     steps:
