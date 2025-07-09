@@ -66,8 +66,8 @@ describe('student-service', () => {
         grade: 5,
         isActive: true,
         assignmentCount: 3,
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01'),
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-01-01T00:00:00.000Z',
         class: {
           id: 'class-1',
           name: '1組',
@@ -81,8 +81,8 @@ describe('student-service', () => {
         grade: 6,
         isActive: false,
         assignmentCount: 0,
-        createdAt: new Date('2024-01-02'),
-        updatedAt: new Date('2024-01-02'),
+        createdAt: '2024-01-02T00:00:00.000Z',
+        updatedAt: '2024-01-02T00:00:00.000Z',
         class: {
           id: 'class-2',
           name: '2組',
@@ -143,8 +143,8 @@ describe('student-service', () => {
         grade: 5,
         isActive: true,
         assignmentCount: 2,
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01'),
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-01-01T00:00:00.000Z',
         class: {
           id: 'class-1',
           name: '1組',
