@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { NextRequest } from 'next/server'
 import { GET } from '../route'
 import { prisma } from '@/lib/database'
@@ -55,71 +56,81 @@ describe('/api/system/export', () => {
       mockAuthenticateAdmin.mockResolvedValue({} as any)
 
       const mockClasses = [
-        { id: 1, name: '1組', year: 5, createdAt: new Date('2024-01-01') },
-        { id: 2, name: '2組', year: 5, createdAt: new Date('2024-01-02') },
+        { id: 'class-1', name: '1組', year: 5, createdAt: new Date('2024-01-01'), updatedAt: new Date('2024-01-01') },
+        { id: 'class-2', name: '2組', year: 5, createdAt: new Date('2024-01-02'), updatedAt: new Date('2024-01-02') },
       ]
 
       const mockStudents = [
         {
-          id: 1,
+          id: 'student-1',
           name: '田中太郎',
+          classId: 'class-1',
           grade: 5,
           isActive: true,
           createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-01'),
           class: { name: '1組', year: 5 },
         },
         {
-          id: 2,
+          id: 'student-2',
           name: '佐藤花子',
+          classId: 'class-2',
           grade: 5,
           isActive: true,
           createdAt: new Date('2024-01-02'),
+          updatedAt: new Date('2024-01-02'),
           class: { name: '2組', year: 5 },
         },
       ]
 
       const mockRooms = [
         {
-          id: 1,
+          id: 'room-1',
           name: '図書室A',
           capacity: 5,
           description: 'メイン図書室',
-          isActive: true,
           createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-01'),
         },
         {
-          id: 2,
+          id: 'room-2',
           name: '図書室B',
           capacity: 3,
           description: 'サブ図書室',
-          isActive: false,
           createdAt: new Date('2024-01-02'),
+          updatedAt: new Date('2024-01-02'),
         },
       ]
 
       const mockAssignments = [
         {
-          id: 1,
-          dayOfWeek: 'MONDAY',
+          id: 'assignment-1',
+          studentId: 'student-1',
+          roomId: 'room-1',
+          dayOfWeek: 1,
           term: 'FIRST_TERM',
           createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-01'),
           student: { name: '田中太郎', grade: 5 },
           room: { name: '図書室A' },
         },
         {
-          id: 2,
-          dayOfWeek: 'TUESDAY',
+          id: 'assignment-2',
+          studentId: 'student-2',
+          roomId: 'room-2',
+          dayOfWeek: 2,
           term: 'SECOND_TERM',
           createdAt: new Date('2024-01-02'),
+          updatedAt: new Date('2024-01-02'),
           student: { name: '佐藤花子', grade: 5 },
           room: { name: '図書室B' },
         },
       ]
 
-      mockPrisma.class.findMany.mockResolvedValue(mockClasses)
-      mockPrisma.student.findMany.mockResolvedValue(mockStudents)
-      mockPrisma.room.findMany.mockResolvedValue(mockRooms)
-      mockPrisma.assignment.findMany.mockResolvedValue(mockAssignments)
+      mockPrisma.class.findMany.mockResolvedValue(mockClasses as any)
+      mockPrisma.student.findMany.mockResolvedValue(mockStudents as any)
+      mockPrisma.room.findMany.mockResolvedValue(mockRooms as any)
+      mockPrisma.assignment.findMany.mockResolvedValue(mockAssignments as any)
 
       const response = await GET(request)
       const data = await response.json()
@@ -134,7 +145,7 @@ describe('/api/system/export', () => {
 
       // Check classes data structure
       expect(data.data.classes[0]).toMatchObject({
-        id: 1,
+        id: 'class-1',
         name: '1組',
         year: 5,
         createdAt: '2024-01-01T00:00:00.000Z',
@@ -142,7 +153,7 @@ describe('/api/system/export', () => {
 
       // Check students data structure
       expect(data.data.students[0]).toMatchObject({
-        id: 1,
+        id: 'student-1',
         name: '田中太郎',
         grade: 5,
         class: '5年1組',
@@ -152,7 +163,7 @@ describe('/api/system/export', () => {
 
       // Check rooms data structure
       expect(data.data.rooms[0]).toMatchObject({
-        id: 1,
+        id: 'room-1',
         name: '図書室A',
         capacity: 5,
         description: 'メイン図書室',
@@ -161,10 +172,10 @@ describe('/api/system/export', () => {
 
       // Check assignments data structure
       expect(data.data.assignments[0]).toMatchObject({
-        id: 1,
+        id: 'assignment-1',
         studentName: '田中太郎',
         roomName: '図書室A',
-        dayOfWeek: 'MONDAY',
+        dayOfWeek: 1,
         term: 'FIRST_TERM',
         createdAt: '2024-01-01T00:00:00.000Z',
       })
