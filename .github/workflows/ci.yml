@@ -146,6 +146,7 @@ jobs:
             }
 
       - name: Build for production
+        id: build
         run: |
           echo "Starting production build..."
           npm run build || {
@@ -169,11 +170,13 @@ jobs:
           ls -la .next/
 
       - name: Upload build artifacts
+        if: success() && steps.build.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts-${{ matrix.node-version }}
           path: .next
           retention-days: 1
+          if-no-files-found: error
 
       - name: Check build size
         if: matrix.node-version == '20.x'
@@ -221,14 +224,24 @@ jobs:
           DATABASE_URL: file:./e2e-test.db
 
       - name: Download build artifacts
+        id: download-artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts-20.x
           path: .next
+        continue-on-error: true
+
+      - name: Check artifact download status
+        if: steps.download-artifacts.outcome == 'failure'
+        run: |
+          echo "Failed to download build artifacts. Building locally..."
+          npm run build
+        env:
+          NODE_ENV: production
 
       - name: Verify build artifacts
         run: |
-          echo "Using production build from test job..."
+          echo "Verifying build artifacts..."
           if [ ! -d ".next" ]; then
             echo "Error: .next directory not found"
             exit 1
