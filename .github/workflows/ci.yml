@@ -285,6 +285,9 @@ jobs:
           echo "Application is ready on http://localhost:3000"
         env:
           NODE_ENV: production
+          DATABASE_URL: file:./e2e-test.db
+          NEXTAUTH_URL: http://localhost:3000
+          NEXTAUTH_SECRET: test-secret-for-e2e-tests
 
       - name: Run Playwright tests against production build
         run: npm run test:e2e:ci
@@ -292,6 +295,9 @@ jobs:
         env:
           CI: true
           NODE_ENV: production
+          DATABASE_URL: file:./e2e-test.db
+          NEXTAUTH_URL: http://localhost:3000
+          NEXTAUTH_SECRET: test-secret-for-e2e-tests
 
       - name: Stop Next.js application
         if: always()
