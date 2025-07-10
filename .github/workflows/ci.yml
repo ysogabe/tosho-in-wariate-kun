@@ -168,13 +168,17 @@ jobs:
           fi
           echo "Build directory contents:"
           ls -la .next/
+          echo "Current working directory:"
+          pwd
+          echo "All directories in current path:"
+          ls -la
 
       - name: Upload build artifacts
         if: success() && steps.build.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts-${{ matrix.node-version }}
-          path: .next
+          path: ${{ github.workspace }}/.next
           retention-days: 1
           if-no-files-found: error
 
@@ -228,7 +232,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts-20.x
-          path: .next
+          path: ${{ github.workspace }}/.next
         continue-on-error: true
 
       - name: Check artifact download status
