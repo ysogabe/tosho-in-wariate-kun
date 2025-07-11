@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import fs from 'fs'
 import path from 'path'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
@@ -39,6 +40,7 @@ async function main() {
     await seedRooms()
     await seedClasses()
     await seedStudents()
+    await seedUsers()
 
     console.log('✅ Seeding completed successfully!')
   } catch (error) {
@@ -54,6 +56,10 @@ async function clearDatabase() {
   await prisma.class.deleteMany()
   await prisma.room.deleteMany()
   await prisma.setting.deleteMany()
+  // 認証関連のテーブルもクリア
+  await prisma.session.deleteMany()
+  await prisma.account.deleteMany()
+  await prisma.user.deleteMany()
   console.log('  ✓ Database cleared')
 }
 
@@ -242,6 +248,45 @@ async function createStudentsIndividually(
   }
 
   console.log(`  ✓ Created ${createdCount} students individually`)
+}
+
+async function seedUsers() {
+  console.log('👤 Creating test users...')
+
+  try {
+    // テスト用管理者ユーザー
+    const adminPassword = await bcrypt.hash('admin123', 10)
+    const adminUser = await prisma.user.upsert({
+      where: { email: 'admin@test.com' },
+      update: {},
+      create: {
+        name: 'テスト管理者',
+        email: 'admin@test.com',
+        password: adminPassword,
+        role: 'admin',
+      },
+    })
+    console.log(`  ✓ Created admin user: ${adminUser.email}`)
+
+    // テスト用一般ユーザー
+    const userPassword = await bcrypt.hash('user123', 10)
+    const testUser = await prisma.user.upsert({
+      where: { email: 'user@test.com' },
+      update: {},
+      create: {
+        name: 'テストユーザー',
+        email: 'user@test.com',
+        password: userPassword,
+        role: 'student',
+      },
+    })
+    console.log(`  ✓ Created test user: ${testUser.email}`)
+
+    console.log('  ✓ Test users created successfully')
+  } catch (error) {
+    console.error('  ❌ Error creating test users:', error)
+    throw error
+  }
 }
 
 main()

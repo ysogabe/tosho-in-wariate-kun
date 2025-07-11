@@ -1,7 +1,11 @@
 import { test, expect } from '@playwright/test'
+import { loginAsAdmin } from './helpers/auth'
 
 test.describe('System Settings Page - E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
+    // 管理者としてログイン
+    await loginAsAdmin(page)
+    
     // Mock API responses for consistent testing
     await page.route('/api/system/info', async route => {
       const mockData = {

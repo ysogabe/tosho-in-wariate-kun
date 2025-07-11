@@ -274,21 +274,6 @@ jobs:
           du -sh .next/
           echo "Build verification complete - ready for E2E testing"
 
-      - name: Start Next.js application
-        run: |
-          echo "Starting Next.js application in background..."
-          npm run start &
-          APP_PID=$!
-          echo "APP_PID=$APP_PID" >> $GITHUB_ENV
-          echo "Waiting for application to be ready..."
-          npx wait-on http://localhost:3000 --timeout 60000
-          echo "Application is ready on http://localhost:3000"
-        env:
-          NODE_ENV: production
-          DATABASE_URL: file:./e2e-test.db
-          NEXTAUTH_URL: http://localhost:3000
-          NEXTAUTH_SECRET: test-secret-for-e2e-tests
-
       - name: Run Playwright tests against production build
         run: npm run test:e2e:ci
         timeout-minutes: 30
@@ -298,16 +283,6 @@ jobs:
           DATABASE_URL: file:./e2e-test.db
           NEXTAUTH_URL: http://localhost:3000
           NEXTAUTH_SECRET: test-secret-for-e2e-tests
-
-      - name: Stop Next.js application
-        if: always()
-        run: |
-          echo "Stopping Next.js application..."
-          if [ ! -z "$APP_PID" ]; then
-            kill $APP_PID || true
-          fi
-          # Also kill any remaining Node.js processes on port 3000
-          pkill -f "next start" || true
 
       - name: Upload test results
         if: always()

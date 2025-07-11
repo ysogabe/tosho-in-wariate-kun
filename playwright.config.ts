@@ -97,9 +97,12 @@ export default defineConfig({
     command: process.env.CI ? 'npm start' : 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: true, // 既存のサーバーを使用
-    timeout: 120000, // 2分間待機
+    timeout: 180000, // 3分間待機（CI環境での安定性向上）
     env: {
       NODE_ENV: process.env.CI ? 'production' : 'development',
+      DATABASE_URL: process.env.CI ? 'file:./e2e-test.db' : process.env.DATABASE_URL,
+      NEXTAUTH_URL: 'http://localhost:3000',
+      NEXTAUTH_SECRET: process.env.CI ? 'test-secret-for-e2e-tests' : process.env.NEXTAUTH_SECRET,
     },
   },
 })
