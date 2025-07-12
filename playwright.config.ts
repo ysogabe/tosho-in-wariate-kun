@@ -96,7 +96,7 @@ export default defineConfig({
     // CI環境ではプロダクションサーバーを使用、ローカルでは開発サーバー
     command: process.env.CI ? 'npm start' : 'npm run dev',
     url: 'http://localhost:3000',
-    reuseExistingServer: true, // 既存のサーバーを使用
+    reuseExistingServer: !process.env.CI, // CI環境では新しいサーバーを起動
     timeout: 180000, // 3分間待機（CI環境での安定性向上）
     env: {
       NODE_ENV: process.env.CI ? 'production' : 'development',
