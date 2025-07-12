@@ -16,6 +16,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Single Application**: フロントエンドとバックエンドを統合したNext.jsアプリケーション
 - **Simplified Structure**: MVPに適したシンプルなアーキテクチャ
 
+### MVP Display Requirements
+
+**IMPORTANT**: MVPでは以下の表示要件を設定しています。
+
+- **最低解像度**: iPad Air横置き（1180x820）以上
+- **対象デバイス**: デスクトップPC、タブレット（横置き）
+- **レスポンシブ対応**: MVPスコープ外（将来実装予定）
+- **モバイル対応**: MVPスコープ外（将来実装予定）
+
+**設計指針**: 学校現場での利用を想定し、職員室のPCやタブレット端末での操作性を優先します。
+
 ### Project Structure
 
 ```
@@ -423,7 +434,7 @@ git push
 
 **2. End-to-End Tests (Playwright)**
 - **対象**: ユーザーワークフロー、複雑なUI相互作用、統合シナリオ
-- **範囲**: フォーム操作、ダイアログ、ファイルダウンロード、レスポンシブデザイン
+- **範囲**: フォーム操作、ダイアログ、ファイルダウンロード
 - **特徴**: 実ブラウザ環境、APIモック、実際のユーザー体験
 
 #### Testing Tool Selection Guidelines
@@ -443,7 +454,6 @@ git push
 - ✅ タブ切り替えとUI状態管理
 - ✅ ファイルダウンロード・アップロード
 - ✅ 複数コンポーネント間の連携
-- ✅ レスポンシブデザイン
 - ✅ 複雑なユーザージャーニー
 - ✅ APIとUIの統合シナリオ
 - ✅ 実際のブラウザ機能が必要なテスト

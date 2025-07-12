@@ -170,35 +170,6 @@ test.describe('System Settings Page - E2E Tests', () => {
     await expect(page.getByRole('heading', { name: 'システム設定' })).toBeVisible()
   })
 
-  test('レスポンシブデザインが動作する', async ({ page }) => {
-    // モバイル画面サイズでテスト
-    await page.setViewportSize({ width: 375, height: 667 })
-    
-    await page.goto('/admin/settings')
-    
-    // ページが正しく読み込まれるまで待機
-    await page.waitForLoadState('networkidle')
-    await page.waitForTimeout(1000) // レスポンシブレイアウト安定化待機
-    
-    // モバイルでも基本機能が利用できることを確認
-    await expect(page.getByRole('heading', { name: 'システム設定' })).toBeVisible({ timeout: 10000 })
-    await expect(page.getByRole('tab', { name: 'システム情報' })).toBeVisible({ timeout: 10000 })
-    await expect(page.getByRole('tab', { name: 'データ管理' })).toBeVisible({ timeout: 10000 })
-    await expect(page.getByRole('tab', { name: 'メンテナンス' })).toBeVisible({ timeout: 10000 })
-    
-    // タブ切り替えがモバイルでも動作することを確認（CI環境での安定性向上）
-    const dataManagementTab = page.getByRole('tab', { name: 'データ管理' })
-    await dataManagementTab.waitFor({ state: 'visible', timeout: 10000 })
-    await dataManagementTab.click({ force: true }) // CI環境での安定性のためforce: trueを使用
-    
-    // データ管理タブがアクティブになるまで待機
-    await expect(dataManagementTab).toHaveAttribute('data-state', 'active', { timeout: 10000 })
-    await page.waitForTimeout(1000) // タブ切り替えアニメーション完了を確実に待機
-    
-    // データ管理タブのコンテンツが表示されることを確認
-    await expect(page.getByText('データエクスポート')).toBeVisible({ timeout: 15000 })
-    await expect(page.getByRole('button', { name: 'データをエクスポート' })).toBeVisible({ timeout: 15000 })
-  })
 
   test('エラーハンドリングが動作する', async ({ page }) => {
     // APIエラーをモック

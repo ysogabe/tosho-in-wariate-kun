@@ -80,6 +80,7 @@ interface SystemInfo {
 }
 
 export default function SystemSettingsPage() {
+  const [activeTab, setActiveTab] = useState('info')
   const [showResetDialog, setShowResetDialog] = useState(false)
   const [resetType, setResetType] = useState<
     'assignments' | 'students' | 'all'
@@ -207,7 +208,7 @@ export default function SystemSettingsPage() {
       }
     >
       <div className="space-y-6">
-        <Tabs defaultValue="info" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="info">システム情報</TabsTrigger>
             <TabsTrigger value="data">データ管理</TabsTrigger>
