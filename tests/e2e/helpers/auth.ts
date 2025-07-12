@@ -128,37 +128,37 @@ export async function loginAsAdmin(page: Page) {
     }
   })
   
-  // 複数の方法でフォーム送信を試行
+  // フォーム送信試行（成功時は追加試行を停止）
+  let authSuccess = false
+  
   try {
     // 方法1: ボタンクリック
     console.log('E2E Auth: Method 1 - Button click')
     await page.click('button[type="submit"]')
-    await page.waitForTimeout(1500)
+    await page.waitForTimeout(2000)
     
-    // URL変化を確認
+    // URL変化を確認（成功判定）
     const urlAfterClick = page.url()
     console.log('E2E Auth: URL after button click:', urlAfterClick)
     
-    // 方法2: パスワードフィールドでEnterキー
-    console.log('E2E Auth: Method 2 - Enter key submission')
-    await page.focus('input[name="password"]')
-    await page.press('input[name="password"]', 'Enter')
-    await page.waitForTimeout(1500)
-    
-    const urlAfterEnter = page.url()
-    console.log('E2E Auth: URL after Enter key:', urlAfterEnter)
-    
-    // 方法3: フォームを直接送信
-    console.log('E2E Auth: Method 3 - Direct form submission')
-    await page.locator('form').evaluate(form => {
-      console.log('Browser: Dispatching submit event on form')
-      const submitEvent = new Event('submit', { bubbles: true, cancelable: true })
-      form.dispatchEvent(submitEvent)
-    })
-    await page.waitForTimeout(1500)
-    
-    const urlAfterDirect = page.url()
-    console.log('E2E Auth: URL after direct submission:', urlAfterDirect)
+    if (urlAfterClick.includes('/admin')) {
+      console.log('E2E Auth: Authentication successful, skipping additional attempts')
+      authSuccess = true
+    } else {
+      // 方法2: パスワードフィールドでEnterキー（1回目失敗時のみ）
+      console.log('E2E Auth: Method 2 - Enter key submission (backup)')
+      await page.focus('input[name="password"]')
+      await page.press('input[name="password"]', 'Enter')
+      await page.waitForTimeout(1500)
+      
+      const urlAfterEnter = page.url()
+      console.log('E2E Auth: URL after Enter key:', urlAfterEnter)
+      
+      if (urlAfterEnter.includes('/admin')) {
+        console.log('E2E Auth: Enter key authentication successful')
+        authSuccess = true
+      }
+    }
     
   } catch (error) {
     console.log('E2E Auth: Form submission error:', error)
