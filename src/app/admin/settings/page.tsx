@@ -208,7 +208,11 @@ export default function SystemSettingsPage() {
       }
     >
       <div className="space-y-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="space-y-6"
+        >
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="info">システム情報</TabsTrigger>
             <TabsTrigger value="data">データ管理</TabsTrigger>
