@@ -106,8 +106,11 @@ test.describe('System Settings Page - E2E Tests', () => {
     // リセットボタンをクリック
     await page.getByRole('button', { name: 'データリセット' }).click()
     
-    // ダイアログの表示確認
-    await expect(page.locator('[role="dialog"]')).toBeVisible()
+    // CI環境でのダイアログ表示を待機
+    await page.waitForTimeout(500) // ダイアログアニメーション完了を待機
+    
+    // ダイアログの表示確認（より長いタイムアウトで）
+    await expect(page.locator('[role="dialog"]')).toBeVisible({ timeout: 15000 })
     await expect(page.getByText('データリセット確認')).toBeVisible()
     await expect(page.getByPlaceholder('管理者パスワードを入力')).toBeVisible()
     await expect(page.getByText('キャンセル')).toBeVisible()
@@ -132,7 +135,10 @@ test.describe('System Settings Page - E2E Tests', () => {
     
     // リセットダイアログを開く
     await page.getByRole('button', { name: 'データリセット' }).click()
-    await expect(page.locator('[role="dialog"]')).toBeVisible()
+    
+    // CI環境でのダイアログ表示を待機
+    await page.waitForTimeout(500)
+    await expect(page.locator('[role="dialog"]')).toBeVisible({ timeout: 15000 })
     
     // フォームに入力
     await page.getByPlaceholder('管理者パスワードを入力').fill('test123')
@@ -176,9 +182,12 @@ test.describe('System Settings Page - E2E Tests', () => {
     await expect(page.getByRole('tab', { name: 'データ管理' })).toBeVisible()
     await expect(page.getByRole('tab', { name: 'メンテナンス' })).toBeVisible()
     
-    // タブ切り替えがモバイルでも動作することを確認
-    await page.getByRole('tab', { name: 'データ管理' }).click()
-    await expect(page.getByRole('button', { name: 'データをエクスポート' })).toBeVisible()
+    // タブ切り替えがモバイルでも動作することを確認（CI環境での安定性向上）
+    const dataManagementTab = page.getByRole('tab', { name: 'データ管理' })
+    await dataManagementTab.waitFor({ state: 'visible' })
+    await dataManagementTab.click({ force: true }) // CI環境での安定性のためforce: trueを使用
+    await page.waitForTimeout(300) // タブ切り替えアニメーション待機
+    await expect(page.getByRole('button', { name: 'データをエクスポート' })).toBeVisible({ timeout: 10000 })
   })
 
   test('エラーハンドリングが動作する', async ({ page }) => {

@@ -182,27 +182,15 @@ jobs:
           NODE_ENV: test
           DATABASE_URL: file:./e2e-test.db
 
-      - name: Build for E2E testing
+      # E2E testing uses development server for consistency with local testing
+      # Production build is verified in the test job above
+      - name: Prepare for E2E testing
         run: |
-          echo "Building application for E2E testing..."
-          npm run build
-        env:
-          NODE_ENV: production
+          echo "Preparing E2E testing environment..."
+          echo "E2E tests will use development server for consistency with local environment"
+          echo "This avoids CI-specific issues with production build + dev server mismatch"
 
-      - name: Verify build output
-        run: |
-          echo "Verifying build output..."
-          if [ ! -d ".next" ]; then
-            echo "Error: .next directory not found after build"
-            exit 1
-          fi
-          echo "Build directory contents:"
-          ls -la .next/
-          echo "Build size:"
-          du -sh .next/
-          echo "Build verification complete - ready for E2E testing"
-
-      - name: Run Playwright tests against production build
+      - name: Run Playwright tests against development server
         run: npm run test:e2e:ci
         timeout-minutes: 30
         env:

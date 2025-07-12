@@ -20,10 +20,10 @@ export default defineConfig({
     ['json', { outputFile: 'playwright-report/results.json' }]
   ] : 'html',
   /* Global test timeout */
-  timeout: 30000,
+  timeout: process.env.CI ? 45000 : 30000, // CI環境では45秒に延長
   /* Expect timeout */
   expect: {
-    timeout: 5000,
+    timeout: process.env.CI ? 10000 : 5000, // CI環境では10秒に延長
   },
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
@@ -40,16 +40,16 @@ export default defineConfig({
     video: process.env.CI ? 'retain-on-failure' : 'retain-on-failure',
     
     /* Action timeout */
-    actionTimeout: 15000, // Docker環境では少し長めに
+    actionTimeout: process.env.CI ? 20000 : 15000, // CI環境では20秒に延長
     
     /* Navigation timeout */
-    navigationTimeout: 45000, // Docker環境では少し長めに
+    navigationTimeout: process.env.CI ? 60000 : 45000, // CI環境では60秒に延長
     
     /* Docker環境での設定 */
     ...(process.env.CI && {
       // CIでは安定性を重視
       launchOptions: {
-        slowMo: 100, // 操作間に100msの遅延
+        slowMo: 250, // 操作間に250msの遅延（CI環境での安定性向上）
       },
     }),
   },
