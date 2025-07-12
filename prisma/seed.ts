@@ -251,7 +251,15 @@ async function createStudentsIndividually(
 }
 
 async function seedUsers() {
-  console.log('👤 Creating test users...')
+  // E2Eテスト用データベースの場合のみユーザーを作成
+  const isE2EDatabase = process.env.DATABASE_URL?.includes('e2e-test.db')
+  
+  if (!isE2EDatabase) {
+    console.log('👤 Skipping test users creation (not E2E database)')
+    return
+  }
+
+  console.log('👤 Creating test users for E2E testing...')
 
   try {
     // テスト用管理者ユーザー
@@ -285,7 +293,8 @@ async function seedUsers() {
     console.log('  ✓ Test users created successfully')
   } catch (error) {
     console.error('  ❌ Error creating test users:', error)
-    throw error
+    // テストユーザーの作成に失敗してもシード処理全体は続行
+    console.log('  ⚠️ Continuing without test users (E2E tests may fail)')
   }
 }
 
