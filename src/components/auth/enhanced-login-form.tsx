@@ -64,12 +64,12 @@ export function EnhancedLoginForm() {
   }, [form])
 
   const onSubmit = async (values: LoginFormValues) => {
-    console.log('EnhancedLoginForm: onSubmit called', { 
-      email: values.email, 
+    console.log('EnhancedLoginForm: onSubmit called', {
+      email: values.email,
       timestamp: new Date().toISOString(),
-      NODE_ENV: process.env.NODE_ENV 
+      NODE_ENV: process.env.NODE_ENV,
     })
-    
+
     try {
       setAuthError('')
 
@@ -93,7 +93,10 @@ export function EnhancedLoginForm() {
       }
 
       // ログイン成功 - リダイレクト
-      console.log('EnhancedLoginForm: Login successful, redirecting to', redirectTo)
+      console.log(
+        'EnhancedLoginForm: Login successful, redirecting to',
+        redirectTo
+      )
       router.push(redirectTo)
     } catch (error) {
       console.error('EnhancedLoginForm: Login error:', error)
@@ -123,38 +126,49 @@ export function EnhancedLoginForm() {
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     const formData = form.getValues()
     const errors = form.formState.errors
-    
+
     console.log('EnhancedLoginForm: Raw form submit event triggered', {
       timestamp: new Date().toISOString(),
       isValid: form.formState.isValid,
       isDirty: form.formState.isDirty,
       isSubmitting: form.formState.isSubmitting,
-      formData: { email: formData.email, password: formData.password?.length > 0 ? 'filled' : 'empty' },
+      formData: {
+        email: formData.email,
+        password: formData.password?.length > 0 ? 'filled' : 'empty',
+      },
       errors: {
         email: errors.email?.message,
         password: errors.password?.message,
-        root: errors.root?.message
+        root: errors.root?.message,
       },
       touchedFields: form.formState.touchedFields,
-      dirtyFields: form.formState.dirtyFields
+      dirtyFields: form.formState.dirtyFields,
     })
-    
+
     // E2E テスト環境では、データが入っていればバリデーションを回避
-    if (process.env.NODE_ENV === 'development' && formData.email && formData.password) {
-      console.log('EnhancedLoginForm: E2E environment detected, bypassing React Hook Form validation')
+    if (
+      process.env.NODE_ENV === 'development' &&
+      formData.email &&
+      formData.password
+    ) {
+      console.log(
+        'EnhancedLoginForm: E2E environment detected, bypassing React Hook Form validation'
+      )
       onSubmit(formData)
       return
     }
-    
+
     // バリデーションエラーがある場合は詳細ログ
     if (!form.formState.isValid) {
-      console.log('EnhancedLoginForm: Form validation failed, not calling onSubmit')
+      console.log(
+        'EnhancedLoginForm: Form validation failed, not calling onSubmit'
+      )
       return
     }
-    
+
     console.log('EnhancedLoginForm: Form is valid, calling handleSubmit')
     // React Hook FormのhandleSubmitを呼ぶ
     return form.handleSubmit(onSubmit)(e)
@@ -291,7 +305,8 @@ export function EnhancedLoginForm() {
         </Button>
 
         {/* デモ用ログイン情報 */}
-        {(process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') && (
+        {(process.env.NODE_ENV === 'development' ||
+          process.env.NODE_ENV === 'test') && (
           <div className="mt-4 p-3 bg-muted rounded-lg">
             <p className="text-sm font-medium mb-2">開発用ログイン情報:</p>
             <div className="text-xs space-y-1">

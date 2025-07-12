@@ -61,10 +61,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(true)
 
       // Debug logging for E2E testing
-      console.log('Mock auth: Attempting sign in', { 
-        email, 
+      console.log('Mock auth: Attempting sign in', {
+        email,
         NODE_ENV: process.env.NODE_ENV,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       })
 
       // TODO: Replace with actual Supabase authentication
@@ -85,15 +85,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         { email: 'user@test.com', password: 'User123', role: 'student' },
       ]
 
-      console.log('Mock auth: Available test users:', testUsers.map(u => ({ email: u.email, role: u.role })))
+      console.log(
+        'Mock auth: Available test users:',
+        testUsers.map((u) => ({ email: u.email, role: u.role }))
+      )
 
       const matchedUser = testUsers.find(
         (u) => u.email === email && u.password === password
       )
 
       if (matchedUser) {
-        console.log('Mock auth: User authentication successful', { email: matchedUser.email, role: matchedUser.role })
-        
+        console.log('Mock auth: User authentication successful', {
+          email: matchedUser.email,
+          role: matchedUser.role,
+        })
+
         const mockUser = {
           id: `mock-user-${matchedUser.role}`,
           email: matchedUser.email,
@@ -121,8 +127,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return {}
       }
 
-      console.log('Mock auth: Authentication failed - credentials not found', { email })
-      return { error: `認証情報が見つかりません。利用可能なユーザー: ${testUsers.map(u => u.email).join(', ')}` }
+      console.log('Mock auth: Authentication failed - credentials not found', {
+        email,
+      })
+      return {
+        error: `認証情報が見つかりません。利用可能なユーザー: ${testUsers.map((u) => u.email).join(', ')}`,
+      }
     } catch (error) {
       console.error('Sign in error:', error)
       return { error: 'ログインに失敗しました' }
