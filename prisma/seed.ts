@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import fs from 'fs'
 import path from 'path'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
@@ -39,6 +40,7 @@ async function main() {
     await seedRooms()
     await seedClasses()
     await seedStudents()
+    await seedUsers()
 
     console.log('✅ Seeding completed successfully!')
   } catch (error) {
@@ -54,6 +56,10 @@ async function clearDatabase() {
   await prisma.class.deleteMany()
   await prisma.room.deleteMany()
   await prisma.setting.deleteMany()
+  // 認証関連のテーブルもクリア
+  await prisma.session.deleteMany()
+  await prisma.account.deleteMany()
+  await prisma.user.deleteMany()
   console.log('  ✓ Database cleared')
 }
 
@@ -183,7 +189,6 @@ async function seedStudents() {
       try {
         const result = await prisma.student.createMany({
           data: studentsToCreate,
-          skipDuplicates: true, // 重複データの防止
         })
         console.log(`  ✓ Created ${result.count} students in batch operation`)
 
@@ -243,6 +248,54 @@ async function createStudentsIndividually(
   }
 
   console.log(`  ✓ Created ${createdCount} students individually`)
+}
+
+async function seedUsers() {
+  // E2Eテスト用データベースの場合のみユーザーを作成
+  const isE2EDatabase = process.env.DATABASE_URL?.includes('e2e-test.db')
+  
+  if (!isE2EDatabase) {
+    console.log('👤 Skipping test users creation (not E2E database)')
+    return
+  }
+
+  console.log('👤 Creating test users for E2E testing...')
+
+  try {
+    // テスト用管理者ユーザー
+    const adminPassword = await bcrypt.hash('admin123', 10)
+    const adminUser = await prisma.user.upsert({
+      where: { email: 'admin@test.com' },
+      update: {},
+      create: {
+        name: 'テスト管理者',
+        email: 'admin@test.com',
+        password: adminPassword,
+        role: 'admin',
+      },
+    })
+    console.log(`  ✓ Created admin user: ${adminUser.email}`)
+
+    // テスト用一般ユーザー
+    const userPassword = await bcrypt.hash('user123', 10)
+    const testUser = await prisma.user.upsert({
+      where: { email: 'user@test.com' },
+      update: {},
+      create: {
+        name: 'テストユーザー',
+        email: 'user@test.com',
+        password: userPassword,
+        role: 'student',
+      },
+    })
+    console.log(`  ✓ Created test user: ${testUser.email}`)
+
+    console.log('  ✓ Test users created successfully')
+  } catch (error) {
+    console.error('  ❌ Error creating test users:', error)
+    // テストユーザーの作成に失敗してもシード処理全体は続行
+    console.log('  ⚠️ Continuing without test users (E2E tests may fail)')
+  }
 }
 
 main()

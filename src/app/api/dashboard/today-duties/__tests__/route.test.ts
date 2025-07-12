@@ -24,10 +24,13 @@ jest.mock('next/server', () => ({
     }
   },
   NextResponse: {
-    json: (data: any, init?: ResponseInit) => ({
-      json: () => Promise.resolve(data),
-      status: init?.status || 200,
-    }),
+    json: (data: any, init?: ResponseInit) => {
+      const status = init?.status || 200
+      return {
+        json: () => Promise.resolve(data),
+        status,
+      }
+    },
   },
 }))
 
@@ -265,6 +268,12 @@ describe('GET /api/dashboard/today-duties', () => {
 
   describe('エラーハンドリング', () => {
     it('データベースエラー時に500エラーを返す', async () => {
+      // Mock date to be a weekday (Monday = day 1)
+      const mockDate = new Date('2025-07-14T10:00:00Z') // Monday
+      const dateSpy = jest
+        .spyOn(global, 'Date')
+        .mockImplementation(() => mockDate)
+
       const request = new NextRequest(
         'http://localhost/api/dashboard/today-duties',
         { method: 'GET' }
@@ -277,6 +286,8 @@ describe('GET /api/dashboard/today-duties', () => {
       const response = await GET(request)
 
       expect(response.status).toBe(500)
+      
+      dateSpy.mockRestore()
     })
   })
 

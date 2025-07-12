@@ -52,6 +52,9 @@ const config = {
 
   // Test timeout for CI environment stability
   testTimeout: 30000,
+  
+  // Setup file to disable console.error during tests
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
 
   // Maximum worker processes for CI stability
   maxWorkers: process.env.CI ? 2 : '50%',
