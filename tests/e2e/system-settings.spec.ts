@@ -84,6 +84,9 @@ test.describe('System Settings Page - E2E Tests', () => {
     // データ管理タブに切り替え
     await page.getByRole('tab', { name: 'データ管理' }).click()
     
+    // エビデンス用スクリーンショット - データ管理タブ
+    await page.screenshot({ path: 'test-results/system-settings-data-tab.png', fullPage: true })
+    
     // データ管理機能の確認
     await expect(page.getByRole('button', { name: 'データをエクスポート' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'データリセット' })).toBeVisible()
@@ -115,6 +118,9 @@ test.describe('System Settings Page - E2E Tests', () => {
     await expect(page.getByPlaceholder('管理者パスワードを入力')).toBeVisible()
     await expect(page.getByText('キャンセル')).toBeVisible()
     await expect(page.getByText('リセット実行')).toBeVisible()
+    
+    // エビデンス用スクリーンショット - リセットダイアログ
+    await page.screenshot({ path: 'test-results/system-settings-reset-dialog.png', fullPage: true })
   })
 
   test('データリセット実行が動作する', async ({ page }) => {
@@ -155,6 +161,9 @@ test.describe('System Settings Page - E2E Tests', () => {
     
     // メンテナンスタブに切り替え
     await page.getByRole('tab', { name: 'メンテナンス' }).click()
+    
+    // エビデンス用スクリーンショット - メンテナンスタブ
+    await page.screenshot({ path: 'test-results/system-settings-maintenance-tab.png', fullPage: true })
     
     // メンテナンス機能の確認
     await expect(page.getByText('メンテナンス機能は準備中です')).toBeVisible()

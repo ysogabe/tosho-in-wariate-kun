@@ -34,10 +34,10 @@ export default defineConfig({
     trace: 'on-first-retry',
     
     /* Screenshot settings - すべてのテストでスクリーンショットを保存 */
-    screenshot: process.env.CI ? 'on' : 'only-on-failure',
+    screenshot: 'on', // 成功・失敗問わずスクリーンショットを保存
     
     /* Video settings */
-    video: process.env.CI ? 'retain-on-failure' : 'retain-on-failure',
+    video: 'retain-on-failure',
     
     /* Action timeout */
     actionTimeout: process.env.CI ? 20000 : 15000, // CI環境では20秒に延長
