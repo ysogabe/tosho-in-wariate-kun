@@ -106,7 +106,7 @@ export function PageLayout({
       </header>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className={cn('space-y-6 animate-fadeIn', className)}>
           {/* Page Header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -131,7 +131,7 @@ export function PageLayout({
           {/* Page Content */}
           <div className="space-y-6">{children}</div>
         </div>
-      </div>
+      </main>
 
       {/* Footer */}
       <footer
