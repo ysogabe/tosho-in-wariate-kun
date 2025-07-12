@@ -49,9 +49,6 @@ test.describe('System Settings Page - E2E Tests', () => {
   test('ページ表示とタブ切り替えが動作する', async ({ page }) => {
     await page.goto('/admin/settings')
     
-    // エビデンス用スクリーンショット - 初期表示
-    await page.screenshot({ path: 'test-results/system-settings-initial.png', fullPage: true })
-    
     // ページタイトルとタブの確認
     await expect(page.getByRole('heading', { name: 'システム設定' })).toBeVisible()
     await expect(page.getByRole('tab', { name: 'システム情報' })).toBeVisible()
@@ -65,8 +62,8 @@ test.describe('System Settings Page - E2E Tests', () => {
     await expect(page.getByText('PostgreSQL')).toBeVisible()
     await expect(page.getByText('システム基本情報')).toBeVisible()
     
-    // エビデンス用スクリーンショット - システム情報表示確認
-    await page.screenshot({ path: 'test-results/system-settings-info-tab.png', fullPage: true })
+    // エビデンス用スクリーンショット - システム設定ページ全体
+    await page.screenshot({ path: 'test-results/system-settings-overview.png', fullPage: true })
   })
 
   test('データ管理タブでエクスポート機能が動作する', async ({ page }) => {
@@ -83,9 +80,6 @@ test.describe('System Settings Page - E2E Tests', () => {
     
     // データ管理タブに切り替え
     await page.getByRole('tab', { name: 'データ管理' }).click()
-    
-    // エビデンス用スクリーンショット - データ管理タブ
-    await page.screenshot({ path: 'test-results/system-settings-data-tab.png', fullPage: true })
     
     // データ管理機能の確認
     await expect(page.getByRole('button', { name: 'データをエクスポート' })).toBeVisible()
@@ -119,8 +113,8 @@ test.describe('System Settings Page - E2E Tests', () => {
     await expect(page.getByText('キャンセル')).toBeVisible()
     await expect(page.getByText('リセット実行')).toBeVisible()
     
-    // エビデンス用スクリーンショット - リセットダイアログ
-    await page.screenshot({ path: 'test-results/system-settings-reset-dialog.png', fullPage: true })
+    // エビデンス用スクリーンショット - 重要なダイアログのみ撮影
+    await page.screenshot({ path: 'test-results/system-settings-critical-dialog.png', fullPage: true })
   })
 
   test('データリセット実行が動作する', async ({ page }) => {
@@ -161,9 +155,6 @@ test.describe('System Settings Page - E2E Tests', () => {
     
     // メンテナンスタブに切り替え
     await page.getByRole('tab', { name: 'メンテナンス' }).click()
-    
-    // エビデンス用スクリーンショット - メンテナンスタブ
-    await page.screenshot({ path: 'test-results/system-settings-maintenance-tab.png', fullPage: true })
     
     // メンテナンス機能の確認
     await expect(page.getByText('メンテナンス機能は準備中です')).toBeVisible()

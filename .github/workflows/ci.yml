@@ -210,12 +210,20 @@ jobs:
             test-results/
           retention-days: 30
 
-      - name: Upload screenshots (always)
+      - name: Upload evidence screenshots (always)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-screenshots
-          path: test-results/**/*.png
+          name: test-evidence-screenshots
+          path: test-results/*.png
+          retention-days: 30
+
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failure-screenshots
+          path: test-results/**/*-chromium/*.png
           retention-days: 30
 
       - name: Upload videos on failure

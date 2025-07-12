@@ -33,8 +33,8 @@ export default defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
     
-    /* Screenshot settings - すべてのテストでスクリーンショットを保存 */
-    screenshot: 'on', // 成功・失敗問わずスクリーンショットを保存
+    /* Screenshot settings - 手動撮影があるため失敗時のみ自動撮影 */
+    screenshot: 'only-on-failure',
     
     /* Video settings */
     video: 'retain-on-failure',
