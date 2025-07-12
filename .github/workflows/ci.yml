@@ -145,65 +145,6 @@ jobs:
               });
             }
 
-      - name: Build for production
-        id: build
-        run: |
-          echo "Starting production build..."
-          npm run build || {
-            echo "Build failed. Checking for errors..."
-            ls -la
-            echo "Package.json scripts:"
-            cat package.json | grep -A 5 -B 5 "build"
-            exit 1
-          }
-          echo "Build completed successfully"
-        env:
-          NODE_ENV: production
-
-      - name: Verify build output
-        run: |
-          if [ ! -d ".next" ]; then
-            echo "Error: .next directory not found after build"
-            exit 1
-          fi
-          echo "Build directory contents:"
-          ls -la .next/
-          echo "Current working directory:"
-          pwd
-          echo "All directories in current path:"
-          ls -la
-
-      - name: List build output before upload
-        if: success() && steps.build.outcome == 'success'
-        run: |
-          echo "Checking .next directory before upload:"
-          if [ -d ".next" ]; then
-            echo ".next directory exists"
-            echo "Size of .next:"
-            du -sh .next
-            echo "Files in .next:"
-            find .next -type f | head -20
-          else
-            echo ".next directory NOT found!"
-            echo "Looking for .next in other locations:"
-            find . -name ".next" -type d 2>/dev/null || true
-          fi
-
-      - name: Upload build artifacts
-        if: success() && steps.build.outcome == 'success'
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts-${{ matrix.node-version }}
-          path: .next
-          retention-days: 1
-          if-no-files-found: warn
-
-      - name: Check build size
-        if: matrix.node-version == '20.x'
-        run: |
-          echo "Build completed successfully"
-          ls -la .next/
-          du -sh .next/
 
   playwright-tests:
     name: Playwright E2E Tests
@@ -214,8 +155,6 @@ jobs:
       contents: read
       pull-requests: write
       actions: read
-      pages: write
-      id-token: write
 
     steps:
       - name: Checkout code
@@ -243,34 +182,23 @@ jobs:
           NODE_ENV: test
           DATABASE_URL: file:./e2e-test.db
 
-      - name: Download build artifacts
-        id: download-artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts-20.x
-          path: .next
-        continue-on-error: true
-
-      - name: Check artifact download status
-        if: steps.download-artifacts.outcome == 'failure'
+      - name: Build for E2E testing
         run: |
-          echo "Failed to download build artifacts. Building locally..."
+          echo "Building application for E2E testing..."
           npm run build
         env:
           NODE_ENV: production
 
-      - name: Verify build artifacts
+      - name: Verify build output
         run: |
-          echo "Verifying build artifacts..."
+          echo "Verifying build output..."
           if [ ! -d ".next" ]; then
-            echo "Error: .next directory not found"
+            echo "Error: .next directory not found after build"
             exit 1
           fi
-          if [ ! -f ".next/package.json" ] && [ ! -f ".next/BUILD_ID" ]; then
-            echo "Error: Build artifacts appear to be incomplete"
-            exit 1
-          fi
+          echo "Build directory contents:"
           ls -la .next/
+          echo "Build size:"
           du -sh .next/
           echo "Build verification complete - ready for E2E testing"
 
@@ -386,11 +314,12 @@ jobs:
               console.error('Error processing test results:', error);
             }
 
-      - name: Deploy to GitHub Pages
-        if: failure() && github.event_name == 'pull_request'
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./playwright-report
-          destination_dir: playwright-reports/${{ github.run_id }}
-          keep_files: true
+      # NOTE: GitHub Pages deployment disabled due to permission issues
+      # - name: Deploy to GitHub Pages
+      #   if: failure() && github.event_name == 'pull_request'
+      #   uses: peaceiris/actions-gh-pages@v3
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     publish_dir: ./playwright-report
+      #     destination_dir: playwright-reports/${{ github.run_id }}
+      #     keep_files: true
