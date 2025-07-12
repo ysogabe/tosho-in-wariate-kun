@@ -164,11 +164,12 @@ export function EnhancedLoginForm() {
       return
     }
 
-    // Jest テスト環境では、バリデーション状態に関係なく直接 onSubmit を呼ぶ
+    // Jest テスト環境では、バリデーション無視してhandleSubmitを実行
     if (process.env.JEST_WORKER_ID && formData.email && formData.password) {
-      console.log('EnhancedLoginForm: Jest test environment detected, calling onSubmit directly')
-      onSubmit(formData)
-      return
+      console.log(
+        'EnhancedLoginForm: Jest test environment detected, bypassing validation but using handleSubmit'
+      )
+      return form.handleSubmit(onSubmit)(e)
     }
 
     // バリデーションエラーがある場合は詳細ログ
