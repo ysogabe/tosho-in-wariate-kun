@@ -362,6 +362,47 @@ expect(students).toHaveLength(450)
 - テストファイルは既に `.eslintrc.json` の `ignorePatterns` で除外されており、Lintの対象外
 - プロダクションビルドも `npm run build` で事前確認する
 
+### 必須: プッシュ前テスト順序
+
+**重要**: CIリソース節約のため、プッシュ前に必ず以下の順序でローカルテストを実施する
+
+#### 1. 基本品質チェック（必須）
+```bash
+npm run type-check    # TypeScript型チェック
+npm run lint         # ESLint実行
+npm run test:ci      # 単体テスト（CI環境同等）
+npm run build        # プロダクションビルド
+```
+
+#### 2. E2Eテスト（機能追加・修正時）
+```bash
+npm run test:e2e     # 全E2Eテスト実行
+# または特定テストのみ
+npx playwright test tests/e2e/specific-test.spec.ts
+```
+
+#### 3. プッシュ実行
+```bash
+git push             # 全ローカルテスト成功後のみ実行
+```
+
+#### 実行例（完全版）
+```bash
+# Step 1: 基本品質チェック
+npm run type-check && npm run lint && npm run test:ci && npm run build
+
+# Step 2: E2Eテスト（必要に応じて）
+npm run test:e2e
+
+# Step 3: 成功後プッシュ
+git push
+```
+
+**禁止事項**:
+- ローカルテスト未実施でのプッシュ
+- CI失敗を前提としたプッシュ
+- `git push --force` の使用（特別な理由がない限り）
+
 ### Testing Philosophy and Quality Focus
 
 **IMPORTANT**: カバレッジの向上より、根本的なテスト品質向上を目標とする
