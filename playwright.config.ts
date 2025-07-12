@@ -93,13 +93,13 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    // CI環境ではプロダクションサーバーを使用、ローカルでは開発サーバー
-    command: process.env.CI ? 'npm start' : 'npm run dev',
+    // 常に開発サーバーを使用（認証問題の調査のため）
+    command: 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI, // CI環境では新しいサーバーを起動
     timeout: 180000, // 3分間待機（CI環境での安定性向上）
     env: {
-      NODE_ENV: process.env.CI ? 'production' : 'development',
+      NODE_ENV: 'development', // 常に開発モードで実行
       DATABASE_URL: process.env.CI ? 'file:./e2e-test.db' : process.env.DATABASE_URL,
       NEXTAUTH_URL: 'http://localhost:3000',
       NEXTAUTH_SECRET: process.env.CI ? 'test-secret-for-e2e-tests' : process.env.NEXTAUTH_SECRET,

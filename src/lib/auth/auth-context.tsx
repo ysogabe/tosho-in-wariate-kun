@@ -60,6 +60,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setIsLoading(true)
 
+      // Debug logging for E2E testing
+      console.log('Mock auth: Attempting sign in', { 
+        email, 
+        NODE_ENV: process.env.NODE_ENV,
+        timestamp: new Date().toISOString()
+      })
+
       // TODO: Replace with actual Supabase authentication
       // const { error } = await supabase.auth.signInWithPassword({
       //   email,
@@ -73,13 +80,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const testUsers = [
         { email: 'test@example.com', password: 'Password123', role: 'teacher' },
         { email: 'admin@example.com', password: 'Password123', role: 'admin' },
+        // E2E testing users (matching seed data with proper validation format)
+        { email: 'admin@test.com', password: 'Admin123', role: 'admin' },
+        { email: 'user@test.com', password: 'User123', role: 'student' },
       ]
+
+      console.log('Mock auth: Available test users:', testUsers.map(u => ({ email: u.email, role: u.role })))
 
       const matchedUser = testUsers.find(
         (u) => u.email === email && u.password === password
       )
 
       if (matchedUser) {
+        console.log('Mock auth: User authentication successful', { email: matchedUser.email, role: matchedUser.role })
+        
         const mockUser = {
           id: `mock-user-${matchedUser.role}`,
           email: matchedUser.email,
@@ -107,7 +121,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return {}
       }
 
-      return { error: 'Invalid credentials' }
+      console.log('Mock auth: Authentication failed - credentials not found', { email })
+      return { error: `認証情報が見つかりません。利用可能なユーザー: ${testUsers.map(u => u.email).join(', ')}` }
     } catch (error) {
       console.error('Sign in error:', error)
       return { error: 'ログインに失敗しました' }
