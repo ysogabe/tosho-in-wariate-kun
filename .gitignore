@@ -108,4 +108,7 @@ docs/kamui-creative-*/
 *.tsbuildinfo
 
 /generated/prisma
+# MCP Configuration files (personal settings)
 .mcp.json
+.claude/
+mcp-servers.json
