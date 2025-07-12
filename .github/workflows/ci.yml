@@ -218,11 +218,11 @@ jobs:
           path: test-results/*.png
           retention-days: 30
 
-      - name: Upload failure screenshots
-        if: failure()
+      - name: Upload all test screenshots
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-failure-screenshots
+          name: playwright-all-screenshots
           path: test-results/**/*-chromium/*.png
           retention-days: 30
 
