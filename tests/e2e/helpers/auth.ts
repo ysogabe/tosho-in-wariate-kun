@@ -166,7 +166,7 @@ export async function loginAsAdmin(page: Page) {
   
   // ログイン処理を少し待機
   console.log('E2E Auth: Waiting for login processing')
-  await page.waitForTimeout(3000)
+  await page.waitForTimeout(1500)
   
   // 現在のURLを確認
   const currentUrl = page.url()

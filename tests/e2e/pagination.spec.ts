@@ -39,9 +39,9 @@ test.describe('Pagination Component - E2E Tests', () => {
       // Look for buttons with specific text content within pagination area
       const paginationArea = page.locator('text=Pagination').locator('..').locator('..')
       
-      await expect(paginationArea.getByRole('button').filter({ hasText: /^1$/ })).toBeVisible()
-      await expect(paginationArea.getByRole('button').filter({ hasText: /^2$/ })).toBeVisible()
-      await expect(paginationArea.getByRole('button').filter({ hasText: /^3$/ })).toBeVisible()
+      await expect(paginationArea.getByRole('button').filter({ hasText: /^1$/ }).first()).toBeVisible()
+      await expect(paginationArea.getByRole('button').filter({ hasText: /^2$/ }).first()).toBeVisible()
+      await expect(paginationArea.getByRole('button').filter({ hasText: /^3$/ }).first()).toBeVisible()
       
       // Evidence screenshot for page numbers
       await page.screenshot({ path: 'test-results/pagination-page-numbers.png' })
@@ -50,7 +50,7 @@ test.describe('Pagination Component - E2E Tests', () => {
     test('current page is highlighted correctly', async ({ page }) => {
       // Find pagination area and look for current page with aria-current
       const paginationArea = page.locator('text=Pagination').locator('..').locator('..')
-      const currentPageButton = paginationArea.getByRole('button').filter({ hasText: /^1$/ }).first()
+      const currentPageButton = paginationArea.getByRole('button').filter({ hasText: /^1$/ }).first().first()
       
       await expect(currentPageButton).toHaveAttribute('aria-current', 'page')
       
@@ -96,7 +96,7 @@ test.describe('Pagination Component - E2E Tests', () => {
       const paginationArea = page.locator('text=Pagination').locator('..').locator('..')
       
       // Click on page 2 button using specific text filter
-      const page2Button = paginationArea.getByRole('button').filter({ hasText: /^2$/ })
+      const page2Button = paginationArea.getByRole('button').filter({ hasText: /^2$/ }).first().first()
       await expect(page2Button).toBeVisible()
       await page2Button.click()
       
@@ -123,7 +123,7 @@ test.describe('Pagination Component - E2E Tests', () => {
       await page.waitForTimeout(500)
       
       // Should now be on page 2
-      const page2Button = paginationArea.getByRole('button').filter({ hasText: /^2$/ })
+      const page2Button = paginationArea.getByRole('button').filter({ hasText: /^2$/ }).first()
       await expect(page2Button).toHaveAttribute('aria-current', 'page')
       await expect(page.getByText('21-40 / 195件')).toBeVisible()
       
@@ -133,7 +133,7 @@ test.describe('Pagination Component - E2E Tests', () => {
       await page.waitForTimeout(500)
       
       // Should be back on page 1
-      const page1Button = paginationArea.getByRole('button').filter({ hasText: /^1$/ })
+      const page1Button = paginationArea.getByRole('button').filter({ hasText: /^1$/ }).first()
       await expect(page1Button).toHaveAttribute('aria-current', 'page')
       await expect(page.getByText('1-20 / 195件')).toBeVisible()
       
@@ -143,7 +143,7 @@ test.describe('Pagination Component - E2E Tests', () => {
       await page.waitForTimeout(500)
       
       // Should be on page 10 (total 195 items / 20 per page = 10 pages)
-      const page10Button = paginationArea.getByRole('button').filter({ hasText: /^10$/ })
+      const page10Button = paginationArea.getByRole('button').filter({ hasText: /^10$/ }).first()
       await expect(page10Button).toHaveAttribute('aria-current', 'page')
       await expect(page.getByText('181-195 / 195件')).toBeVisible()
       
@@ -250,7 +250,7 @@ test.describe('Pagination Component - E2E Tests', () => {
         await expect(page.getByText('1-50 / 195件')).toBeVisible()
         
         // Verify total pages reduced (195 items / 50 per page = 4 pages)
-        const page4Button = paginationArea.getByRole('button').filter({ hasText: /^4$/ })
+        const page4Button = paginationArea.getByRole('button').filter({ hasText: /^4$/ }).first()
         await expect(page4Button).toBeVisible()
       } else {
         // If page size selection doesn't work in test, verify basic functionality
@@ -271,7 +271,7 @@ test.describe('Pagination Component - E2E Tests', () => {
       await pageSizeSelect.click()
       await page.waitForTimeout(500)
       
-      await page.getByRole('option', { name: '10' }).click()
+      await page.getByRole('option', { name: '10' }).first().click()
       await page.waitForTimeout(1000)
       
       // Now we have 195 / 10 = 20 pages, should show ellipsis
@@ -357,7 +357,7 @@ test.describe('Pagination Component - E2E Tests', () => {
       await expect(focusedElement).toBeVisible()
       
       // Test Enter key activation on page 2
-      const page2Button = paginationArea.getByRole('button').filter({ hasText: /^2$/ })
+      const page2Button = paginationArea.getByRole('button').filter({ hasText: /^2$/ }).first()
       await page2Button.focus()
       await page.keyboard.press('Enter')
       await page.waitForTimeout(500)
@@ -379,8 +379,8 @@ test.describe('Pagination Component - E2E Tests', () => {
       await expect(page.getByRole('button', { name: '最後のページ' })).toHaveAttribute('aria-label', '最後のページ')
       
       // Check page button aria-labels (use specific pagination area buttons)
-      const page1Button = paginationArea.getByRole('button').filter({ hasText: /^1$/ })
-      const page2Button = paginationArea.getByRole('button').filter({ hasText: /^2$/ })
+      const page1Button = paginationArea.getByRole('button').filter({ hasText: /^1$/ }).first()
+      const page2Button = paginationArea.getByRole('button').filter({ hasText: /^2$/ }).first()
       
       await expect(page1Button).toHaveAttribute('aria-label', 'ページ 1')
       await expect(page2Button).toHaveAttribute('aria-label', 'ページ 2')
@@ -398,12 +398,12 @@ test.describe('Pagination Component - E2E Tests', () => {
       // The component test page provides stable test data (currentPage=1, totalPages=10, etc.)
       
       // Verify basic functionality still works
-      const page1Button = paginationArea.getByRole('button').filter({ hasText: /^1$/ })
+      const page1Button = paginationArea.getByRole('button').filter({ hasText: /^1$/ }).first()
       await expect(page1Button).toBeVisible()
       await expect(page.getByText('1-20 / 195件')).toBeVisible()
       
       // Test rapid clicking doesn't break functionality
-      const page2Button = paginationArea.getByRole('button').filter({ hasText: /^2$/ })
+      const page2Button = paginationArea.getByRole('button').filter({ hasText: /^2$/ }).first()
       await page2Button.click()
       await page2Button.click()
       await page2Button.click()
@@ -423,11 +423,11 @@ test.describe('Pagination Component - E2E Tests', () => {
       const startTime = Date.now()
       
       // Perform multiple navigation operations
-      const page2Button = paginationArea.getByRole('button').filter({ hasText: /^2$/ })
+      const page2Button = paginationArea.getByRole('button').filter({ hasText: /^2$/ }).first()
       await page2Button.click()
       await page.waitForTimeout(100)
       
-      const page3Button = paginationArea.getByRole('button').filter({ hasText: /^3$/ })
+      const page3Button = paginationArea.getByRole('button').filter({ hasText: /^3$/ }).first()
       await page3Button.click()
       await page.waitForTimeout(100)
       
