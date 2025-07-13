@@ -21,11 +21,30 @@ test.describe('Class Management - E2E Tests', () => {
     // Login as admin to access class management
     await loginAsAdmin(page)
     
-    // Navigate to class management page
-    await page.goto('/admin/classes')
+    // Navigate to class management page with Fast Refresh tolerance
+    await page.goto('/admin/classes', { waitUntil: 'domcontentloaded' })
     
-    // Wait for page to load completely
-    await page.waitForLoadState('networkidle')
+    // Wait for page to load completely with Fast Refresh retries
+    let loadAttempts = 0
+    const maxLoadAttempts = 5
+    
+    while (loadAttempts < maxLoadAttempts) {
+      try {
+        await page.waitForLoadState('networkidle', { timeout: 10000 })
+        break
+      } catch (error) {
+        loadAttempts++
+        console.log(`Load attempt ${loadAttempts}/${maxLoadAttempts}, waiting for Fast Refresh...`)
+        
+        if (loadAttempts >= maxLoadAttempts) {
+          console.log('Proceeding with domcontentloaded state due to Fast Refresh')
+          await page.waitForLoadState('domcontentloaded')
+          break
+        }
+        
+        await page.waitForTimeout(2000)
+      }
+    }
     
     // Wait for page heading (matches actual page title without emoji)
     await expect(page.getByRole('heading', { name: /クラス管理/ })).toBeVisible()

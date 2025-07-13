@@ -22,11 +22,30 @@ test.describe('Room Management - E2E Tests', () => {
     // Login as admin to access room management
     await loginAsAdmin(page)
     
-    // Navigate to room management page
-    await page.goto('/admin/rooms')
+    // Navigate to room management page with Fast Refresh tolerance
+    await page.goto('/admin/rooms', { waitUntil: 'domcontentloaded' })
     
-    // Wait for page to load completely
-    await page.waitForLoadState('networkidle')
+    // Wait for page to load completely with Fast Refresh retries
+    let loadAttempts = 0
+    const maxLoadAttempts = 5
+    
+    while (loadAttempts < maxLoadAttempts) {
+      try {
+        await page.waitForLoadState('networkidle', { timeout: 10000 })
+        break
+      } catch (error) {
+        loadAttempts++
+        console.log(`Load attempt ${loadAttempts}/${maxLoadAttempts}, waiting for Fast Refresh...`)
+        
+        if (loadAttempts >= maxLoadAttempts) {
+          console.log('Proceeding with domcontentloaded state due to Fast Refresh')
+          await page.waitForLoadState('domcontentloaded')
+          break
+        }
+        
+        await page.waitForTimeout(2000)
+      }
+    }
     
     // Wait for page heading (matches actual page title)
     await expect(page.getByRole('heading', { name: /図書室管理/ })).toBeVisible()

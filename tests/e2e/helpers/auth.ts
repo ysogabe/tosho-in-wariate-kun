@@ -135,7 +135,7 @@ export async function loginAsAdmin(page: Page) {
     // 方法1: ボタンクリック
     console.log('E2E Auth: Method 1 - Button click')
     await page.click('button[type="submit"]')
-    await page.waitForTimeout(2000)
+    await page.waitForTimeout(3000)
     
     // URL変化を確認（成功判定）
     const urlAfterClick = page.url()
@@ -149,7 +149,7 @@ export async function loginAsAdmin(page: Page) {
       console.log('E2E Auth: Method 2 - Enter key submission (backup)')
       await page.focus('input[name="password"]')
       await page.press('input[name="password"]', 'Enter')
-      await page.waitForTimeout(1500)
+      await page.waitForTimeout(3000)
       
       const urlAfterEnter = page.url()
       console.log('E2E Auth: URL after Enter key:', urlAfterEnter)
@@ -166,7 +166,7 @@ export async function loginAsAdmin(page: Page) {
   
   // ログイン処理を少し待機
   console.log('E2E Auth: Waiting for login processing')
-  await page.waitForTimeout(1500)
+  await page.waitForTimeout(3000)
   
   // 現在のURLを確認
   const currentUrl = page.url()
@@ -181,8 +181,28 @@ export async function loginAsAdmin(page: Page) {
   
   // ログイン成功の確認（管理者ダッシュボードへのリダイレクト）
   console.log('E2E Auth: Waiting for redirect to /admin')
-  await page.waitForURL('/admin', { timeout: 15000 })
-  console.log('E2E Auth: Successfully redirected to admin page')
+  
+  // Fast Refresh対応: URLチェックをリトライ形式で実行
+  let redirectAttempts = 0
+  const maxRedirectAttempts = 10
+  
+  while (redirectAttempts < maxRedirectAttempts) {
+    try {
+      await page.waitForURL('/admin', { timeout: 3000 })
+      console.log('E2E Auth: Successfully redirected to admin page')
+      break
+    } catch (error) {
+      redirectAttempts++
+      console.log(`E2E Auth: Redirect attempt ${redirectAttempts}/${maxRedirectAttempts}, waiting for Fast Refresh...`)
+      
+      if (redirectAttempts >= maxRedirectAttempts) {
+        throw new Error(`Authentication redirect failed after ${maxRedirectAttempts} attempts. Current URL: ${page.url()}`)
+      }
+      
+      // Fast Refreshが完了するまで待機
+      await page.waitForTimeout(2000)
+    }
+  }
 }
 
 export async function loginAsUser(page: Page) {
