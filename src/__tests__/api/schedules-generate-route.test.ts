@@ -19,7 +19,7 @@ jest.mock('@/lib/auth/helpers', () => ({
   authenticateAdmin: jest.fn(),
 }))
 
-describe.skip('/api/schedules/generate Route Tests (認証テスト除外)', () => {
+describe('/api/schedules/generate Route Tests', () => {
   const mockSchedulerService = jest.mocked(SchedulerService)
   const mockAuthenticateAdmin = jest.mocked(authenticateAdmin)
 

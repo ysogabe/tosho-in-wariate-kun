@@ -6,6 +6,7 @@
 import { NextRequest } from 'next/server'
 import { PUT } from '../route'
 import { authenticateAdmin } from '@/lib/auth/helpers'
+import { prisma } from '@/lib/database/client'
 
 // モック設定
 jest.mock('@/lib/database/client', () => ({
@@ -30,27 +31,12 @@ jest.mock('@/lib/auth/helpers', () => ({
   authenticateAdmin: jest.fn(),
 }))
 
-const mockPrisma = {
-  assignment: {
-    findUnique: jest.fn(),
-    findFirst: jest.fn(),
-    update: jest.fn(),
-    count: jest.fn(),
-  },
-  student: {
-    findUnique: jest.fn(),
-  },
-  room: {
-    findUnique: jest.fn(),
-  },
-  $transaction: jest.fn(),
-} as any
-
 const mockAuthenticateAdmin = authenticateAdmin as jest.MockedFunction<
   typeof authenticateAdmin
 >
+const mockPrisma = prisma as jest.Mocked<typeof prisma>
 
-describe.skip('PUT /api/schedules/[id] (認証テスト除外)', () => {
+describe('PUT /api/schedules/[id]', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockAuthenticateAdmin.mockResolvedValue({

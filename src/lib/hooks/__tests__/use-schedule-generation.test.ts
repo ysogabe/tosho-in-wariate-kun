@@ -14,7 +14,7 @@ jest.mock('sonner', () => ({
   toast: mockToast,
 }))
 
-describe.skip('useScheduleGeneration', () => {
+describe('useScheduleGeneration', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     jest.useFakeTimers()

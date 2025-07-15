@@ -314,6 +314,7 @@ export default function ClassManagementPage() {
               </Button>
             )}
             <Button
+              data-testid="create-class-button"
               onClick={() => {
                 setCreateErrors({})
                 setShowCreateDialog(true)
@@ -475,6 +476,7 @@ export default function ClassManagementPage() {
                 <Input
                   id="create-name"
                   name="name"
+                  data-testid="class-name"
                   placeholder="例: 5年1組"
                   style={{ borderRadius: '8px' }}
                 />
@@ -485,6 +487,7 @@ export default function ClassManagementPage() {
                 <Select name="year">
                   <SelectTrigger
                     id="create-year"
+                    data-testid="year-select"
                     style={{ borderRadius: '8px' }}
                   >
                     <SelectValue placeholder="学年を選択" />
@@ -507,6 +510,7 @@ export default function ClassManagementPage() {
                 </Button>
                 <Button
                   type="submit"
+                  data-testid="submit-button"
                   disabled={isCreating}
                   style={{
                     backgroundColor: 'hsl(200, 100%, 85%)',

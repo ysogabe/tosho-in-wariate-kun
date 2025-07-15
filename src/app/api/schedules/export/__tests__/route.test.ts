@@ -6,6 +6,7 @@
 import { NextRequest } from 'next/server'
 import { GET } from '../route'
 import { authenticate } from '@/lib/auth/helpers'
+import { prisma } from '@/lib/database/client'
 
 // モック設定
 jest.mock('@/lib/database/client', () => ({
@@ -20,17 +21,12 @@ jest.mock('@/lib/auth/helpers', () => ({
   authenticate: jest.fn(),
 }))
 
-const mockPrisma = {
-  assignment: {
-    findMany: jest.fn(),
-  },
-} as any
-
 const mockAuthenticate = authenticate as jest.MockedFunction<
   typeof authenticate
 >
+const mockPrisma = prisma as jest.Mocked<typeof prisma>
 
-describe.skip('GET /api/schedules/export (認証テスト除外)', () => {
+describe('GET /api/schedules/export', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockAuthenticate.mockResolvedValue({

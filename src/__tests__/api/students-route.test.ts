@@ -37,7 +37,7 @@ jest.mock('next-auth/next', () => ({
   getServerSession: jest.fn(),
 }))
 
-describe.skip('/api/students Route Tests (認証テスト除外)', () => {
+describe('/api/students Route Tests', () => {
   const mockPrisma = jest.mocked(prisma)
 
   beforeEach(() => {

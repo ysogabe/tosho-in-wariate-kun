@@ -182,23 +182,25 @@ jobs:
           NODE_ENV: test
           DATABASE_URL: file:./e2e-test.db
 
-      # E2E testing uses development server for consistency with local testing
-      # Production build is verified in the test job above
+      # E2E testing uses production build for realistic testing
+      # This ensures E2E tests validate the actual production environment
       - name: Prepare for E2E testing
         run: |
           echo "Preparing E2E testing environment..."
-          echo "E2E tests will use development server for consistency with local environment"
-          echo "This avoids CI-specific issues with production build + dev server mismatch"
+          echo "E2E tests will use production build for realistic validation"
+          echo "This ensures consistency with actual production deployment"
 
-      - name: Run Playwright tests against development server
+      - name: Run Playwright tests against production build
         run: npm run test:e2e:ci
         timeout-minutes: 30
         env:
           CI: true
-          NODE_ENV: production
+          NODE_ENV: production    # プロダクション環境でのE2E
+          NEXT_PUBLIC_E2E_AUTH_BYPASS: true  # E2E認証バイパス
           DATABASE_URL: file:./e2e-test.db
-          NEXTAUTH_URL: http://localhost:3000
+          NEXTAUTH_URL: http://localhost:3100
           NEXTAUTH_SECRET: test-secret-for-e2e-tests
+          PORT: 3100
 
       - name: Upload test results
         if: always()
