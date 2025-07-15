@@ -30,6 +30,11 @@ export function useScheduleGeneration() {
       onSuccess,
       onError,
     }: GenerateScheduleOptions) => {
+      // 既に生成中の場合は無視
+      if (isGenerating) {
+        return
+      }
+
       setIsGenerating(true)
       setProgress(0)
 
@@ -85,7 +90,7 @@ export function useScheduleGeneration() {
         setProgress(0)
       }
     },
-    []
+    [isGenerating]
   )
 
   return {
