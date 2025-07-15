@@ -211,6 +211,7 @@ describe('/api/students Route Tests', () => {
         name: '田中太郎',
         classId: '22222222-2222-2222-2222-222222222222',
         grade: 5,
+        isActive: true,
       }
 
       const request = new NextRequest('http://localhost/api/students', {
@@ -236,6 +237,7 @@ describe('/api/students Route Tests', () => {
         name: '田中太郎',
         classId: '99999999-9999-9999-9999-999999999999',
         grade: 5,
+        isActive: true,
       }
 
       const request = new NextRequest('http://localhost/api/students', {
@@ -277,6 +279,7 @@ describe('/api/students Route Tests', () => {
         name: '田中太郎',
         classId: '22222222-2222-2222-2222-222222222222',
         grade: 5,
+        isActive: true,
       }
 
       const request = new NextRequest('http://localhost/api/students', {
@@ -309,6 +312,7 @@ describe('/api/students Route Tests', () => {
         name: '',
         classId: '22222222-2222-2222-2222-222222222222',
         grade: 5,
+        isActive: true,
       }
 
       const request = new NextRequest('http://localhost/api/students', {
@@ -339,6 +343,7 @@ describe('/api/students Route Tests', () => {
         name: '田中太郎',
         classId: '22222222-2222-2222-2222-222222222222',
         grade: 4,
+        isActive: true,
       }
 
       const request = new NextRequest('http://localhost/api/students', {
@@ -362,6 +367,7 @@ describe('/api/students Route Tests', () => {
         name: '田中太郎',
         classId: '22222222-2222-2222-2222-222222222222',
         grade: 5,
+        isActive: true,
       }
 
       const request = new NextRequest('http://localhost/api/students', {
