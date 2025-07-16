@@ -33,10 +33,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // MVP: Check for existing session from cookies
-    const checkInitialSession = async () => {
+    const initAuth = async () => {
       try {
-        // Use helper function to get client session
+        // ✅ シンプルなE2E検出 - E2E環境では自動ログイン
+        if (process.env.NEXT_PUBLIC_E2E_AUTH_BYPASS === 'true') {
+          // E2Eテスト用の自動ログイン
+          const e2eUser = {
+            id: 'e2e-admin',
+            email: 'admin@test.com',
+            role: 'admin',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            app_metadata: {},
+            user_metadata: {},
+            aud: 'authenticated',
+            confirmation_sent_at: null,
+            confirmed_at: new Date().toISOString(),
+            email_confirmed_at: new Date().toISOString(),
+            invited_at: null,
+            last_sign_in_at: new Date().toISOString(),
+            phone: null,
+            phone_confirmed_at: null,
+            recovery_sent_at: null,
+          } as MockUser
+          console.log('E2E Auth: Auto-login enabled', {
+            user: e2eUser.email,
+            role: e2eUser.role,
+          })
+          setUser(e2eUser)
+          setClientSession(e2eUser)
+          setIsLoading(false)
+          return
+        }
+
+        // 通常の認証フロー
         const sessionData = getClientSession()
         if (sessionData) {
           setUser(sessionData as MockUser)
@@ -53,7 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    checkInitialSession()
+    initAuth()
   }, [])
 
   const signIn = useCallback(async (email: string, password: string) => {

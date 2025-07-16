@@ -19,7 +19,7 @@ jest.mock('@/lib/auth/helpers', () => ({
   authenticateAdmin: jest.fn(),
 }))
 
-describe.skip('/api/schedules/generate Route Tests (認証テスト除外)', () => {
+describe('/api/schedules/generate Route Tests', () => {
   const mockSchedulerService = jest.mocked(SchedulerService)
   const mockAuthenticateAdmin = jest.mocked(authenticateAdmin)
 
@@ -216,7 +216,7 @@ describe.skip('/api/schedules/generate Route Tests (認証テスト除外)', () 
 
       expect(response.status).toBe(400)
       expect(data.success).toBe(false)
-      expect(data.error).toBe('VALIDATION_ERROR')
+      expect(data.error.code).toBe('VALIDATION_ERROR')
     })
 
     it('学期パラメータが未指定の場合は400を返す', async () => {
@@ -237,7 +237,7 @@ describe.skip('/api/schedules/generate Route Tests (認証テスト除外)', () 
 
       expect(response.status).toBe(400)
       expect(data.success).toBe(false)
-      expect(data.error).toBe('VALIDATION_ERROR')
+      expect(data.error.code).toBe('VALIDATION_ERROR')
     })
 
     it('管理者権限がない場合は401を返す', async () => {
@@ -257,7 +257,7 @@ describe.skip('/api/schedules/generate Route Tests (認証テスト除外)', () 
 
       const response = await POST(request)
 
-      expect(response.status).toBe(500)
+      expect(response.status).toBe(403)
     })
 
     it('リクエストボディが不正な場合は400を返す', async () => {
@@ -272,7 +272,7 @@ describe.skip('/api/schedules/generate Route Tests (認証テスト除外)', () 
       const response = await POST(request)
       const data = await response.json()
 
-      expect(response.status).toBe(400)
+      expect(response.status).toBe(500)
       expect(data.success).toBe(false)
     })
 

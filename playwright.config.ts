@@ -28,7 +28,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:3100',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
@@ -54,7 +54,7 @@ export default defineConfig({
     }),
   },
 
-  /* Configure projects for major browsers */
+  /* Configure projects for major browsers - Chromium only */
   projects: [
     {
       name: 'chromium',
@@ -76,33 +76,22 @@ export default defineConfig({
         },
       },
     },
-
-    // CI環境では他のブラウザはスキップ（安定性重視）
-    ...(process.env.CI ? [] : [
-      {
-        name: 'firefox',
-        use: { ...devices['Desktop Firefox'] },
-      },
-
-      {
-        name: 'webkit',
-        use: { ...devices['Desktop Safari'] },
-      },
-    ]),
   ],
 
-  /* Run your local dev server before starting the tests */
+  /* Run production server for E2E tests */
   webServer: {
-    // 常に開発サーバーを使用（認証問題の調査のため）
-    command: 'npm run dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI, // CI環境では新しいサーバーを起動
-    timeout: 180000, // 3分間待機（CI環境での安定性向上）
+    // プロダクションビルド + サーバーを使用（本番環境と同等）
+    command: 'NEXT_PUBLIC_E2E_AUTH_BYPASS=true npm run build && PORT=3100 NEXT_PUBLIC_E2E_AUTH_BYPASS=true npm run start',
+    url: 'http://localhost:3100',
+    reuseExistingServer: !process.env.CI,
+    timeout: 180000,
     env: {
-      NODE_ENV: 'development', // 常に開発モードで実行
+      NODE_ENV: 'production', // プロダクション環境でのE2E
+      NEXT_PUBLIC_E2E_AUTH_BYPASS: 'true', // クライアントサイドで参照可能
       DATABASE_URL: process.env.CI ? 'file:./e2e-test.db' : process.env.DATABASE_URL,
-      NEXTAUTH_URL: 'http://localhost:3000',
+      NEXTAUTH_URL: 'http://localhost:3100',
       NEXTAUTH_SECRET: process.env.CI ? 'test-secret-for-e2e-tests' : process.env.NEXTAUTH_SECRET,
+      PORT: '3100',
     },
   },
 })

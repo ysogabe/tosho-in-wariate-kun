@@ -37,7 +37,7 @@ jest.mock('next-auth/next', () => ({
   getServerSession: jest.fn(),
 }))
 
-describe.skip('/api/students Route Tests (認証テスト除外)', () => {
+describe('/api/students Route Tests', () => {
   const mockPrisma = jest.mocked(prisma)
 
   beforeEach(() => {
@@ -211,6 +211,7 @@ describe.skip('/api/students Route Tests (認証テスト除外)', () => {
         name: '田中太郎',
         classId: '22222222-2222-2222-2222-222222222222',
         grade: 5,
+        isActive: true,
       }
 
       const request = new NextRequest('http://localhost/api/students', {
@@ -236,6 +237,7 @@ describe.skip('/api/students Route Tests (認証テスト除外)', () => {
         name: '田中太郎',
         classId: '99999999-9999-9999-9999-999999999999',
         grade: 5,
+        isActive: true,
       }
 
       const request = new NextRequest('http://localhost/api/students', {
@@ -277,6 +279,7 @@ describe.skip('/api/students Route Tests (認証テスト除外)', () => {
         name: '田中太郎',
         classId: '22222222-2222-2222-2222-222222222222',
         grade: 5,
+        isActive: true,
       }
 
       const request = new NextRequest('http://localhost/api/students', {
@@ -309,6 +312,7 @@ describe.skip('/api/students Route Tests (認証テスト除外)', () => {
         name: '',
         classId: '22222222-2222-2222-2222-222222222222',
         grade: 5,
+        isActive: true,
       }
 
       const request = new NextRequest('http://localhost/api/students', {
@@ -339,6 +343,7 @@ describe.skip('/api/students Route Tests (認証テスト除外)', () => {
         name: '田中太郎',
         classId: '22222222-2222-2222-2222-222222222222',
         grade: 4,
+        isActive: true,
       }
 
       const request = new NextRequest('http://localhost/api/students', {
@@ -362,6 +367,7 @@ describe.skip('/api/students Route Tests (認証テスト除外)', () => {
         name: '田中太郎',
         classId: '22222222-2222-2222-2222-222222222222',
         grade: 5,
+        isActive: true,
       }
 
       const request = new NextRequest('http://localhost/api/students', {

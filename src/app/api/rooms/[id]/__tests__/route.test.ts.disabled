@@ -4,7 +4,8 @@
  */
 
 import { NextRequest } from 'next/server'
-import { authenticate } from '@/lib/auth/helpers'
+import { authenticate, authenticateAdmin } from '@/lib/auth/helpers'
+import { prisma } from '@/lib/database/client'
 
 // Next.js環境のセットアップ
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -15,6 +16,7 @@ jest.mock('@/lib/database/client', () => ({
   prisma: {
     room: {
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
     },
@@ -23,19 +25,16 @@ jest.mock('@/lib/database/client', () => ({
 
 jest.mock('@/lib/auth/helpers', () => ({
   authenticate: jest.fn(),
+  authenticateAdmin: jest.fn(),
 }))
-
-const mockPrisma = {
-  room: {
-    findUnique: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-  },
-} as any
 
 const mockAuthenticate = authenticate as jest.MockedFunction<
   typeof authenticate
 >
+const mockAuthenticateAdmin = authenticateAdmin as jest.MockedFunction<
+  typeof authenticateAdmin
+>
+const mockPrisma = prisma as jest.Mocked<typeof prisma>
 
 // テストデータ
 const mockRoom = {
@@ -140,7 +139,7 @@ describe.skip('GET /api/rooms/[id] (認証テスト除外)', () => {
 describe.skip('PUT /api/rooms/[id] (認証テスト除外)', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockAuthenticate.mockResolvedValue({
+    mockAuthenticateAdmin.mockResolvedValue({
       id: 'test-user',
       email: 'test@example.com',
       role: 'admin',
@@ -175,6 +174,7 @@ describe.skip('PUT /api/rooms/[id] (認証テスト除外)', () => {
     })
 
     mockPrisma.room.findUnique.mockResolvedValue(mockRoom)
+    mockPrisma.room.findFirst.mockResolvedValue(null) // No duplicate room name
     mockPrisma.room.update.mockResolvedValue({
       ...mockRoom,
       ...updateData,
@@ -241,7 +241,7 @@ describe.skip('PUT /api/rooms/[id] (認証テスト除外)', () => {
 describe.skip('DELETE /api/rooms/[id] (認証テスト除外)', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockAuthenticate.mockResolvedValue({
+    mockAuthenticateAdmin.mockResolvedValue({
       id: 'test-user',
       email: 'test@example.com',
       role: 'admin',

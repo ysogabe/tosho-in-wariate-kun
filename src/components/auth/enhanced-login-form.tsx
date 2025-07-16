@@ -127,61 +127,15 @@ export function EnhancedLoginForm() {
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    const formData = form.getValues()
-    const errors = form.formState.errors
-
-    console.log('EnhancedLoginForm: Raw form submit event triggered', {
-      timestamp: new Date().toISOString(),
-      isValid: form.formState.isValid,
-      isDirty: form.formState.isDirty,
-      isSubmitting: form.formState.isSubmitting,
-      formData: {
-        email: formData.email,
-        password: formData.password?.length > 0 ? 'filled' : 'empty',
-      },
-      errors: {
-        email: errors.email?.message,
-        password: errors.password?.message,
-        root: errors.root?.message,
-      },
-      touchedFields: form.formState.touchedFields,
-      dirtyFields: form.formState.dirtyFields,
-    })
-
-    // E2E テスト環境では、データが入っていればバリデーションを回避
-    // ブラウザ環境かつ開発モードでのみ適用（Jest単体テスト環境では適用しない）
-    if (
-      process.env.NODE_ENV === 'development' &&
-      typeof window !== 'undefined' &&
-      !process.env.JEST_WORKER_ID &&
-      formData.email &&
-      formData.password
-    ) {
+    // E2E環境では自動認証が有効なので、フォーム送信は不要
+    if (process.env.NEXT_PUBLIC_E2E_AUTH_BYPASS === 'true') {
       console.log(
-        'EnhancedLoginForm: E2E environment detected, bypassing React Hook Form validation'
-      )
-      onSubmit(formData)
-      return
-    }
-
-    // Jest テスト環境では、バリデーション無視してhandleSubmitを実行
-    if (process.env.JEST_WORKER_ID && formData.email && formData.password) {
-      console.log(
-        'EnhancedLoginForm: Jest test environment detected, bypassing validation but using handleSubmit'
-      )
-      return form.handleSubmit(onSubmit)(e)
-    }
-
-    // バリデーションエラーがある場合は詳細ログ
-    if (!form.formState.isValid) {
-      console.log(
-        'EnhancedLoginForm: Form validation failed, not calling onSubmit'
+        'EnhancedLoginForm: E2E environment - auto-authentication active'
       )
       return
     }
 
-    console.log('EnhancedLoginForm: Form is valid, calling handleSubmit')
-    // React Hook FormのhandleSubmitを呼ぶ
+    // 通常のReact Hook Form処理
     return form.handleSubmit(onSubmit)(e)
   }
 
@@ -317,7 +271,8 @@ export function EnhancedLoginForm() {
 
         {/* デモ用ログイン情報 */}
         {(process.env.NODE_ENV === 'development' ||
-          process.env.NODE_ENV === 'test') && (
+          process.env.NODE_ENV === 'test' ||
+          process.env.NEXT_PUBLIC_E2E_AUTH_BYPASS === 'true') && (
           <div className="mt-4 p-3 bg-muted rounded-lg">
             <p className="text-sm font-medium mb-2">開発用ログイン情報:</p>
             <div className="text-xs space-y-1">
